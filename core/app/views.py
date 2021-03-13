@@ -14,27 +14,27 @@ from .models import *
 
 @login_required(login_url="/login/")
 def index(request):
+    #HOME PAGE SHOULD: show warehouses, and select Inspections
 
-    levels = querys.getLevels()
     clientUser = request.user.profile.client
 
     id_client,cols = querys.getClientID(clientUser)
     print(id_client[0][0])
     data, description = querys.getWarehouses(id_client[0][0])
-
+    print("data",data)
+    print("description:,",description)
     context = {'data':data,
                'description':description,
                'client':clientUser,
 
-               'levels': levels,
                }
 
     return render(request,'warehouses.html',context)
 
 @login_required(login_url="/login/")
 def inspections(request):
-
-    levels = querys.getLevels()
+    # id_inspection = request.GET['id_inspection']
+    # levels = querys.getLevels()
     clientUser = request.user.profile.client
 
     id_client,cols = querys.getClientID(clientUser)
@@ -45,7 +45,7 @@ def inspections(request):
                'description':description,
                'client':clientUser,
 
-               'levels': levels,
+               # 'levels': levels,
                }
 
     return render(request,'inspections.html',context)
@@ -53,9 +53,13 @@ def inspections(request):
 
 @login_required(login_url="/login/")
 def all(request):
+
+    id_inspection = request.GET['id_inspection']
+    # print(id_inspection)
     data,description = querys.getMatch(0,300)
     picpath = []
-    levels = querys.getLevels()
+    levels = querys.getLevels(id_inspection)
+
 
     for row in data:
         picpath.insert(0,"assets/smarti/VisionBar0_rack_"+str(row[0]).zfill(8)+"_2021-01-10.bmp")
@@ -96,6 +100,7 @@ def all(request):
 
 @login_required(login_url="/login/")
 def level(request):
+    id_inspection = request.GET['id_inspection']
     nivel = request.GET['level']
     data,description = querys.unitsByLevel(nivel)
     positions,units = querys.levelOcupation(nivel)
@@ -103,7 +108,7 @@ def level(request):
     ocupation = int(units) / int(positions)
     # print("{:.2f}".format(ocupation*100))
     picpath = []
-    levels = querys.getLevels()
+    levels = querys.getLevels(id_inspection)
 
     for row in data:
         picpath.insert(0,"assets/smarti/VisionBar0_rack_"+str(row[0]).zfill(8)+"_2021-01-10.bmp")

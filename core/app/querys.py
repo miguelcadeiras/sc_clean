@@ -4,13 +4,13 @@ from mysql.connector import errorcode
 def connect():
   try:
 
-    cnx = mysql.connector.connect(user='root', password = 'angelito79',
+    cnx = mysql.connector.connect(user='root', password = 'Smartcubik1',
                                 database='inventory')
     cnx.set_charset_collation(charset='none', collation='none')
 
   except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-      print("Something is wrong with your user name or password")
+      print("Something is wrong with your user name or password Bitch")
     elif err.errno == errorcode.ER_BAD_DB_ERROR:
       print("Database does not exist")
     else:
@@ -24,7 +24,7 @@ def mysqlQuery(query,*kargs):
   # print(kargs)
   mysql_schema='inventory'
   mysql_user='root'
-  mysql_password = 'angelito79'
+  mysql_password = 'Smartcubik1'
   result = 'none'
 
   try:
@@ -34,17 +34,21 @@ def mysqlQuery(query,*kargs):
     cursor = cnx.cursor()
     if len(kargs)>0:
       result = cursor.execute(query,multi=kargs)
-      # print(result)
+      print(result)
+      results = []
       for r in result:
-        results = r.fetchall()
-        # print(results)
+        results.append(r.fetchall())
+
+      return results
     else:
       cursor.execute(query)
       results = cursor.fetchall()
-    num_fields = len(cursor.description)
-    field_names = [i[0] for i in cursor.description]
-    # print(query)
-    return results,field_names
+      num_fields = len(cursor.description)
+      field_names = [i[0] for i in cursor.description]
+      # print(query)
+      return results, field_names
+
+
 
   except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -109,8 +113,21 @@ def getLevels():
   # print(levels[0])
   return levels[0]
 
+def getLevels(id_inspection):
+  query = "call inventory.levels("+str(id_inspection)+");"
+  levels = mysqlQuery(query,True)
+  print("getLevels:",levels)
+  return levels[0]
+
 def unitsByLevel(level):
   query = "select * from positions_by_level;"
+  # print(query)
+  result = mysqlQuery(query)
+  # print(result)
+  return  result
+
+def unitsByLevel(level,id_inspection):
+  query = "select * from positions_by_level where id_inspection="+str(id_inspection)+";"
   # print(query)
   result = mysqlQuery(query)
   # print(result)
@@ -130,6 +147,29 @@ def levelOcupation(level):
   `nivel`
   like
   '"""+level+"""';
+  """
+  result = mysqlQuery(query)[0][0][0]
+  result1 = mysqlQuery(query1)[0][0][0]
+
+  # print(result)
+  return  result,result1
+
+def levelOcupation(level,id_inspection):
+  print(type(level),level)
+  query = """   select
+  count(distinct(position))
+  from positions_by_level where
+  `nivel`
+  like
+  '"""+level+"""';"""
+  query1 = """select
+  count(distinct(unit))
+  from positions_by_level where
+  `nivel`
+  like
+  '"""+level+"""' where id_inspection="""+str(id_inspection)+"""
+  
+  ;
   """
   result = mysqlQuery(query)[0][0][0]
   result1 = mysqlQuery(query1)[0][0][0]

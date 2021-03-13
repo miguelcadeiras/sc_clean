@@ -8,7 +8,6 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     client = models.CharField(max_length=30, blank=True)
 
-
     def __str__(self):  # __unicode__ for Python 2
         return self.user.username
 

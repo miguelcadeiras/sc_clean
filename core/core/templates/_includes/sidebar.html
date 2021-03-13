@@ -35,7 +35,7 @@
               </li>
               {% for l in levels %}
               <li class="nav-item {% if request.GET.level == l.0 %} link active {% endif %}">
-                <a href="/level?level={{l.0}}" class="nav-link">
+                <a href="/level?level={{l.0}}&id_inspection={{request.GET.id_inspection}}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>LEVEL {{l.0}}</p>
                 </a>
