@@ -1,0 +1,52 @@
+{% load static %}
+
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="https://www.smartcubik.com" class="brand-link">
+      <img src="{% static 'sclogo.png' %}" alt="logo" class="brand-image img-square elevation-0" >
+      <span class="brand-text font-weight-light">SmartCubik</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+
+          <li class="nav-header">WAREHOUSE</li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-copy"></i>
+              <p>
+                Levels
+                <i class="fas fa-angle-left right"></i>
+                <span class="badge badge-info right">{{ levels|length }}</span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item menu-open">
+                <a href="/" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>ALL</p>
+                </a>
+              </li>
+              {% for l in levels %}
+              <li class="nav-item {% if request.GET.level == l.0 %} link active {% endif %}">
+                <a href="/level?level={{l.0}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>LEVEL {{l.0}}</p>
+                </a>
+              </li>
+             {% endfor %}
+
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>

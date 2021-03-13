@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% load static %}
+{% block title %} CLIENT 1 INSPECTIONS {% endblock%}
+
+{% block PageTitle %}INSPECTION Dashboard{% endblock %}
+
+{% block indicators %}
+        <div class="row">
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-info">
+              <div class="inner">
+                <h3>14723</h3>
+
+                <p>Ocupation</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-bag"></i>
+              </div>
+              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+          </div>
+          <!-- ./col -->
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-success">
+              <div class="inner">
+                <h3>73<sup style="font-size: 20px">%</sup></h3>
+
+                <p>Ocupation Ratio</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-stats-bars"></i>
+              </div>
+              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+          </div>
+          <!-- ./col -->
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-warning">
+              <div class="inner">
+                <h3>19720</h3>
+
+                <p>Total Positons</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-person-add"></i>
+              </div>
+              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+          </div>
+          <!-- ./col -->
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-danger">
+              <div class="inner">
+                <h3>6<sup style="font-size: 20px">%</sup></h3>
+
+                <p>Missmatch</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-pie-graph"></i>
+              </div>
+              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+          </div>
+          <!-- ./col -->
+        </div>
+{% endblock %}
+
+{% block content %}
+
+  <div class="row">
+    <!-- Left col -->
+    <section class="col-lg-7 connectedSortable">
+      <!-- Custom tabs (TABLE)-->
+     <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Position | Unit match</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div id="example1_wrapper" class="dataTables_wrapper dt-bootstrap4"><div class="row">
+
+                  <table id="table1" name="example1" class="table table-bordered table-striped dataTable table-responsive dtr-inline" role="grid" aria-describedby="table1_info">
+                  <thead>
+                  <tr role="row">
+                      {% for col in description %}
+                    {% if forloop.first %}
+                    {% else %}
+                      <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+                                          {% endif %}
+
+                      {% endfor %}
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {% for row in data %}
+
+                  <tr role="row" class="odd">
+                    {% for item in row %}
+                    {% if forloop.first %}
+
+                      {%else%}
+                    <td>
+                        {% if forloop.counter == 2 %}
+                          <a href="/all?id_inspection={{row.0}}">{{item}}</a>
+                        {% else%}
+                        {{item}}
+                      {% endif %}
+                      </td>
+
+                    {% endif %}
+
+                      {% endfor %}
+
+                  </tr>
+                  {% endfor %}
+               </tbody>
+                  <tfoot>
+                   <tr role="row">
+   {% for col in description %}
+                    {% if forloop.first %}
+                    {% else %}
+                      <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+                                          {% endif %}
+
+                      {% endfor %}
+                  </tr>
+                  </tfoot>
+                </table></div></div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+
+      <!-- /.card -->
+
+
+      <!-- /.card -->
+    </section>
+    <!-- /.Left col -->
+    <!-- right col (We are only adding the ID to make the widgets sortable)-->
+    <section class="col-lg-5 connectedSortable">
+
+
+      <!-- /.card -->
+    </section>
+    <!-- right col -->
+  </div>
+
+{% endblock %}
+
+{% block pageScripts %}
+<script>
+  $(document).ready(function() {
+
+    $("#table1").DataTable({
+      "responsive": true,
+      "autoWidth": false,
+    });
+} );
+</script>
+{% endblock %}
