@@ -11,5 +11,6 @@ urlpatterns = [
     path('inspections',views.inspections,name='inspections'),
     path('all',views.all,name='all'),
     path('level', views.level, name='level'),
-    path('test',views.testPage, name='testpage')
+    path('test',views.testPage, name='testpage'),
+    path('importWMS',views.importWMS,name='importWMS')
 ]

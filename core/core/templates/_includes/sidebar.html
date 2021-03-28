@@ -2,19 +2,27 @@
 
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="https://www.smartcubik.com" class="brand-link">
+    <a href="http://www.smartcubik.com" class="brand-link">
       <img src="{% static 'sclogo.png' %}" alt="logo" class="brand-image img-square elevation-0" >
-      <span class="brand-text font-weight-light">SmartCubik</span>
+      <span class="brand-text font-weight-light">Smart Cubik</span>
     </a>
 
     <!-- Sidebar -->
-    <div class="sidebar">
+    <li class="sidebar">
 
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
+          <div class="row">
+            <div class="col-4 text-light" ><i class="nav-icon fas fa-user"></i></div>
+            <div class="col-8 text-uppercase text-light">
+                {{request.user}}
+            </div>
+
+          </div>
+          <span class="brand-link font-weight-light"> </span>
 
           <li class="nav-header">WAREHOUSE</li>
           <li class="nav-item">
@@ -28,7 +36,7 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item menu-open">
-                <a href="/" class="nav-link">
+                <a href="/all?id_inspection={{request.GET.id_inspection}}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>ALL</p>
                 </a>

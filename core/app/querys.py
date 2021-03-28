@@ -26,18 +26,20 @@ def mysqlQuery(query,*kargs):
   mysql_user='root'
   mysql_password = 'Smartcubik1'
   result = 'none'
-
+  field_names = []
   try:
     cnx = mysql.connector.connect(host='localhost',user=mysql_user, password=mysql_password,
                                   database=mysql_schema)
     cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
     cursor = cnx.cursor()
     if len(kargs)>0:
+
       result = cursor.execute(query,multi=kargs)
       print(result)
       results = []
       for r in result:
         results.append(r.fetchall())
+
 
       return results
     else:
@@ -97,24 +99,43 @@ def getInspectionData(id_inspection):
     return result
 
 def getMatch(*args):
-  query = 'SELECT * FROM runningpositions;'
+  id_inspection = 0
+  query = 'call runningpositions();'
   if len(args) >= 0:
-    query = 'SELECT * FROM runningpositions limit '+str(args[0])+','+str(args[1])+';'
+     offset = str(args[0])
+     limit = str(args[1])
+     id_inspection = str(args[2])
+     query = 'CALL runningpositions('+id_inspection +','+offset+','+limit+');'
+  #
 
-  print(query)
-  result = mysqlQuery(query)
+
+  # query = """SELECT Positions.rack,codePos,picPath FROM
+  #       (SELECT DISTINCT codePos, rack FROM `inventorymaptbl`  WHERE
+  #       (NOT ((`inventorymaptbl`.`codePos` LIKE '')))
+  #       and id_inspection = """+str(id_inspection)+""") as Positions
+	# 	INNER JOIN  (SELECT DISTINCT codeUnit, picPath, rack,camera, nivel,visionBar
+	# 	from `inventorymaptbl` WHERE (NOT ((`inventorymaptbl`.`codePos` LIKE '')))
+	# 	and id_inspection = """+str(id_inspection)+""") as Units
+  #       on Positions.rack = Units.rack
+  #       LIMIT """+offset+""","""+limit+""";"""
+  # print(query)
+
+  result = mysqlQuery(query,True)
+
   # print(result)
   return result
 
 
-def getLevels():
-  query = 'select * from levels;'
-  levels = mysqlQuery(query)
-  # print(levels[0])
-  return levels[0]
+# def getLevels():
+#   query = 'select * from levels;'
+#   levels = mysqlQuery(query)
+#   # print(levels[0])
+#   return levels[0]
 
 def getLevels(id_inspection):
   query = "call inventory.levels("+str(id_inspection)+");"
+  # print("query",query)
+
   levels = mysqlQuery(query,True)
   print("getLevels:",levels)
   return levels[0]
@@ -176,3 +197,6 @@ def levelOcupation(level,id_inspection):
 
   # print(result)
   return  result,result1
+
+def insertDATA(fileName):
+  return True

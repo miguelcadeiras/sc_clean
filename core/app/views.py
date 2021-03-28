@@ -7,6 +7,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.template import loader
 from django.http import HttpResponse
 from django import template
+from django.contrib import messages
 
 from . import querys
 from .models import *
@@ -15,11 +16,11 @@ from .models import *
 @login_required(login_url="/login/")
 def index(request):
     #HOME PAGE SHOULD: show warehouses, and select Inspections
-
+    print(request.user)
     clientUser = request.user.profile.client
 
     id_client,cols = querys.getClientID(clientUser)
-    print(id_client[0][0])
+    print(id_client)
     data, description = querys.getWarehouses(id_client[0][0])
     print("data",data)
     print("description:,",description)
@@ -53,40 +54,43 @@ def inspections(request):
 
 @login_required(login_url="/login/")
 def all(request):
-
-    id_inspection = request.GET['id_inspection']
-    # print(id_inspection)
-    data,description = querys.getMatch(0,300)
     picpath = []
-    levels = querys.getLevels(id_inspection)
-
-
-    for row in data:
-        picpath.insert(0,"assets/smarti/VisionBar0_rack_"+str(row[0]).zfill(8)+"_2021-01-10.bmp")
-
-    # print(len1,description, picpath)
     id_inspection = request.GET['id_inspection']
+
+    levels = []
+    levels = querys.getLevels(id_inspection)
+    data, description = querys.getMatch(request.GET['offset'],request.GET['qty'],id_inspection)
+    description = ["Rack","Position","Unit Readed","Camera","VisionBar","Level","Picture"]
     query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection='+str(id_inspection)
 
     warehouseTotalPositions = querys.mysqlQuery(query)[0][0][0]
-    print( 'warehouseTotalPositions',warehouseTotalPositions)
+    # print( 'warehouseTotalPositions',warehouseTotalPositions)
     query = "select count(wmsProduct) from wmspositionmaptbl where wmsproduct not like '' and id_inspection="+str(id_inspection)
-
     warehouseTotalCount = querys.mysqlQuery(query)[0][0][0]
-    print('warehouseTotalCount',warehouseTotalCount)
+    # print('warehouseTotalCount',warehouseTotalCount)
     query = "select count(distinct(codePos)) from inventorymaptbl where codePos not like '' and id_inspection="+str(id_inspection)
     readedPositions = querys.mysqlQuery(query)[0][0][0]
-    print('readedPositions',readedPositions)
+    # print('readedPositions',readedPositions)
     query = "select count(unit) from runningPositions where unit not like '' and id_inspection="+str(id_inspection)
     readedCount = querys.mysqlQuery(query)[0][0][0]
-    print('readedCount',readedCount)
+    # print('readedCount',readedCount)
     # print(data)
+
+    warehouseRatio = 0
+    if warehouseTotalPositions>0:
+        warehouseRatio = round(warehouseTotalCount/warehouseTotalPositions,2)*100
+
+    if request.method == "POST":
+        messages.success(request, 'Data Exported ')
+
+        print("here")
+
     context = {'data':data,
                'clientName': request.user.profile.client,
                'warehouseName': querys.getWarehouseName(request.GET['id_inspection']),
                'warehouseTotalPositions':warehouseTotalPositions,
                'warehouseTotalCount': warehouseTotalCount,
-               'warehouseRatio': round(warehouseTotalCount/warehouseTotalPositions,2)*100,
+               'warehouseRatio': warehouseRatio,
                'readedPositions':readedPositions,
                'readedCount':readedCount,
                'readedRatio':round(readedCount/readedPositions,2)*100,
@@ -129,6 +133,16 @@ def level(request):
 def testPage(request):
     querys.connect()
     return render(request,'base.html',{})
+
+def importWMS(request):
+    if request.method=="POST":
+
+        print("myfile", request.POST['myfile'])
+    #     now we have to import to the DB.. but i don't have a file yet.
+
+
+    context ={}
+    return  render(request,'importWMS.html',context)
 
 # @login_required(login_url="/login/")
 # def pages(request):

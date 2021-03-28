@@ -9,6 +9,11 @@
       <li class="nav-item d-none d-sm-inline-block">
         <a href="/" class="nav-link">Home</a>
       </li>
+      {% if 'all' in request.path  %}
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="importWMS?id_inspection={{request.GET.id_inspection}}" class="nav-link">Import WMS Data</a>
+      </li>
+      {% endif %}
       <li class="nav-item d-none d-sm-inline-block">
         <a href="logout" class="nav-link">Log OUT</a>
       </li>

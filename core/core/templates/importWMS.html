@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %} Import WMS {% endblock%}
+
+{% block PageTitle %}Import WMS data{% endblock %}
+
+{% block indicators %}
+{% endblock %}
+
+
+{% block content %}
+<div class ="col-4 row justify-content-md-center">
+<div class="card" >
+    <div class="card-header"><h5 class="card-title">Import your file</h5></div>
+  <div class="card-body ">
+
+      <p> File format should be just 2 columns: Position, Unit
+      <br>  Note: data should be as Readed in CodeBars</p>
+      <div class="d-flex justify-content-center">
+   <form method = "post" >
+{% csrf_token %}
+  <label for="myfile">Select a file:</label><br>
+  <input type="file" class = "btn btn-warning" id="myfile" name="myfile"><br><br>
+  <input type="submit" class ="btn btn-primary">
+</form>
+          </div>
+  </div>
+</div>
+    </div>
+
+
+{% endblock %}
+
+{% block pageScripts %}
+{% endblock %}
