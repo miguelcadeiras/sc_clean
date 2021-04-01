@@ -12,7 +12,7 @@
 
   <div class="row">
     <!-- Left col -->
-    <section class="col-lg-7 connectedSortable">
+    <section class="col-lg-4 connectedSortable">
       <!-- Custom tabs (TABLE)-->
      <div class="card">
               <div class="card-header">
@@ -28,7 +28,7 @@
                       {% for col in description %}
                     {% if forloop.first %}
                     {% else %}
-                      <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+                      <th class="" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="">{{col}}</th>
                                           {% endif %}
 
                       {% endfor %}
@@ -97,6 +97,7 @@
     $("#table1").DataTable({
       "responsive": true,
       "autoWidth": false,
+      "order": [[ 1, "desc" ]]
     });
 } );
 </script>

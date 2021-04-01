@@ -91,15 +91,21 @@
 
 {% block content %}
 
+<div class="form-check">
+  <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
+  <label class="form-check-label" for="exampleRadios1">
+    Default radio
+  </label>
+</div>
+
 <div class="row">
     <!-- Left col -->
-    <section class="col-lg-7 col-md-10 col-sm-10  connectedSortable">
+    <section class="col-lg-10   connectedSortable">
         <!-- Custom tabs (TABLE)-->
         <div class="card">
             <div class="card-header">
                 <div class="row">
-
-                    <div class="col-md-10">
+                    <div class="col-md-12">
                         <div class="row">
                             <div class="col-md-3"><h3 class="card-title text-bold">Position | Unit match</h3></div>
                             <div class="col-md-4">Showing Records: {{request.GET.offset }} {{readedCount|sub:request.GET.qty}}</div>
@@ -114,8 +120,6 @@
                                         </li>
                                         {% endif %}
                                         <li class="page-item"><a class="page-link" href="all?id_inspection={{request.GET.id_inspection}}&qty={{readedCount}}&offset=0">get All Data</a></li>
-
-
                                         <li class="page-item">
                                             <a class="page-link" href="all?id_inspection={{request.GET.id_inspection}}&qty={{request.GET.qty}}&offset={{request.GET.qty|add:request.GET.offset}}" aria-label="Next">
                                                 <span aria-hidden="true">500 &raquo;</span>
@@ -129,13 +133,9 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body">
-
-
-
                         <table id="table1" name="example1" class="table table-responsive table-bordered table-striped dataTable dtr-inline" role="grid" aria-describedby="table1_info">
                             <thead>
                             <tr role="row">
@@ -153,18 +153,9 @@
                                     <div class="text-center">
                                         <a href="media/smarti/{{item}}" ><img src="media/smarti/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
                                     </div>
-
-                                    <!--                      <a href="media/smarti/{{item}}" >-->
-                                    <!--                          <i class="fas fa-camera"></i>-->
-
-                                    <!--                       <img class="img-thumbnail" src="media/smarti/{{item}}" style="" alt="">-->
-                                    <!--                        </a>-->
                                     {% else %} {{item}}
                                     {% endif %}
-
-
                                 </td>
-
                                 {% endfor %}
                                 {% endwith %}
                             </tr>
@@ -187,14 +178,12 @@
             <!-- /.card -->
             <!-- /.card -->
     </section>
-    <section class="col-lg-5 col-md-2 col-sm-10">
-        <div class="col-md-3">
+        <div class="col-md-2">
             <form method = "post" action="">
                 {% csrf_token %}
                 <button type="submit" id="exportData" class="btn btn-block btn-secondary">Export all Data</button>
             </form>
         </div>
-    </section>
 
     <!-- /.Left col -->
     <!-- right col (We are only adding the ID to make the widgets sortable)-->

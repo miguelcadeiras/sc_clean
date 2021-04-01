@@ -8,8 +8,8 @@ from django.template import loader
 from django.http import HttpResponse
 from django import template
 from django.contrib import messages
-
-from . import querys
+import csv
+from . import querys,utils
 from .models import *
 
 
@@ -60,7 +60,9 @@ def all(request):
     levels = []
     levels = querys.getLevels(id_inspection)
     data, description = querys.getMatch(request.GET['offset'],request.GET['qty'],id_inspection)
-    description = ["Rack","Position","Unit Readed","Camera","VisionBar","Level","Picture"]
+
+    description = description[0]
+    data = data[0]
     query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection='+str(id_inspection)
 
     warehouseTotalPositions = querys.mysqlQuery(query)[0][0][0]
@@ -81,9 +83,20 @@ def all(request):
         warehouseRatio = round(warehouseTotalCount/warehouseTotalPositions,2)*100
 
     if request.method == "POST":
+        desc,exportData = querys.getMatch(0,0,id_inspection)
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(description)
+        for row in data:
+            writer.writerow(row)
         messages.success(request, 'Data Exported ')
 
-        print("here")
+        return response
+
+
 
     context = {'data':data,
                'clientName': request.user.profile.client,

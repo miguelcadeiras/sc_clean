@@ -9,3 +9,5 @@ dj-database-url
 python-decouple
 gunicorn
 whitenoise
+pandas
+django-mathfilters
