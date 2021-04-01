@@ -47,7 +47,7 @@ def mysqlQuery(query, *kargs):
                   field_names.append([])
 
 
-            print(field_names)
+            # print(field_names)
             return results,field_names
         else:
             cursor.execute(query)
@@ -163,7 +163,7 @@ def unitsByLevel(level, id_inspection):
 
 
 def levelOcupation(level):
-    print(type(level), level)
+    # print(type(level), level)
     query = """   select
   count(distinct(position))
   from positions_by_level where
@@ -185,7 +185,7 @@ def levelOcupation(level):
 
 
 def levelOcupation(level, id_inspection):
-    print(type(level), level)
+    # print(type(level), level)
     query = """   select
   count(distinct(position))
   from positions_by_level where
