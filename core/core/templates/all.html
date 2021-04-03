@@ -130,39 +130,51 @@
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body">
-                        <table id="table1" name="example1" class="table table-responsive table-bordered table-striped dataTable dtr-inline" role="grid" aria-describedby="table1_info">
-                            <thead>
-                            <tr role="row">
-                                {% for col in description %}
-                                <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
-                                {% endfor %}
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for row in data %}
-                            {% with idPic=row.0%}
-                            <tr role="row" class="odd">
-                                {% for item in row %}
-                                <td> {% if forloop.last %}
-                                    <div class="text-center">
-                                        <a href="media/smarti/{{item}}" ><img src="media/smarti/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
-                                    </div>
-                                    {% else %} {{item}}
-                                    {% endif %}
-                                </td>
-                                {% endfor %}
-                                {% endwith %}
-                            </tr>
+                    <table id="table1" name="example1" class="table table-responsive table-bordered table-striped dataTable dtr-inline" role="grid" aria-describedby="table1_info">
+                        <thead>
+                        <tr role="row">
+                            {% for col in description %}
+                             {% if forloop.last  %}
+                                {% if request.GET.pic == '0' %}
+                                {% endif %}
+                            {% else %}
+                            <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+                            {% endif %}
                             {% endfor %}
-                            </tbody>
-                            <tfoot>
-                            <tr role="row">
-                                {% for col in description %}
-                                <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
-                                {% endfor %}
-                            </tr>
-                            </tfoot>
-                        </table>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in data %}
+                        {% with idPic=row.0%}
+                        <tr role="row" class="odd">
+                            {% for item in row %}
+
+                                {% if forloop.last  %}
+                                {% if request.GET.pic == '1' %}
+                                <td>
+                                <div class="text-center">
+                                    <a href="media/smarti/{{item}}" ><img src="media/smarti/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
+                                </div>
+                                </td>
+                                {% endif %}
+                                {% else %}
+                                <td>{{item}}</td>
+
+                                {% endif %}
+
+                            {% endfor %}
+                            {% endwith %}
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                        <tr role="row">
+                            {% for col in description %}
+                            <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+                            {% endfor %}
+                        </tr>
+                        </tfoot>
+                    </table>
 
 
                 </div>
@@ -172,12 +184,12 @@
             <!-- /.card -->
             <!-- /.card -->
     </section>
-        <div class="col-md-2">
-            <form method = "post" action="">
-                {% csrf_token %}
-                <button type="submit" id="exportData" class="btn btn-block btn-secondary">Export all Data</button>
-            </form>
-        </div>
+    <div class="col-md-2">
+        <form method = "post" action="">
+            {% csrf_token %}
+            <button type="submit" id="exportData" class="btn btn-block btn-secondary">Export all Data</button>
+        </form>
+    </div>
 
     <!-- /.Left col -->
     <!-- right col (We are only adding the ID to make the widgets sortable)-->
