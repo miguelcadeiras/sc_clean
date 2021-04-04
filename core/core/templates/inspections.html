@@ -44,7 +44,7 @@
                       {%else%}
                     <td>
                         {% if forloop.counter == 2 %}
-                          <a href="/all?id_inspection={{row.0}}&qty=500&offset=0&matching=false&pic=0">{{item}}</a>
+                          <a href="/all?id_inspection={{row.0}}&qty=500&offset=0&matching=0&pic=0">{{item}}</a>
                         {% else%}
                         {{item}}
                       {% endif %}

@@ -59,10 +59,18 @@ def all(request):
 
     levels = []
     levels = querys.getLevels(id_inspection)
-    data, description = querys.getMatch(request.GET['offset'],request.GET['qty'],id_inspection)
+    if request.GET['matching']=='0':
+        data, description = querys.getRunningPositions(request.GET['offset'],request.GET['qty'],id_inspection)
+        description = description[0]
+        data = data[0]
+    else:
+        data,description = querys.getMatching(id_inspection)
+        description = description[0]
 
-    description = description[0]
-    data = data[0]
+        data = data[0]
+
+
+
     query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection='+str(id_inspection)
 
     warehouseTotalPositions = querys.mysqlQuery(query)[0][0][0]
@@ -83,7 +91,10 @@ def all(request):
         warehouseRatio = round(warehouseTotalCount/warehouseTotalPositions,2)*100
 
     if request.method == "POST":
-        desc,exportData = querys.getMatch(0,0,id_inspection)
+        if request.GET['matching'] == '0':
+            desc,exportData = querys.getRunningPositions(0,0,id_inspection)
+        else:
+            desc, exportData = querys.getMatching(id_inspection)
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'

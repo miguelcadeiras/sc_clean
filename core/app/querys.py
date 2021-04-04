@@ -113,7 +113,7 @@ def getInspectionData(id_inspection):
     return result
 
 
-def getMatch(*args):
+def getRunningPositions(*args):
     id_inspection = 0
     query = 'call runningpositions();'
     if len(args) >= 0:
@@ -130,7 +130,46 @@ def getMatch(*args):
     # print(result)
     return result
 
+def getMatching(id_inspection):
+    query = """
+    -- ####################################################################  
+ --   macheo entre teorico y leido
+-- #################################################################### 
+SELECT rack,wmsposition,pos,wmsproduct,case when isnull(units) then '' else units end as readedUnit,wmsDesc,picPath from wmspositionmaptbl 
+left join (
+select distinct positions.pos,positions.rack,positions.palletType,units,unit.nivel,camera,picPath from (
+		Select distinct substring(codePos,1,12) AS pos,rack, CASE when LENGTH(codePos)>12 then substring(codePos,11,2) else '__' end as palletType ,nivel,picPath	from inventorymaptbl 
+        where 
+			codePos not like '' AND
+            codePos not like '%XX%' AND
+            substring(codePos,11,2) not like '01' and
+            length(codePos)>=10 and   
 
+            id_inspection="""+str(id_inspection)+""" 
+		order by rack,nivel,codePos
+        
+        ) as positions
+        left Join (
+			        Select distinct codeUnit AS units,nivel,camera ,rack	from inventorymaptbl 
+						where 
+								codePos like ''
+								and customCode1 like ''
+								and customCode2 like ''
+								and customCode3 like ''
+								and id_inspection=30 
+						order by rack,nivel,camera) as unit
+		on positions.rack=unit.rack and positions.nivel=unit.nivel
+        
+        order by pos) as readedPositions
+        on wmspositionmaptbl.wmsPosition=readedPositions.pos
+        where id_inspection="""+str(id_inspection)+""" ;
+
+    """
+    # print(query)
+    result = mysqlQuery(query, False)
+
+    # print(result)
+    return result
 # def getLevels():
 #   query = 'select * from levels;'
 #   levels = mysqlQuery(query)

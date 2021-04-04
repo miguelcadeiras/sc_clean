@@ -14,7 +14,7 @@
         <a href="importWMS?id_inspection={{request.GET.id_inspection}}" class="nav-link">Import WMS Data</a>
       </li>
       {% endif %}
-
+      {% if 'matching' in request.GET %}
       <li class="nav-item d-none d-sm-inline-block">
         {% if request.GET.matching == '0' %}
         <a href="all?id_inspection={{request.GET.id_inspection}}&qty={{request.GET.qty}}&offset={{request.GET.offset}}&matching=1&pic=1" class="nav-link active">Matching Data</a>
@@ -22,7 +22,7 @@
         <a href="all?id_inspection={{request.GET.id_inspection}}&qty={{request.GET.qty}}&offset={{request.GET.offset}}&matching=0&pic=0" class="nav-link active">Readed Data</a>
         {% endif %}
       </li>
-
+      {% endif %}
       <li class="nav-item d-none d-sm-inline-block">
         <a href="logout" class="nav-link">Log OUT</a>
       </li>

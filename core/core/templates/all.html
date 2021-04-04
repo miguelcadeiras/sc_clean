@@ -18,75 +18,6 @@
 
 {% block indicators %}
 
-<div class="row">
-    <div class="col-lg-3 col-6">
-        <!-- small box -->
-        <div class="small-box bg-info">
-            <div class="inner">
-                <h3>{{warehouseTotalCount}}</h3>
-
-                <p>WMS Ocupation</p>
-            </div>
-            <div class="icon">
-                <i class="ion ion-bag"></i>
-            </div>
-
-            <span class="small-box-footer">                <h3>{{readedCount}}</h3>
-                  <p>Read Ocupation</p></span>
-        </div>
-    </div>
-    <!-- ./col -->
-    <div class="col-lg-3 col-6">
-        <!-- small box -->
-        <div class="small-box bg-success">
-            <div class="inner">
-                <h3>{{warehouseTotalPositions}}</h3>
-
-                <p>WMS positions</p>
-            </div>
-            <div class="small-box-footer">
-                <h3>{{readedPositions}}</h3>
-
-                <p>Readed positions</p>
-            </div>
-
-        </div>
-    </div>
-    <!-- ./col -->
-    <div class="col-lg-3 col-6">
-        <!-- small box -->
-        <div class="small-box bg-warning">
-            <div class="inner ">
-                <h3>{{warehouseRatio}} %</h3>
-
-                <p>Ocupation Ratio</p>
-            </div>
-            <div class="small-box-footer ">
-                <h3>{{readedRatio}} %</h3>
-
-                <p>Readed Ratio</p>
-            </div>
-
-
-        </div>
-    </div>
-    <!-- ./col -->
-    <div class="col-lg-3 col-6">
-        <!-- small box -->
-        <div class="small-box bg-danger">
-            <div class="inner">
-                <h3>6<sup style="font-size: 20px">%</sup></h3>
-
-                <p>Missmatch</p>
-            </div>
-            <div class="icon">
-                <i class="ion ion-pie-graph"></i>
-            </div>
-            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-        </div>
-    </div>
-    <!-- ./col -->
-</div>
 {% endblock %}
 
 {% block content %}
@@ -146,14 +77,17 @@
                         <tbody>
                         {% for row in data %}
                         {% with idPic=row.0%}
-                        <tr role="row" class="odd">
+
+                        <tr role="row" class="odd {% if request.GET.matching == '1' and row.3 != row.4  %}bg-danger{% endif %}">
                             {% for item in row %}
 
                                 {% if forloop.last  %}
                                 {% if request.GET.pic == '1' %}
                                 <td>
                                 <div class="text-center">
+                                    {% if row.3 != row.4  %}
                                     <a href="media/smarti/{{item}}" ><img src="media/smarti/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
+                                    {% endif %}
                                 </div>
                                 </td>
                                 {% endif %}
@@ -184,12 +118,19 @@
             <!-- /.card -->
             <!-- /.card -->
     </section>
+
     <div class="col-md-2">
+        <div class="row">
+            <div class="col">
         <form method = "post" action="">
             {% csrf_token %}
             <button type="submit" id="exportData" class="btn btn-block btn-secondary">Export all Data</button>
-        </form>
+        </form><br>
+            </div>
+        </div>
+        {% include '_includes/indicators.html' %}
     </div>
+
 
     <!-- /.Left col -->
     <!-- right col (We are only adding the ID to make the widgets sortable)-->
