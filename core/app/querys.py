@@ -24,8 +24,8 @@ def connect():
 def mysqlQuery(query, *kargs):
     # print(kargs)
     mysql_schema = 'inventory'
-    mysql_user = 'root'
-    mysql_password = 'Smartcubik1'
+    mysql_user = 'webuser'
+    mysql_password = 'Smartcubik1web'
     result = 'none'
     field_names = []
     try:
@@ -144,7 +144,7 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
             codePos not like '%XX%' AND
             substring(codePos,11,2) not like '01' and
             length(codePos)>=10 and   
-
+            # length(codePos)<14 and
             id_inspection="""+str(id_inspection)+""" 
 		order by rack,nivel,codePos
         
