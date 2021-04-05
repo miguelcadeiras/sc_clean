@@ -9,24 +9,62 @@
 
 
 {% block content %}
-<div class ="col-4 row justify-content-md-center">
-<div class="card" >
-    <div class="card-header"><h5 class="card-title">Import your file</h5></div>
-  <div class="card-body ">
+<div class="row">
+    <div class ="col-6">
+        <div class="card" >
+            <div class="card-header"><h5 class="card-title">WMS Data</h5></div>
+            <div class="card-body ">
 
-      <p> File format should be just 2 columns: Position, Unit
-      <br>  Note: data should be as Readed in CodeBars</p>
-      <div class="d-flex justify-content-center">
-   <form method = "post" >
-{% csrf_token %}
-  <label for="myfile">Select a file:</label><br>
-  <input type="file" class = "btn btn-warning" id="myfile" name="myfile"><br><br>
-  <input type="submit" class ="btn btn-primary">
-</form>
-          </div>
-  </div>
-</div>
+
+                <div id="example1_wrapper" class="wrapper">
+
+                    <table id="table1" name="example1" class="table table-bordered table-striped dataTable  "  style="width:100%">
+                        <thead>
+                        <tr role="row">
+                            {% for col in description %}
+                            <th class="" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="">{{col}}</th>
+                            {% endfor %}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in data %}
+                        <tr role="row" class="odd">
+                            {% for item in row %}
+                            <td>
+                                {{item}}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+
+                    </table></div>
+
+
+            </div>
+        </div>
     </div>
+    <div class ="col-1"></div>
+    <div class ="col-3 justify-content-md-center">
+        <div class="card" >
+            <div class="card-header"><h5 class="card-title">Import your file</h5></div>
+            <div class="card-body ">
+
+                <p> File format should contain 2 to 4 columns: wmsPosition, wmsProduct, wmsDesc,wmsDesc1
+                    <br>  Note: Positions Data should be as Readed in CodeBars </p>
+                <div class="d-flex justify-content-center">
+                    <form method = "post" >
+                        {% csrf_token %}
+                        <label for="myfile">Select a file:</label><br>
+                        <input type="file" class = "btn btn-warning" id="myfile" name="myfile"><br><br>
+                        <input type="submit" class ="btn btn-primary">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 {% endblock %}

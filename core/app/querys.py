@@ -249,3 +249,12 @@ def levelOcupation(level, id_inspection):
 
 def insertDATA(fileName):
     return True
+
+def getWMSData(id_inspection):
+    query = "select wmsposition,wmsproduct,wmsDesc,wmsDesc1 from wmspositionmaptbl where id_inspection = "+str(id_inspection)
+    return mysqlQuery(query,False)
+
+def deleteWMSData(id_inspection):
+    query = "delete form wmspositiontable where id_inspection="+str(id_inspection)
+    mysqlQuery(query, False)
+    return

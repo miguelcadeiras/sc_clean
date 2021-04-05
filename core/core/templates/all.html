@@ -61,7 +61,7 @@
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body">
-                    <table id="table1" name="example1" class="table table-responsive table-bordered table-striped dataTable dtr-inline" role="grid" aria-describedby="table1_info">
+                    <table id="table1" name="example1" class="table  table-bordered table-striped dataTable dtr-inline" role="grid" aria-describedby="table1_info">
                         <thead>
                         <tr role="row">
                             {% for col in description %}
@@ -76,8 +76,6 @@
                         </thead>
                         <tbody>
                         {% for row in data %}
-                        {% with idPic=row.0%}
-
                         <tr role="row" class="odd {% if request.GET.matching == '1' and row.3 != row.4  %}bg-danger{% endif %}">
                             {% for item in row %}
 
@@ -97,7 +95,7 @@
                                 {% endif %}
 
                             {% endfor %}
-                            {% endwith %}
+
                         </tr>
                         {% endfor %}
                         </tbody>
@@ -149,6 +147,7 @@
       "autoWidth": true,
       "lengthMenu": [[50, 100, 500, -1], [50, 100, 500, "All"]]
     });
+
 } );
 </script>
 {% endblock %}
