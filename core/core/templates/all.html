@@ -61,16 +61,19 @@
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body">
-                    <table id="table1" name="example1" class="table  table-bordered table-striped dataTable dtr-inline" role="grid" aria-describedby="table1_info">
+                    <table id="table1" name="example1" class="table table-bordered table-striped dataTable " role="grid" aria-describedby="table1_info" style="width:100%">
                         <thead>
                         <tr role="row">
                             {% for col in description %}
                              {% if forloop.last  %}
                                 {% if request.GET.pic == '0' %}
+                                {% else %}
+                                 <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+
                                 {% endif %}
-                            {% else %}
-                            <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
-                            {% endif %}
+                             {% else %}
+                                <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+                             {% endif %}
                             {% endfor %}
                         </tr>
                         </thead>
