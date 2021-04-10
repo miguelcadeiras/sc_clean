@@ -53,10 +53,10 @@
                 <p> File format should contain 2 to 4 columns: wmsPosition, wmsProduct, wmsDesc,wmsDesc1
                     <br>  Note: Positions Data should be as Readed in CodeBars </p>
                 <div class="d-flex justify-content-center">
-                    <form method = "post" >
+                    <form method = "post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <label for="myfile">Select a file:</label><br>
-                        <input type="file" class = "btn btn-warning" id="myfile" name="myfile"><br><br>
+                        <input type="file" name="myfile" class = "btn btn-warning" id="myfile" " ><br><br>
                         <input type="submit" class ="btn btn-primary">
                     </form>
                 </div>
@@ -70,4 +70,16 @@
 {% endblock %}
 
 {% block pageScripts %}
+<script>
+  $(document).ready(function() {
+
+    $("#table1").DataTable({
+
+      "responsive": true,
+      "autoWidth": true,
+      "lengthMenu": [[50, 100, 500, -1], [50, 100, 500, "All"]]
+    });
+
+} );
+</script>
 {% endblock %}

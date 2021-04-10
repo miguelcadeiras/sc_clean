@@ -10,14 +10,20 @@
 {% block PageTitle %}{{request.user.profile.client}} || {{warehouseName.0.0.0}} {% endblock %}
 
 {% block PageInfo %}
-<div >
-    <p>{{warehouseName.0.0.1}},{{warehouseName.0.0.2}},<br>{{warehouseName.0.0.3}}<br>
-        Inspection date:{{inspection.0.0.1}} || Description : {{inspection.0.0.0}} </p></div>
+
 {% endblock %}
 
 
 {% block indicators %}
+<div class="row">
+    <div class="col-lg-4" >
+        <span>
+<!--            {{warehouseName.0.0.1}},{{warehouseName.0.0.2}},<br>{{warehouseName.0.0.3}}<br>-->
+            Inspection date:{{inspection.0.0.1}} || Description : {{inspection.0.0.0}} </span>
+    </div>
 
+
+</div>
 {% endblock %}
 
 {% block content %}
@@ -33,29 +39,32 @@
                     <div class="col-md-12">
                         <div class="row">
                             <div class="col-md-3"><h3 class="card-title text-bold">Position | Unit match</h3></div>
-                            <div class="col-md-4">Showing Records: {{request.GET.offset }} {{readedCount|sub:request.GET.qty}}</div>
-                            <div class="col-md-5">
-                                <nav aria-label="Page navigation example">
-                                    <ul class="pagination">
-                                        {% if  request.GET.offset > "0" %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="all?id_inspection={{request.GET.id_inspection}}&qty={{request.GET.qty}}&offset={{request.GET.offset|sub:request.GET.qty}}" aria-label="Previous">
-                                                <span aria-hidden="true">&laquo; 500</span>
-                                            </a>
-                                        </li>
-                                        {% endif %}
-                                        <li class="page-item"><a class="page-link" href="all?id_inspection={{request.GET.id_inspection}}&qty={{readedCount}}&offset=0">get All Data</a></li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="all?id_inspection={{request.GET.id_inspection}}&qty={{request.GET.qty}}&offset={{request.GET.qty|add:request.GET.offset}}" aria-label="Next">
-                                                <span aria-hidden="true">500 &raquo;</span>
-                                            </a>
-                                        </li>
-
-
-                                    </ul>
-                                </nav>
-
+                            <div class="col-lg-6">
+                                {% include '_includes/searchBox.html' %}
                             </div>
+<!--                            <div class="col-md-4">Showing Records: {{request.GET.offset }} {{readedCount|sub:request.GET.qty}}</div>-->
+<!--                            <div class="col-md-5">-->
+<!--                                <nav aria-label="Page navigation example">-->
+<!--                                    <ul class="pagination">-->
+<!--                                        {% if  request.GET.offset > "0" %}-->
+<!--                                        <li class="page-item">-->
+<!--                                            <a class="page-link" href="all?id_inspection={{request.GET.id_inspection}}&qty={{request.GET.qty}}&offset={{request.GET.offset|sub:request.GET.qty}}" aria-label="Previous">-->
+<!--                                                <span aria-hidden="true">&laquo; 500</span>-->
+<!--                                            </a>-->
+<!--                                        </li>-->
+<!--                                        {% endif %}-->
+<!--                                        <li class="page-item"><a class="page-link" href="all?id_inspection={{request.GET.id_inspection}}&qty={{readedCount}}&offset=0">get All Data</a></li>-->
+<!--                                        <li class="page-item">-->
+<!--                                            <a class="page-link" href="all?id_inspection={{request.GET.id_inspection}}&qty={{request.GET.qty}}&offset={{request.GET.qty|add:request.GET.offset}}" aria-label="Next">-->
+<!--                                                <span aria-hidden="true">500 &raquo;</span>-->
+<!--                                            </a>-->
+<!--                                        </li>-->
+
+
+<!--                                    </ul>-->
+<!--                                </nav>-->
+
+<!--                            </div>-->
                         </div>
                     </div>
                 </div>
@@ -65,15 +74,15 @@
                         <thead>
                         <tr role="row">
                             {% for col in description %}
-                             {% if forloop.last  %}
-                                {% if request.GET.pic == '0' %}
-                                {% else %}
-                                 <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+                            {% if forloop.last  %}
+                            {% if request.GET.pic == '0' %}
+                            {% else %}
+                            <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
 
-                                {% endif %}
-                             {% else %}
-                                <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
-                             {% endif %}
+                            {% endif %}
+                            {% else %}
+                            <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+                            {% endif %}
                             {% endfor %}
                         </tr>
                         </thead>
@@ -82,36 +91,34 @@
                         <tr role="row" class="odd {% if request.GET.matching == '1' and row.3 != row.4  %}bg-danger{% endif %}">
                             {% for item in row %}
 
-                                {% if forloop.last  %}
-                                {% if request.GET.pic == '1' %}
-                                <td>
+                            {% if forloop.last  %}
+                            {% if request.GET.pic == '1' %}
+                            <td>
                                 <div class="text-center">
                                     {% if row.3 != row.4  %}
                                     <a href="media/smarti/{{item}}" ><img src="media/smarti/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
                                     {% endif %}
                                 </div>
-                                </td>
-                                {% endif %}
-                                {% else %}
-                                <td>{{item}}</td>
+                            </td>
+                            {% endif %}
+                            {% else %}
+                            <td>{{item}}</td>
 
-                                {% endif %}
+                            {% endif %}
 
                             {% endfor %}
 
                         </tr>
                         {% endfor %}
                         </tbody>
-                        <tfoot>
-                        <tr role="row">
-                            {% for col in description %}
-                            <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
-                            {% endfor %}
-                        </tr>
-                        </tfoot>
+                        <!--                        <tfoot>-->
+                        <!--                        <tr role="row">-->
+                        <!--                            {% for col in description %}-->
+                        <!--                            <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>-->
+                        <!--                            {% endfor %}-->
+                        <!--                        </tr>-->
+                        <!--                        </tfoot>-->
                     </table>
-
-
                 </div>
                 <!-- /.card-body -->
             </div>
@@ -123,10 +130,10 @@
     <div class="col-md-2">
         <div class="row">
             <div class="col">
-        <form method = "post" action="">
-            {% csrf_token %}
-            <button type="submit" id="exportData" class="btn btn-block btn-secondary">Export all Data</button>
-        </form><br>
+                <form method = "post" action="">
+                    {% csrf_token %}
+                    <button type="submit" name="exportData" id="exportData" class="btn btn-block btn-secondary">Export all Data</button>
+                </form><br>
             </div>
         </div>
         {% include '_includes/indicators.html' %}
@@ -144,12 +151,35 @@
 {% block pageScripts %}
 <script>
   $(document).ready(function() {
+   // Setup - add a text input to each footer cell
+<!--    $('#table1 thead th').each( function () {-->
+<!--        var title = $(this).text();-->
+<!--        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );-->
+<!--    } );-->
 
     $("#table1").DataTable({
+
       "responsive": true,
       "autoWidth": true,
       "lengthMenu": [[50, 100, 500, -1], [50, 100, 500, "All"]]
     });
+
+<!--        var table = $('#example').DataTable({-->
+<!--        initComplete: function () {-->
+<!--            // Apply the search-->
+<!--            this.api().columns().every( function () {-->
+<!--                var that = this;-->
+
+<!--                $( 'input', this.footer() ).on( 'keyup change clear', function () {-->
+<!--                    if ( that.search() !== this.value ) {-->
+<!--                        that-->
+<!--                            .search( this.value )-->
+<!--                            .draw();-->
+<!--                    }-->
+<!--                } );-->
+<!--            } );-->
+<!--        }-->
+<!--    });-->
 
 } );
 </script>
