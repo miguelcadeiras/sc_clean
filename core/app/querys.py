@@ -1,6 +1,12 @@
 import mysql.connector
+import csv
 from mysql.connector import errorcode
+from time import process_time
+from django.conf import settings
 
+mysql_schema = 'inventory'
+mysql_user = 'webuser'
+mysql_password = 'Smartcubik1web'
 
 def connect():
     try:
@@ -23,9 +29,6 @@ def connect():
 
 def mysqlQuery(query, *kargs):
     # print(kargs)
-    mysql_schema = 'inventory'
-    mysql_user = 'webuser'
-    mysql_password = 'Smartcubik1web'
     result = 'none'
     field_names = []
     try:
@@ -71,6 +74,24 @@ def mysqlQuery(query, *kargs):
         return result
         cnx.close()
 
+def execute(query):
+    try:
+        cnx = mysql.connector.connect(host='localhost', user=mysql_user, password=mysql_password,
+                                      database=mysql_schema)
+        cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
+        cursor = cnx.cursor()
+        cursor.execute(query)
+        cnx.commit()
+
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with your user name or password")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist")
+        else:
+            print(err)
+            return 'error'
+    return True
 
 def getClientID(clientName):
     query = "SELECT id_client FROM clienttbl where clientName like '" + str(clientName) + "';"
@@ -119,12 +140,32 @@ def getRunningPositions(*args):
     if len(args) >= 0:
         offset = str(args[0])
         limit = str(args[1])
-        if limit == 0:
-            limit = 65000
-
         id_inspection = str(args[2])
+
+        if limit == 0:
+            limit = mysqlQuery('select count(distinct(codePos)) from inventorymaptbl where id_inspection='+str(id_inspection))[0][0][0]
+
+
         query = 'CALL runningpositions(' + id_inspection + ',' + offset + ',' + limit + ');'
 
+    result = mysqlQuery(query, True)
+
+    # print(result)
+    return result
+
+def getRunningPositionsCenco(id_inspection,id_asile,id_N,id_pos,offset,qty):
+    # PROCEDURE REQUIEREMENTS MYSQL
+    # PROCEDURE `runningPositionsCenco`(IN idInsp INT, in idAsile varchar(10), IN idN varchar(10),in idPos varchar(20), IN offset int, in QTY int)
+    print("input Parameters","asile", id_asile,"nivel", id_N,"pos", id_pos)
+    idAsile = "'%%'" if id_asile.lower() == 'all' else "'%"+str(id_asile)+"%'"
+    idN = "'%%'" if id_N.lower() == 'all' else"'%"+str(id_N)+"%'"
+    idPos = "'%%'" if id_pos.lower() == 'all' else "'%"+str(id_pos)+"%'"
+    print("query parameters","asile",idAsile,"nivel",idN,"pos",idPos)
+    if qty == 0:
+       qty = mysqlQuery('select count(distinct(codePos)) from inventorymaptbl where id_inspection='+str(id_inspection))[0][0][0]
+
+    query = 'CALL runningpositionsCenco(' + id_inspection + ',' + idAsile+ ',' +idN+ ',' +idPos+ ',' + str(offset) + ',' + str(qty) + ');'
+    print("query",query)
     result = mysqlQuery(query, True)
 
     # print(result)
@@ -247,5 +288,50 @@ def levelOcupation(level, id_inspection):
     return result, result1
 
 
-def insertDATA(fileName):
+def importData(myfile,id_inspection):
+    # try:
+    # Start the stopwatch / counter
+    t1_start = process_time()
+
+    with open(myfile, 'r') as csv_file:
+            reader = csv.reader(csv_file, delimiter=',', quotechar='|')
+            for index,row in enumerate(reader):
+                if index == 0:
+                    print(row)
+                else:
+                    query = "insert into wmspositionmaptbl (wmsposition,wmsproduct,wmsdesc,wmsdesc1,id_inspection) values('"+row[0]+"','"+row[1]+"','"+row[2]+"','"+row[3]+"',"+str(id_inspection)+");"
+                    # print("query", query)
+                    if index == 1:
+
+                        print("query",query)
+
+
+
+                    # mysqlQuery(query, False)
+                    execute(query)
+
+            print("import Process Finished")
+
+    # Stop the stopwatch / counter
+    t1_stop = process_time()
+    print("Elapsed time during the whole program in seconds:",
+          t1_stop - t1_start)
     return True
+
+def deleteData(id_inspection):
+    try:
+        query = "DELETE  FROM wmspositionmaptbl where id_inspection ="+str(id_inspection)+";"
+        execute(query)
+        return True
+    except:
+        print("someError")
+        return False
+
+def getWMSData(id_inspection):
+    query = "select wmsposition,wmsproduct,wmsDesc,wmsDesc1 from wmspositionmaptbl where id_inspection = "+str(id_inspection)
+    return mysqlQuery(query,False)
+
+def deleteWMSData(id_inspection):
+    query = "delete form wmspositiontable where id_inspection="+str(id_inspection)
+    mysqlQuery(query, False)
+    return

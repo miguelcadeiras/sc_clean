@@ -21,16 +21,14 @@ def login_view(request):
     msg = ''
     if request.method == "POST":
 
-
-        print('hola')
-
         username = request.POST['username']
-        print('username:',username)
+        # print('username:',username)
         password = request.POST['password']
-        print('pass:',password)
+        # print('pass:',password)
 
 
         user = authenticate(request, username=username, password=password)
+
         if user is not None:
             login(request, user)
             # Redirect to a success page.
@@ -38,8 +36,13 @@ def login_view(request):
             return redirect("/")
 
         else:
-            msg = 'user not found, or password not valid'
-            print('user Not found')
+            test = User.objects.filter(username=username)
+            if len(test)==0:
+                messages.warning(request,'User not found')
+            else:
+                messages.error(request,'Check your Password')
+
+            # print('user Not found')
             return render(request, "accounts/login.html", {"msg": msg, })
             # Return an 'invalid login' error message.
 
@@ -47,6 +50,7 @@ def login_view(request):
     return render(request, "accounts/login.html", {})
 
     # return render(request, "accounts/login.html", {})
+
 
 
 def register_user(request):

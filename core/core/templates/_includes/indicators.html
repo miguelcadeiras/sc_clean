@@ -3,55 +3,62 @@
     <div class="col">
         <!-- small box -->
         <div class="small-box bg-info">
-            <div class="inner">
+            <div class="inner text-center">
                 <h3>{{warehouseTotalCount}}</h3>
 
                 <p>WMS Ocupation</p>
             </div>
             <div class="icon">
-                <i class="ion ion-bag"></i>
+                <!--                <i class="ion ion-bag"></i>-->
             </div>
 
-            <span class="small-box-footer">                <h3>{{readedCount}}</h3>
-                  <p>Read Ocupation</p></span>
+            <span class="small-box-footer">
+                <h3>{{warehouseTotalPositions}}</h3>
+                  <p>WMS positions</p></span>
         </div>
     </div>
     <!-- ./col -->
     <div class="col">
         <!-- small box -->
         <div class="small-box bg-success">
-            <div class="inner">
-                <h3>{{warehouseTotalPositions}}</h3>
+            <div class="inner text-center">
+                <h3>{{ readedCount}}</h3>
 
-                <p>WMS positions</p>
+                <p>Read Ocupation</p>
             </div>
             <div class="small-box-footer">
                 <h3>{{readedPositions}}</h3>
 
-                <p>Readed positions</p>
+                <p>Read positions</p>
             </div>
 
         </div>
     </div>
     <!-- ./col -->
-    <div class="col">
-        <!-- small box -->
-        <div class="small-box bg-warning">
-            <div class="inner ">
-                <h3>{{warehouseRatio}} %</h3>
 
-                <p>Ocupation Ratio</p>
+        <div class="col">
+            <!-- small box -->
+            <div class="small-box bg-warning">
+                <div class="inner text-center">
+                    <h3 >{{warehouseRatio}} %</h3>
+
+                    <p>WMS Ocupation Ratio</p>
+                </div>
+                <div class="small-box-footer ">
+                    <h3>{{readedRatio}} %</h3>
+
+                    <p>Readed Ratio</p>
+                </div>
+
+
             </div>
-            <div class="small-box-footer ">
-                <h3>{{readedRatio}} %</h3>
-
-                <p>Readed Ratio</p>
-            </div>
-
-
         </div>
-    </div>
+
     <!-- ./col -->
+
+    <!-- ./col -->
+</div>
+<div class=" row">
     <div class="col">
         <!-- small box -->
         <div class="small-box bg-danger">
@@ -66,5 +73,4 @@
             <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
-    <!-- ./col -->
-</div>
+        </div>

@@ -1,0 +1,53 @@
+
+
+<!--<div class="card card-primary">-->
+<!--    <div class="card-header with-border">-->
+<!--        <h3 >Filter Data</h3>-->
+<!--    </div>-->
+<!--    <div class="card-body">-->
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-3 ">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">aisle</span>
+                        </div>
+                        <input type="text" name="asile" class="form-control" placeholder="all">
+                    </div>
+                    <!--                <input type="text" class="form-control" placeholder=".col-xs-3">-->
+                </div>
+                <div class="col-xs-2 ">
+                    <div class="input-group  ">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Level</span>
+                        </div>
+                        <select name="level"  class="form-control">
+                            <option>All</option>
+                            <option> 2</option>
+                            <option> 3</option>
+                            <option> 4</option>
+                            <option> 5</option>
+                        </select>
+                    </div>
+                    <!--                <input type="text" class="form-control" placeholder=".col-xs-3">-->
+                </div>
+                <div class="col-4 ">
+                    <div class="input-group  ">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Exact Position</span>
+                        </div>
+                        <input type="text" name="position" class="form-control" placeholder="___">
+                    </div>
+                    <!--                <input type="text" class="form-control" placeholder=".col-xs-3">-->
+                </div>
+                <DIV class="col-1">
+                    <button type="submit" name="applyFilter" class="btn btn-primary">Apply</button>
+                </DIV>
+            </div>
+        </form>
+<!--    </div>-->
+
+<!--    &lt;!&ndash; /.box-body &ndash;&gt;-->
+<!--</div>-->
+
