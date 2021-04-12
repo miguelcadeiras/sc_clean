@@ -49,7 +49,8 @@ def mysqlQuery(query, *kargs):
                 else:
                   field_names.append([])
 
-
+            cursor.close()
+            cnx.close()
             # print(field_names)
             return results,field_names
         else:
@@ -82,6 +83,29 @@ def execute(query):
         cursor = cnx.cursor()
         cursor.execute(query)
         cnx.commit()
+        cursor.close()
+        cnx.close()
+
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with your user name or password")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist")
+        else:
+            print(err)
+            return 'error'
+    return True
+
+def executeMulti(query):
+    try:
+        cnx = mysql.connector.connect(host='localhost', user=mysql_user, password=mysql_password,
+                                      database=mysql_schema)
+        cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
+        cursor = cnx.cursor()
+        cursor.execute(query,multi=True)
+        cnx.commit()
+        cursor.close()
+        cnx.close()
 
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -305,10 +329,44 @@ def importData(myfile,id_inspection):
 
                         print("query",query)
 
+                    # mysqlQuery(query, False)
+                    execute(query)
+
+            print("import Process Finished")
+
+    # Stop the stopwatch / counter
+    t1_stop = process_time()
+    print("Elapsed time during the whole program in seconds:",
+          t1_stop - t1_start)
+    return True
+
+def importDataBulk(myfile,id_inspection):
+    # try:
+    # Start the stopwatch / counter
+    t1_start = process_time()
+
+    with open(myfile, 'r') as csv_file:
+            query="insert into wmspositionmaptbl (wmsposition,wmsproduct,wmsdesc,wmsdesc1,id_inspection) values"
+            reader = csv.reader(csv_file, delimiter=',', quotechar='|')
+            for index,row in enumerate(reader):
+                if index == 0:
+                    next
+                    #print(row)
+                else:
+
+                    query += "('"+row[0]+"','"+row[1]+"','"+row[2]+"','"+row[3]+"',"+str(id_inspection)+"),"
+                    # print("query", query)
+                    if index == 1:
+                        print("query",query)
+                        next
+
+
 
 
                     # mysqlQuery(query, False)
-                    execute(query)
+
+            # print("query", query)
+            execute(query[:-1])
 
             print("import Process Finished")
 

@@ -193,31 +193,29 @@ def testPage(request):
     querys.connect()
     return render(request, 'base.html', {})
 
-
+@login_required(login_url="/login/")
 def importWMS(request):
     id_inspection = request.GET['id_inspection']
-    data, description = querys.getWMSData(id_inspection)
 
     if request.method == "POST":
         # print("myfile", request.POST['myfile'])
 
         myfile = request.FILES['myfile']
-
-
-
         print("myfile: ",myfile,myfile.name)
         fs = FileSystemStorage()
         filename = fs.save(myfile.name,myfile)
         print(filename)
         # uploaded_file_url = fs.url(filename)
         # print(uploaded_file_url)
-        importBool = querys.importData(os.path.join(settings.MEDIA_ROOT,filename),id_inspection)
+        importBool = querys.importDataBulk(os.path.join(settings.MEDIA_ROOT,filename),id_inspection)
         os.remove(os.path.join(settings.MEDIA_ROOT,filename))
         if importBool:
             messages.success(request,"Your Data has been Imported correctly")
         else:
             messages.error(request,"Check your file, we couldn't import it")
-    #     now we have to import to the DB.. but i don't have a file yet.
+
+
+    data, description = querys.getWMSData(id_inspection)
 
     context = {"data": data[0],
                "description": description[0],
