@@ -5,8 +5,9 @@ from time import process_time
 from django.conf import settings
 
 mysql_schema = 'inventory'
-mysql_user = 'webuser'
-mysql_password = 'Smartcubik1web'
+mysql_user = 'smartcubik'
+mysql_password = 'Smartcubik1Root!'
+mysql_host = '151.106.108.129'
 
 def connect():
     try:
@@ -32,7 +33,7 @@ def mysqlQuery(query, *kargs):
     result = 'none'
     field_names = []
     try:
-        cnx = mysql.connector.connect(host='localhost', user=mysql_user, password=mysql_password,
+        cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
                                       database=mysql_schema)
         cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
         cursor = cnx.cursor()
@@ -77,7 +78,7 @@ def mysqlQuery(query, *kargs):
 
 def execute(query):
     try:
-        cnx = mysql.connector.connect(host='localhost', user=mysql_user, password=mysql_password,
+        cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
                                       database=mysql_schema)
         cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
         cursor = cnx.cursor()
@@ -98,7 +99,7 @@ def execute(query):
 
 def executeMulti(query):
     try:
-        cnx = mysql.connector.connect(host='localhost', user=mysql_user, password=mysql_password,
+        cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
                                       database=mysql_schema)
         cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
         cursor = cnx.cursor()
