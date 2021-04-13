@@ -44,7 +44,7 @@ def inspections(request):
     clientUser = request.user.profile.client
 
     id_client, cols = querys.getClientID(clientUser)
-    print(id_client[0][0])
+    # print(id_client[0][0])
     data, description = querys.getInspections(request.GET['id_warehouse'])
 
     context = {'data': data,
