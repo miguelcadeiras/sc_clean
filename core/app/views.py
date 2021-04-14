@@ -78,7 +78,6 @@ def all(request):
     else:
         data, description = querys.getMatching(id_inspection)
         description = description[0]
-
         data = data[0]
 
     query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection=' + str(id_inspection)
@@ -133,11 +132,34 @@ def all(request):
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
 
+            queryUpdateExported = "UPDATE inventorymaptbl set exported = (case codeUnit "
+            # we need to form an bulk update query like
+        # update
+        # inventorymaptbl
+        # set
+        # exported =
+        # (case codeunit
+        # when  'PA20210125162354879' then 0
+        # END)
+        # where
+        # id_inspection = 30;
+
             writer = csv.writer(response)
             writer.writerow(description)
             for row in data:
+
                 writer.writerow(row)
+                if request.GET['matching'] == '1':
+                    queryUpdateExported += " when '" +str(row[4])+"' then 1 \n"
+                    # print("row",row)
+                else:
+                    queryUpdateExported += " when '" + str(row[4]) + "' then 1 \n"
+
+
             messages.success(request, 'Data Exported ')
+            queryUpdateExported+= " end) where id_inspection="+str(id_inspection)+";"
+            # print(queryUpdateExported)
+            querys.execute(queryUpdateExported)
 
             return response
 

@@ -9,12 +9,20 @@ mysql_user = 'smartcubik'
 mysql_password = 'Smartcubik1Root!'
 mysql_host = '151.106.108.129'
 
+mysql_schemaDev = 'inventory'
+mysql_userDev = 'webuser'
+mysql_passwordDev = 'Smartcubik1web'
+mysql_hostDev = 'localhost'
+
+
 def connect():
     try:
-
-        cnx = mysql.connector.connect(user='root', password='Smartcubik1',
-                                      database='inventory')
-        cnx.set_charset_collation(charset='none', collation='none')
+        if settings.DEBUG:
+            cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
+                                      database=mysql_schemaDev)
+        else:
+            cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
+                                          database=mysql_schema)
 
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -27,14 +35,25 @@ def connect():
         print("succes")
         cnx.close()
 
+def openConnection():
+    return
+
+def closeConnection():
+    return
 
 def mysqlQuery(query, *kargs):
     # print(kargs)
     result = 'none'
     field_names = []
     try:
-        cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
-                                      database=mysql_schema)
+
+        if settings.DEBUG:
+            cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
+                                      database=mysql_schemaDev)
+        else:
+            cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
+                                          database=mysql_schema)
+
         cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
         cursor = cnx.cursor()
         if len(kargs) > 0:
@@ -60,6 +79,7 @@ def mysqlQuery(query, *kargs):
             num_fields = len(cursor.description)
             field_names = [i[0] for i in cursor.description]
             # print(query)
+            cnx.close()
             return results, field_names
 
 
@@ -73,13 +93,19 @@ def mysqlQuery(query, *kargs):
             print(err)
             return 'error'
     else:
+        
         return result
-        cnx.close()
+
 
 def execute(query):
     try:
-        cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
-                                      database=mysql_schema)
+        if settings.DEBUG:
+            cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
+                                          database=mysql_schemaDev)
+        else:
+            cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
+                                          database=mysql_schema)
+
         cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
         cursor = cnx.cursor()
         cursor.execute(query)
@@ -99,8 +125,12 @@ def execute(query):
 
 def executeMulti(query):
     try:
-        cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
-                                      database=mysql_schema)
+        if settings.DEBUG:
+            cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
+                                          database=mysql_schemaDev)
+        else:
+            cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
+                                          database=mysql_schema)
         cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
         cursor = cnx.cursor()
         cursor.execute(query,multi=True)
@@ -181,16 +211,16 @@ def getRunningPositions(*args):
 def getRunningPositionsCenco(id_inspection,id_asile,id_N,id_pos,offset,qty):
     # PROCEDURE REQUIEREMENTS MYSQL
     # PROCEDURE `runningPositionsCenco`(IN idInsp INT, in idAsile varchar(10), IN idN varchar(10),in idPos varchar(20), IN offset int, in QTY int)
-    print("input Parameters","asile", id_asile,"nivel", id_N,"pos", id_pos)
+    # print("input Parameters","asile", id_asile,"nivel", id_N,"pos", id_pos)
     idAsile = "'%%'" if id_asile.lower() == 'all' else "'%"+str(id_asile)+"%'"
     idN = "'%%'" if id_N.lower() == 'all' else"'%"+str(id_N)+"%'"
     idPos = "'%%'" if id_pos.lower() == 'all' else "'%"+str(id_pos)+"%'"
-    print("query parameters","asile",idAsile,"nivel",idN,"pos",idPos)
+    # print("query parameters","asile",idAsile,"nivel",idN,"pos",idPos)
     if qty == 0:
        qty = mysqlQuery('select count(distinct(codePos)) from inventorymaptbl where id_inspection='+str(id_inspection))[0][0][0]
 
     query = 'CALL runningpositionsCenco(' + id_inspection + ',' + idAsile+ ',' +idN+ ',' +idPos+ ',' + str(offset) + ',' + str(qty) + ');'
-    print("query",query)
+    # print("query",query)
     result = mysqlQuery(query, True)
 
     # print(result)
@@ -198,38 +228,36 @@ def getRunningPositionsCenco(id_inspection,id_asile,id_N,id_pos,offset,qty):
 
 def getMatching(id_inspection):
     query = """
-    -- ####################################################################  
- --   macheo entre teorico y leido
--- #################################################################### 
-SELECT rack,wmsposition,pos,wmsproduct,case when isnull(units) then '' else units end as readedUnit,wmsDesc,picPath from wmspositionmaptbl 
+SELECT verified as v,rack,wmsposition,pos,wmsproduct,units,wmsDesc,exported,case when wmsProduct=units then 0 else picPath end as 'check' from wmspositionmaptbl 
 left join (
-select distinct positions.pos,positions.rack,positions.palletType,units,unit.nivel,camera,picPath from (
+select distinct positions.pos,positions.rack,positions.palletType,units,unit.nivel,camera,picPath,verified,exported from (
 		Select distinct substring(codePos,1,12) AS pos,rack, CASE when LENGTH(codePos)>12 then substring(codePos,11,2) else '__' end as palletType ,nivel,picPath	from inventorymaptbl 
         where 
 			codePos not like '' AND
             codePos not like '%XX%' AND
             substring(codePos,11,2) not like '01' and
             length(codePos)>=10 and   
-            # length(codePos)<14 and
+
             id_inspection="""+str(id_inspection)+""" 
 		order by rack,nivel,codePos
         
         ) as positions
         left Join (
-			        Select distinct codeUnit AS units,nivel,camera ,rack	from inventorymaptbl 
+			        Select distinct codeUnit AS units,nivel,camera ,rack,exported,verified	from inventorymaptbl 
 						where 
 								codePos like ''
 								and customCode1 like ''
 								and customCode2 like ''
 								and customCode3 like ''
-								and id_inspection=30 
+								and id_inspection="""+str(id_inspection)+"""
+						group by codeUnit
 						order by rack,nivel,camera) as unit
 		on positions.rack=unit.rack and positions.nivel=unit.nivel
         
         order by pos) as readedPositions
         on wmspositionmaptbl.wmsPosition=readedPositions.pos
-        where id_inspection="""+str(id_inspection)+""" ;
-
+        where id_inspection=30 and rack IS NOT NULL
+        ;
     """
     # print(query)
     result = mysqlQuery(query, False)
