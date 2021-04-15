@@ -42,32 +42,28 @@ def openConnection():
     hostname = socket.gethostname()
     IPAddr = socket.gethostbyname(hostname)
     # print(hostname,IPAddr)
-    setSqlModeQuery = """SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
-SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';"""
 
-    if not IPAddr == '151.106.108.129':
+    if not IPAddr == '151.106.108.129' and not IPAddr == '192.168.0.162':
         cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
-                                      database=mysql_schemaDev)
+                                      database=mysql_schemaDev,sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION')
 
         # cnx.sql_mode = 'TRADITIONAL,NO_ENGINE_SUBSTITUTION'
-        print("connection with:",mysql_hostDev,mysql_userDev, mysql_passwordDev,mysql_schemaDev, cnx.sql_mode)
+        # print("connection with:",mysql_hostDev,mysql_userDev, mysql_passwordDev,mysql_schemaDev, cnx.sql_mode)
     else:
         cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
-                                      database=mysql_schema)
+                                      database=mysql_schema,sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION')
         # cnx.sql_mode = 'TRADITIONAL,NO_ENGINE_SUBSTITUTION'
-        print("connection with:", mysql_host, mysql_user, mysql_password, mysql_schema, cnx.sql_mode)
+        # print("connection with:", mysql_host, mysql_user, mysql_password, mysql_schema, cnx.sql_mode)
 
     cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
     cursor = cnx.cursor()
-    cursor.execute("SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'; SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';")
-    print("sqlmode_excecuted" , cnx.sql_mode)
+    # cursor.execute("SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'; SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';")
+    # print("sqlmode_excecuted" , cnx.sql_mode)
 
 
     return cnx,cursor
 
-def closeConnection():
 
-    return
 
 def mysqlQuery(query, *kargs):
     # print(kargs)

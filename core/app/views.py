@@ -63,7 +63,7 @@ def all(request):
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
     levels = []
-    levels = querys.getLevels(id_inspection)
+    # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
         data, description = querys.getRunningPositionsCenco(id_inspection,'all','all','all',request.GET['offset'], request.GET['qty'],)
         description = description[0]
