@@ -3,6 +3,9 @@ import csv
 from mysql.connector import errorcode
 from time import process_time
 from django.conf import settings
+import socket
+
+
 
 mysql_schema = 'inventory'
 mysql_user = 'smartcubik'
@@ -36,9 +39,26 @@ def connect():
         cnx.close()
 
 def openConnection():
-    return
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
+    # print(hostname,IPAddr)
+
+    if not IPAddr == '151.106.108.129':
+        cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
+                                      database=mysql_schemaDev)
+        print("connection with:",mysql_hostDev,mysql_userDev, mysql_passwordDev,mysql_schemaDev)
+    else:
+        cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
+                                      database=mysql_schema)
+        print("connection with:", mysql_host, mysql_user, mysql_password, mysql_schema)
+
+    cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
+    cursor = cnx.cursor()
+
+    return cnx,cursor
 
 def closeConnection():
+
     return
 
 def mysqlQuery(query, *kargs):
@@ -46,13 +66,13 @@ def mysqlQuery(query, *kargs):
     result = 'none'
     field_names = []
     try:
-
-        if settings.DEBUG:
-            cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
-                                      database=mysql_schemaDev)
-        else:
-            cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
-                                          database=mysql_schema)
+        cnx,cursor = openConnection()
+        # if settings.DEBUG:
+        #     cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
+        #                               database=mysql_schemaDev)
+        # else:
+        #     cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
+        #                                   database=mysql_schema)
 
         cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
         cursor = cnx.cursor()
