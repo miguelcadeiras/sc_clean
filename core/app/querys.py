@@ -1,6 +1,6 @@
 import mysql.connector
 import csv
-from mysql.connector import errorcode
+from mysql.connector import errorcode,constants
 from time import process_time
 from django.conf import settings
 import socket
@@ -46,10 +46,12 @@ def openConnection():
     if not IPAddr == '151.106.108.129':
         cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
                                       database=mysql_schemaDev)
+        cnx.sql_mode = 'TRADITIONAL,NO_ENGINE_SUBSTITUTION'
         print("connection with:",mysql_hostDev,mysql_userDev, mysql_passwordDev,mysql_schemaDev)
     else:
         cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
                                       database=mysql_schema)
+        cnx.sql_mode = 'TRADITIONAL,NO_ENGINE_SUBSTITUTION'
         print("connection with:", mysql_host, mysql_user, mysql_password, mysql_schema)
 
     cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
