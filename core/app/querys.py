@@ -247,7 +247,8 @@ def getRunningPositionsCenco(id_inspection,id_asile,id_N,id_pos,offset,qty):
     if qty == 0:
        qty = mysqlQuery('select count(distinct(codePos)) from inventorymaptbl where id_inspection='+str(id_inspection))[0][0][0]
 
-    query = 'CALL runningpositionsCenco(' + id_inspection + ',' + idAsile+ ',' +idN+ ',' +idPos+ ',' + str(offset) + ',' + str(qty) + ');'
+    query = "SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'; SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';"
+    query += ' CALL runningpositionsCenco(' + id_inspection + ',' + idAsile+ ',' +idN+ ',' +idPos+ ',' + str(offset) + ',' + str(qty) + ');'
     # print("query",query)
     result = mysqlQuery(query, True)
 
@@ -255,7 +256,7 @@ def getRunningPositionsCenco(id_inspection,id_asile,id_N,id_pos,offset,qty):
     return result
 
 def getMatching(id_inspection):
-    query = """
+    query = """ SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'; SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 SELECT verified as v,rack,wmsposition,pos,wmsproduct,units,wmsDesc,exported,case when wmsProduct=units then 0 else picPath end as 'check' from wmspositionmaptbl 
 left join (
 select distinct positions.pos,positions.rack,positions.palletType,units,unit.nivel,camera,picPath,verified,exported from (
