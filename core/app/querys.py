@@ -59,8 +59,8 @@ SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';"""
 
     cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
     cursor = cnx.cursor()
-    # cursor.execute("SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'; SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';")
-    # print("sqlmode_excecuted")
+    cursor.execute("SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'; SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';")
+    print("sqlmode_excecuted" , cnx.sql_mode)
 
 
     return cnx,cursor
@@ -127,15 +127,16 @@ def mysqlQuery(query, *kargs):
 
 def execute(query):
     try:
-        if settings.DEBUG:
-            cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
-                                          database=mysql_schemaDev)
-        else:
-            cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
-                                          database=mysql_schema)
-
-        cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
-        cursor = cnx.cursor()
+        cnx, cursor = openConnection()
+        # if settings.DEBUG:
+        #     cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
+        #                                   database=mysql_schemaDev)
+        # else:
+        #     cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
+        #                                   database=mysql_schema)
+        #
+        # cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
+        # cursor = cnx.cursor()
         cursor.execute(query)
         cnx.commit()
         cursor.close()
@@ -153,14 +154,15 @@ def execute(query):
 
 def executeMulti(query):
     try:
-        if settings.DEBUG:
-            cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
-                                          database=mysql_schemaDev)
-        else:
-            cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
-                                          database=mysql_schema)
-        cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
-        cursor = cnx.cursor()
+        cnx, cursor = openConnection()
+        # if settings.DEBUG:
+        #     cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
+        #                                   database=mysql_schemaDev)
+        # else:
+        #     cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
+        #                                   database=mysql_schema)
+        # cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
+        # cursor = cnx.cursor()
         cursor.execute(query,multi=True)
         cnx.commit()
         cursor.close()
@@ -247,8 +249,7 @@ def getRunningPositionsCenco(id_inspection,id_asile,id_N,id_pos,offset,qty):
     if qty == 0:
        qty = mysqlQuery('select count(distinct(codePos)) from inventorymaptbl where id_inspection='+str(id_inspection))[0][0][0]
 
-    query = "SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'; SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';"
-    query += ' CALL runningpositionsCenco(' + id_inspection + ',' + idAsile+ ',' +idN+ ',' +idPos+ ',' + str(offset) + ',' + str(qty) + ');'
+    query = 'CALL runningpositionsCenco(' + id_inspection + ',' + idAsile+ ',' +idN+ ',' +idPos+ ',' + str(offset) + ',' + str(qty) + ');'
     # print("query",query)
     result = mysqlQuery(query, True)
 
@@ -256,7 +257,7 @@ def getRunningPositionsCenco(id_inspection,id_asile,id_N,id_pos,offset,qty):
     return result
 
 def getMatching(id_inspection):
-    query = """ SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'; SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
+    query = """
 SELECT verified as v,rack,wmsposition,pos,wmsproduct,units,wmsDesc,exported,case when wmsProduct=units then 0 else picPath end as 'check' from wmspositionmaptbl 
 left join (
 select distinct positions.pos,positions.rack,positions.palletType,units,unit.nivel,camera,picPath,verified,exported from (
