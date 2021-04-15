@@ -49,18 +49,18 @@ SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';"""
         cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
                                       database=mysql_schemaDev)
 
-        cnx.sql_mode = 'TRADITIONAL,NO_ENGINE_SUBSTITUTION'
+        # cnx.sql_mode = 'TRADITIONAL,NO_ENGINE_SUBSTITUTION'
         print("connection with:",mysql_hostDev,mysql_userDev, mysql_passwordDev,mysql_schemaDev, cnx.sql_mode)
     else:
         cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
                                       database=mysql_schema)
-        cnx.sql_mode = 'TRADITIONAL,NO_ENGINE_SUBSTITUTION'
+        # cnx.sql_mode = 'TRADITIONAL,NO_ENGINE_SUBSTITUTION'
         print("connection with:", mysql_host, mysql_user, mysql_password, mysql_schema, cnx.sql_mode)
 
     cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
     cursor = cnx.cursor()
-    cursor.execute("SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'; SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';")
-    print("sqlmode_excecuted")
+    # cursor.execute("SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'; SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';")
+    # print("sqlmode_excecuted")
 
 
     return cnx,cursor
