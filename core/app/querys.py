@@ -59,7 +59,7 @@ SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';"""
 
     cnx.set_charset_collation(charset='utf8mb4', collation='utf8mb4_0900_ai_ci')
     cursor = cnx.cursor()
-    cursor.execute("SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';")
+    cursor.execute("SET sql_mode= 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'; SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';")
     print("sqlmode_excecuted")
 
 
