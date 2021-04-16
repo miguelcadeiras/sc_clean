@@ -331,7 +331,7 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
     """
     # print(query)
     if len(kargs) == 2:
-        print(queryFilter)
+        # print(queryFilter)
         result = mysqlQuery(queryFilter, True)
 
     else:
