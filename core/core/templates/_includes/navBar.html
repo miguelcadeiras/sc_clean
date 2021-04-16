@@ -9,12 +9,14 @@
       <li class="nav-item d-none d-sm-inline-block">
         <a href="/" class="nav-link">Warehouses</a>
       </li>
-      {% if 'all' in request.path  %}
+
+
+      {% if 'all' in request.path or 'importWMS' in request.path %}
       <li class="nav-item d-none d-sm-inline-block">
         <a href="inspections?id_warehouse={{id_warehouse}}" class="nav-link">Inspections</a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="importWMS?id_inspection={{request.GET.id_inspection}}" class="nav-link">WMS Data</a>
+        <a href="importWMS?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}" class="nav-link">WMS Data</a>
       </li>
       {% endif %}
       {% if 'matching' in request.GET %}

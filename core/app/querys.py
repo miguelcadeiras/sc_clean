@@ -43,7 +43,7 @@ def openConnection():
     IPAddr = socket.gethostbyname(hostname)
     # print(hostname,IPAddr)
 
-    if not IPAddr == '151.106.108.129' and not IPAddr == '192.168.0.162':
+    if not IPAddr == '151.106.108.129' :
         cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
                                       database=mysql_schemaDev,sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION')
 
@@ -252,9 +252,16 @@ def getRunningPositionsCenco(id_inspection,id_asile,id_N,id_pos,offset,qty):
     # print(result)
     return result
 
-def getMatching(id_inspection):
-    query = """
-SELECT verified as v,rack,wmsposition,pos,wmsproduct,units,wmsDesc,exported,case when wmsProduct=units then 0 else picPath end as 'check' from wmspositionmaptbl 
+def getMatching(id_inspection,*kargs):
+    asile = ''
+    nivel = ''
+    if len(kargs)==2:
+        asile = kargs[0]
+        nivel = kargs[1]
+
+    queryFilter = """
+    set @id_inspection = """+str(id_inspection)+ """, @asile='%"""+str(asile)+ """%',@nivel='%"""+str(nivel)+ """%';
+SELECT verified as v,rack as R,wmsposition,pos,wmsproduct,units,wmsDesc as C,wmsDesc1,wmsDesc2 as Bultos,exported as E,case when wmsProduct=units then 0 else picPath end as 'check' from wmspositionmaptbl 
 left join (
 select distinct positions.pos,positions.rack,positions.palletType,units,unit.nivel,camera,picPath,verified,exported from (
 		Select distinct substring(codePos,1,12) AS pos,rack, CASE when LENGTH(codePos)>12 then substring(codePos,11,2) else '__' end as palletType ,nivel,picPath	from inventorymaptbl 
@@ -264,7 +271,7 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
             substring(codePos,11,2) not like '01' and
             length(codePos)>=10 and   
 
-            id_inspection="""+str(id_inspection)+""" 
+            id_inspection=@id_inspection
 		order by rack,nivel,codePos
         
         ) as positions
@@ -275,20 +282,63 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
 								and customCode1 like ''
 								and customCode2 like ''
 								and customCode3 like ''
-								and id_inspection="""+str(id_inspection)+"""
+								and id_inspection=@id_inspection
 						group by codeUnit
 						order by rack,nivel,camera) as unit
 		on positions.rack=unit.rack and positions.nivel=unit.nivel
         
         order by pos) as readedPositions
         on wmspositionmaptbl.wmsPosition=readedPositions.pos
-        where id_inspection=30 and rack IS NOT NULL
+        where id_inspection=@id_inspection and rack IS NOT NULL
+        and substring(wmsposition,5,3) like @asile 
+        and substring(wmsposition,11,2) like @nivel
+        
+        ;
+    """
+    query = """
+
+set @id_inspection = """+str(id_inspection)+""";
+SELECT verified as v,rack as R,wmsposition,pos,wmsproduct,units,wmsDesc as C,wmsDesc1,wmsDesc2 as Bultos,exported as E,case when wmsProduct=units then 0 else picPath end as 'check' from wmspositionmaptbl 
+left join (
+select distinct positions.pos,positions.rack,positions.palletType,units,unit.nivel,camera,picPath,verified,exported from (
+		Select distinct substring(codePos,1,12) AS pos,rack, CASE when LENGTH(codePos)>12 then substring(codePos,11,2) else '__' end as palletType ,nivel,picPath	from inventorymaptbl 
+        where 
+			codePos not like '' AND
+            codePos not like '%XX%' AND
+            substring(codePos,11,2) not like '01' and
+            length(codePos)>=10 and   
+
+            id_inspection=@id_inspection
+		order by rack,nivel,codePos
+        
+        ) as positions
+        left Join (
+			        Select distinct codeUnit AS units,nivel,camera ,rack,exported,verified	from inventorymaptbl 
+						where 
+								codePos like ''
+								and customCode1 like ''
+								and customCode2 like ''
+								and customCode3 like ''
+								and id_inspection=@id_inspection
+						group by codeUnit
+						order by rack,nivel,camera) as unit
+		on positions.rack=unit.rack and positions.nivel=unit.nivel
+        
+        order by pos) as readedPositions
+        on wmspositionmaptbl.wmsPosition=readedPositions.pos
+        where id_inspection=@id_inspection and rack IS NOT NULL
         ;
     """
     # print(query)
-    result = mysqlQuery(query, False)
+    if len(kargs) == 2:
+        print(queryFilter)
+        result = mysqlQuery(queryFilter, True)
 
-    # print(result)
+    else:
+        result = mysqlQuery(query, True)
+
+    # print("res 1: ",result[1])
+    # print("res 0: ",result[0])
     return result
 # def getLevels():
 #   query = 'select * from levels;'
@@ -400,30 +450,41 @@ def importDataBulk(myfile,id_inspection):
     # Start the stopwatch / counter
     t1_start = process_time()
 
-    with open(myfile, 'r') as csv_file:
-            query="insert into wmspositionmaptbl (wmsposition,wmsproduct,wmsdesc,wmsdesc1,id_inspection) values"
+    with open(myfile, 'r',encoding="utf-8") as csv_file:
+            header = "insert into wmspositionmaptbl (wmsposition,wmsproduct,wmsdesc,wmsdesc1,wmsdesc2,id_inspection) values"
+            query= header
             reader = csv.reader(csv_file, delimiter=',', quotechar='|')
+
+            rowCount = 0
+            r=0
             for index,row in enumerate(reader):
+
                 if index == 0:
                     next
                     #print(row)
                 else:
-
-                    query += "('"+row[0]+"','"+row[1]+"','"+row[2]+"','"+row[3]+"',"+str(id_inspection)+"),"
+                    if "'" in row[3] :
+                        row[3]=row[3].replace("'"," ")
+                    query += "('"+row[0]+"','"+row[1]+"','"+row[2]+"','"+row[3]+"','"+row[4]+"',"+str(id_inspection)+"),"
                     # print("query", query)
                     if index == 1:
-                        print("query",query)
+                        # print("query",query)
                         next
 
-
-
-
-                    # mysqlQuery(query, False)
+                    if rowCount > 5000:
+                        # print("ROWWW:",r)
+                        # print("query", query[:-1])
+                        execute(query[:-1])
+                        query = header
+                        rowCount = 0
+                rowCount += 1
+                r +=1
 
             # print("query", query)
-            execute(query[:-1])
+            if len(query) > len(header):
+                execute(query[:-1])
 
-            print("import Process Finished")
+            # print("import Process Finished")
 
     # Stop the stopwatch / counter
     t1_stop = process_time()
@@ -441,7 +502,7 @@ def deleteData(id_inspection):
         return False
 
 def getWMSData(id_inspection):
-    query = "select wmsposition,wmsproduct,wmsDesc,wmsDesc1 from wmspositionmaptbl where id_inspection = "+str(id_inspection)
+    query = "select wmsposition,wmsproduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionmaptbl where id_inspection = "+str(id_inspection)+" limit 1000;"
     return mysqlQuery(query,False)
 
 def deleteWMSData(id_inspection):

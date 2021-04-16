@@ -77,8 +77,8 @@ def all(request):
         # data = data[0]
     else:
         data, description = querys.getMatching(id_inspection)
-        description = description[0]
-        data = data[0]
+        description = description[1]
+        data = data[1]
 
     query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection=' + str(id_inspection)
     warehouseTotalPositions = querys.mysqlQuery(query)[0][0][0]
@@ -119,9 +119,10 @@ def all(request):
                 data = data[0]
 
             else:
-                data, description = querys.getMatching(id_inspection)
-                description = description[0]
-                data = data[0]
+                level = request.POST['level']
+                data, description = querys.getMatching(id_inspection, request.POST['asile'], '' if level == 'All' else level)
+                description = description[1]
+                data = data[1]
 
         if 'exportData' in request.POST:
             if request.GET['matching'] == '0':
@@ -237,10 +238,20 @@ def importWMS(request):
             messages.error(request,"Check your file, we couldn't import it")
 
 
+
+
     data, description = querys.getWMSData(id_inspection)
+    query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection=' + str(id_inspection)
+    wmsPositions = querys.mysqlQuery(query)[0][0][0]
+    wmsPositions = "(" +str(wmsPositions) + ")"
+
+    query = 'select id_warehouse from inspectiontbl where id_inspection=' + str(id_inspection)
+    id_warehouse = querys.mysqlQuery(query)[0][0][0]
 
     context = {"data": data[0],
                "description": description[0],
+               "wmsPositions":wmsPositions,
+               "id_warehouse":id_warehouse,
                }
     return render(request, 'importWMS.html', context)
 
