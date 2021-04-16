@@ -44,7 +44,7 @@ def inspections(request):
     clientUser = request.user.profile.client
 
     id_client, cols = querys.getClientID(clientUser)
-    print(id_client[0][0])
+    # print(id_client[0][0])
     data, description = querys.getInspections(request.GET['id_warehouse'])
 
     context = {'data': data,
@@ -63,7 +63,7 @@ def all(request):
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
     levels = []
-    levels = querys.getLevels(id_inspection)
+    # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
         data, description = querys.getRunningPositionsCenco(id_inspection,'all','all','all',request.GET['offset'], request.GET['qty'],)
         description = description[0]
@@ -77,9 +77,8 @@ def all(request):
         # data = data[0]
     else:
         data, description = querys.getMatching(id_inspection)
-        description = description[0]
-
-        data = data[0]
+        description = description[1]
+        data = data[1]
 
     query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection=' + str(id_inspection)
     warehouseTotalPositions = querys.mysqlQuery(query)[0][0][0]
@@ -120,9 +119,10 @@ def all(request):
                 data = data[0]
 
             else:
-                data, description = querys.getMatching(id_inspection)
-                description = description[0]
-                data = data[0]
+                level = request.POST['level']
+                data, description = querys.getMatching(id_inspection, request.POST['asile'], '' if level == 'All' else level)
+                description = description[1]
+                data = data[1]
 
         if 'exportData' in request.POST:
             if request.GET['matching'] == '0':
@@ -133,11 +133,34 @@ def all(request):
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
 
+            queryUpdateExported = "UPDATE inventorymaptbl set exported = (case codeUnit "
+            # we need to form an bulk update query like
+        # update
+        # inventorymaptbl
+        # set
+        # exported =
+        # (case codeunit
+        # when  'PA20210125162354879' then 0
+        # END)
+        # where
+        # id_inspection = 30;
+
             writer = csv.writer(response)
             writer.writerow(description)
             for row in data:
+
                 writer.writerow(row)
+                if request.GET['matching'] == '1':
+                    queryUpdateExported += " when '" +str(row[4])+"' then 1 \n"
+                    # print("row",row)
+                else:
+                    queryUpdateExported += " when '" + str(row[4]) + "' then 1 \n"
+
+
             messages.success(request, 'Data Exported ')
+            queryUpdateExported+= " end) where id_inspection="+str(id_inspection)+";"
+            # print(queryUpdateExported)
+            querys.execute(queryUpdateExported)
 
             return response
 
@@ -193,34 +216,42 @@ def testPage(request):
     querys.connect()
     return render(request, 'base.html', {})
 
-
+@login_required(login_url="/login/")
 def importWMS(request):
     id_inspection = request.GET['id_inspection']
-    data, description = querys.getWMSData(id_inspection)
 
     if request.method == "POST":
         # print("myfile", request.POST['myfile'])
 
         myfile = request.FILES['myfile']
-
-
-
         print("myfile: ",myfile,myfile.name)
         fs = FileSystemStorage()
         filename = fs.save(myfile.name,myfile)
         print(filename)
         # uploaded_file_url = fs.url(filename)
         # print(uploaded_file_url)
-        importBool = querys.importData(os.path.join(settings.MEDIA_ROOT,filename),id_inspection)
+        importBool = querys.importDataBulk(os.path.join(settings.MEDIA_ROOT,filename),id_inspection)
         os.remove(os.path.join(settings.MEDIA_ROOT,filename))
         if importBool:
             messages.success(request,"Your Data has been Imported correctly")
         else:
             messages.error(request,"Check your file, we couldn't import it")
-    #     now we have to import to the DB.. but i don't have a file yet.
+
+
+
+
+    data, description = querys.getWMSData(id_inspection)
+    query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection=' + str(id_inspection)
+    wmsPositions = querys.mysqlQuery(query)[0][0][0]
+    wmsPositions = "(" +str(wmsPositions) + ")"
+
+    query = 'select id_warehouse from inspectiontbl where id_inspection=' + str(id_inspection)
+    id_warehouse = querys.mysqlQuery(query)[0][0][0]
 
     context = {"data": data[0],
                "description": description[0],
+               "wmsPositions":wmsPositions,
+               "id_warehouse":id_warehouse,
                }
     return render(request, 'importWMS.html', context)
 

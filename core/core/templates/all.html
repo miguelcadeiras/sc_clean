@@ -76,6 +76,8 @@
                             {% for col in description %}
                             {% if forloop.last  %}
                             {% if request.GET.pic == '0' %}
+                             <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+
                             {% else %}
                             <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
 
@@ -88,21 +90,38 @@
                         </thead>
                         <tbody>
                         {% for row in data %}
-                        <tr role="row" class="odd {% if request.GET.matching == '1' and row.3 != row.4  %}bg-danger{% endif %}">
+                        <tr role="row" class="odd {% if request.GET.matching == '1' and row.4 != row.5  %}bg-danger{% endif %}">
                             {% for item in row %}
 
+
                             {% if forloop.last  %}
-                            {% if request.GET.pic == '1' %}
-                            <td>
-                                <div class="text-center">
-                                    {% if row.3 != row.4  %}
-                                    <a href="media/smarti/{{item}}" ><img src="media/smarti/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
+
+                                {% if request.GET.pic == '1' %}
+                                <td>
+                                    <div class="text-center">
+                                        {% if row.4 != row.5  %}
+                                        <a href="media/smarti/{{item}}" ><img src="media/smarti/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                {% else %}
+                                <td>
+                                    {% if item != '0' %}
+                                <a href="media/smarti/{{item}}" ><i class="fa fa-camera" aria-hidden="true"></i></a>
                                     {% endif %}
-                                </div>
-                            </td>
-                            {% endif %}
+                                </td>
+                                {% endif %}
+
                             {% else %}
-                            <td>{{item}}</td>
+                            <td>
+                                {% if forloop.first  %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="{{row.5}}">
+                                </div>
+                                {% else %}
+                                    {{item}}
+                                {% endif %}
+                            </td>
 
                             {% endif %}
 

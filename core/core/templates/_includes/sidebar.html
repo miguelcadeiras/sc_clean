@@ -26,35 +26,35 @@
 <!--          <span class="brand-link font-weight-light"> </span>-->
 
           <li class="nav-header">WAREHOUSE</li>
-          {% if 'all' in request.path %}
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-copy"></i>
-              <p>
-                Levels
-                <i class="fas fa-angle-left right"></i>
-                <span class="badge badge-info right">{{ levels|length }}</span>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item menu-open">
-                <a href="/all?id_inspection={{request.GET.id_inspection}}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>ALL</p>
-                </a>
-              </li>
-              {% for l in levels %}
-              <li class="nav-item {% if request.GET.level == l.0 %} link active {% endif %}">
-                <a href="/level?level={{l.0}}&id_inspection={{request.GET.id_inspection}}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>LEVEL {{l.0}}</p>
-                </a>
-              </li>
-             {% endfor %}
+<!--          {% if 'all' in request.path %}-->
+<!--          <li class="nav-item">-->
+<!--            <a href="#" class="nav-link">-->
+<!--              <i class="nav-icon fas fa-copy"></i>-->
+<!--              <p>-->
+<!--                Levels-->
+<!--                <i class="fas fa-angle-left right"></i>-->
+<!--                <span class="badge badge-info right">{{ levels|length }}</span>-->
+<!--              </p>-->
+<!--            </a>-->
+<!--            <ul class="nav nav-treeview">-->
+<!--              <li class="nav-item menu-open">-->
+<!--                <a href="/all?id_inspection={{request.GET.id_inspection}}" class="nav-link">-->
+<!--                  <i class="far fa-circle nav-icon"></i>-->
+<!--                  <p>ALL</p>-->
+<!--                </a>-->
+<!--              </li>-->
+<!--              {% for l in levels %}-->
+<!--              <li class="nav-item {% if request.GET.level == l.0 %} link active {% endif %}">-->
+<!--                <a href="/level?level={{l.0}}&id_inspection={{request.GET.id_inspection}}" class="nav-link">-->
+<!--                  <i class="far fa-circle nav-icon"></i>-->
+<!--                  <p>LEVEL {{l.0}}</p>-->
+<!--                </a>-->
+<!--              </li>-->
+<!--             {% endfor %}-->
 
-            </ul>
-          </li>
-          {% endif %}
+<!--            </ul>-->
+<!--          </li>-->
+<!--          {% endif %}-->
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
