@@ -246,7 +246,7 @@ def getRunningPositionsCenco(id_inspection,id_asile,id_N,id_pos,offset,qty):
        qty = mysqlQuery('select count(distinct(codePos)) from inventorymaptbl where id_inspection='+str(id_inspection))[0][0][0]
 
     query = 'CALL runningpositionsCenco(' + id_inspection + ',' + idAsile+ ',' +idN+ ',' +idPos+ ',' + str(offset) + ',' + str(qty) + ');'
-    # print("query",query)
+    print("query",query)
     result = mysqlQuery(query, True)
 
     # print(result)
@@ -304,6 +304,7 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
 		Select distinct substring(codePos,1,12) AS pos,rack, CASE when LENGTH(codePos)>12 then substring(codePos,11,2) else '__' end as palletType ,nivel,picPath	from inventorymaptbl 
         where 
 			codePos not like '' AND
+			codePos not like 'UBG0%' AND
             codePos not like '%XX%' AND
             substring(codePos,11,2) not like '01' and
             length(codePos)>=10 and   
