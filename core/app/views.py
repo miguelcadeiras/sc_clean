@@ -24,10 +24,10 @@ def index(request):
     clientUser = request.user.profile.client
 
     id_client, cols = querys.getClientID(clientUser)
-    print(id_client)
+    # print(id_client)
     data, description = querys.getWarehouses(id_client[0][0])
-    print("data", data)
-    print("description:,", description)
+    # print("data", data)
+    # print("description:,", description)
     context = {'data': data,
                'description': description,
                'client': clientUser,
@@ -65,6 +65,7 @@ def all(request):
     levels = []
     # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
+        print('in Get - matching =0')
         data, description = querys.getRunningPositionsCenco(id_inspection,'all','all','all',request.GET['offset'], request.GET['qty'],)
         description = description[0]
         data = data[0]
@@ -108,7 +109,7 @@ def all(request):
         # print('warehouseRatio',warehouseRatio)
 
     if request.method == "POST":
-
+        print("in Post method")
         if 'applyFilter' in request.POST:
 
             if request.GET['matching'] == '0':
@@ -126,28 +127,28 @@ def all(request):
 
         if 'exportData' in request.POST:
             if request.GET['matching'] == '0':
-                desc, exportData = querys.getRunningPositionsCenco(id_inspection, 'all', 'all', 'all',0, 0)
+
+                exportData, desc = querys.getRunningPositionsCenco(id_inspection, 'all', 'all', 'all',0, 0)
+                desc = desc[0]
+                exportData = exportData[0]
             else:
-                desc, exportData = querys.getMatching(id_inspection)
+                # print("in here")
+                exportData,desc = querys.getMatching(id_inspection)
+                desc = desc[1]
+                # print("desc",desc)
+                exportData = exportData[1]
+                # print("exportData",exportData)
+
 
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
 
             queryUpdateExported = "UPDATE inventorymaptbl set exported = (case codeUnit "
-            # we need to form an bulk update query like
-        # update
-        # inventorymaptbl
-        # set
-        # exported =
-        # (case codeunit
-        # when  'PA20210125162354879' then 0
-        # END)
-        # where
-        # id_inspection = 30;
 
             writer = csv.writer(response)
-            writer.writerow(description)
-            for row in data:
+            writer.writerow(desc)
+
+            for row in exportData:
 
                 writer.writerow(row)
                 if request.GET['matching'] == '1':
@@ -160,6 +161,7 @@ def all(request):
             messages.success(request, 'Data Exported ')
             queryUpdateExported+= " end) where id_inspection="+str(id_inspection)+";"
             # print(queryUpdateExported)
+
             querys.execute(queryUpdateExported)
 
             return response
