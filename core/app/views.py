@@ -160,7 +160,7 @@ def all(request):
 
             messages.success(request, 'Data Exported ')
             queryUpdateExported+= " end) where id_inspection="+str(id_inspection)+";"
-            print(queryUpdateExported)
+            # print(queryUpdateExported)
 
             querys.execute(queryUpdateExported)
 

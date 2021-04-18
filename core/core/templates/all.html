@@ -93,22 +93,19 @@
                         <tr role="row" class="odd {% if request.GET.matching == '1' and row.4 != row.5  %}bg-danger{% endif %}">
                             {% for item in row %}
 
-
                             {% if forloop.last  %}
-
                                 {% if request.GET.pic == '1' %}
                                 <td>
                                     <div class="text-center">
                                         {% if row.4 != row.5  %}
-
                                         <a href="media/smarti/{{item}}" ><img src="media/smarti/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
                                         {% endif %}
                                     </div>
                                 </td>
                                 {% else %}
                                 <td>
-                                    {% if item != '0' %}
-                                <a href="media/smarti/{{item}}" ><i class="fa fa-camera" aria-hidden="true"></i></a>
+                                    {% if item != '0' and row.4 != row.5%}
+                                    <a href="media/smarti/{{item}}" ><i class="fa fa-camera" aria-hidden="true"></i></a>
                                     {% endif %}
                                 </td>
                                 {% endif %}
