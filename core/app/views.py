@@ -24,10 +24,10 @@ def index(request):
     clientUser = request.user.profile.client
 
     id_client, cols = querys.getClientID(clientUser)
-    print(id_client)
+    # print(id_client)
     data, description = querys.getWarehouses(id_client[0][0])
-    print("data", data)
-    print("description:,", description)
+    # print("data", data)
+    # print("description:,", description)
     context = {'data': data,
                'description': description,
                'client': clientUser,
