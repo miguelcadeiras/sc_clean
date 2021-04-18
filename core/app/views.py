@@ -127,13 +127,16 @@ def all(request):
 
         if 'exportData' in request.POST:
             if request.GET['matching'] == '0':
-                print("in here")
+
                 exportData, desc = querys.getRunningPositionsCenco(id_inspection, 'all', 'all', 'all',0, 0)
-                print (desc[0])
                 desc = desc[0]
                 exportData = exportData[0]
             else:
+                print("in here")
                 desc, exportData = querys.getMatching(id_inspection)
+                desc = desc[0]
+                exportData = exportData[0]
+
 
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
