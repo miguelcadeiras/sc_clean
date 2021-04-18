@@ -132,10 +132,12 @@ def all(request):
                 desc = desc[0]
                 exportData = exportData[0]
             else:
-                print("in here")
-                desc, exportData = querys.getMatching(id_inspection)
-                desc = desc[0]
-                exportData = exportData[0]
+                # print("in here")
+                exportData,desc = querys.getMatching(id_inspection)
+                desc = desc[1]
+                # print("desc",desc)
+                exportData = exportData[1]
+                # print("exportData",exportData)
 
 
             response = HttpResponse(content_type='text/csv')
@@ -158,7 +160,8 @@ def all(request):
 
             messages.success(request, 'Data Exported ')
             queryUpdateExported+= " end) where id_inspection="+str(id_inspection)+";"
-            # print(queryUpdateExported)
+            print(queryUpdateExported)
+
             querys.execute(queryUpdateExported)
 
             return response

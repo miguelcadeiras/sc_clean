@@ -335,13 +335,15 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
     """
     # print(query)
     if len(kargs) == 2:
-        print(queryFilter)
+
+        # print(queryFilter)
         result = mysqlQuery(queryFilter, True)
 
     else:
         result = mysqlQuery(query, True)
-        print("this query")
-        print(query)
+        # print("this query")
+        # print(query)
+        # print("result",result)
 
     # print("res 1: ",result[1])
     # print("res 0: ",result[0])
