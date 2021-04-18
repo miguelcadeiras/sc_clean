@@ -261,17 +261,19 @@ def getMatching(id_inspection,*kargs):
 
     queryFilter = """
     set @id_inspection = """+str(id_inspection)+ """, @asile='%"""+str(asile)+ """%',@nivel='%"""+str(nivel)+ """%';
-SELECT verified as v,rack as R,wmsposition,pos,wmsproduct,units,wmsDesc as C,wmsDesc1,wmsDesc2 as Bultos,exported as E,case when wmsProduct=units then 0 else picPath end as 'check' from wmspositionmaptbl 
+SELECT verified as v,rack as R,wmsposition,pos,wmsproduct,CASE WHEN units IS NULL then '' else units end as unit,wmsDesc as C,wmsDesc1,wmsDesc2 as Bultos,exported as E,case when wmsProduct=units then 0 else picPath end as 'check' from wmspositionmaptbl 
 left join (
 select distinct positions.pos,positions.rack,positions.palletType,units,unit.nivel,camera,picPath,verified,exported from (
-		Select distinct substring(codePos,1,12) AS pos,rack, CASE when LENGTH(codePos)>12 then substring(codePos,11,2) else '__' end as palletType ,nivel,picPath	from inventorymaptbl 
+		Select distinct substring(codePos,1,14) AS pos,rack, CASE when LENGTH(codePos)>12 then substring(codePos,11,2) else '__' end as palletType ,nivel,picPath	from inventorymaptbl 
         where 
 			codePos not like '' AND
+			codePos  like 'UBG1%' AND
             codePos not like '%XX%' AND
             substring(codePos,11,2) not like '01' and
-            length(codePos)>=10 and   
+            length(codePos)>=12 and   
 
             id_inspection=@id_inspection
+             group by pos
 		order by rack,nivel,codePos
         
         ) as positions
@@ -298,18 +300,19 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
     query = """
 
 set @id_inspection = """+str(id_inspection)+""";
-SELECT verified as v,rack as R,wmsposition,pos,wmsproduct,units,wmsDesc as C,wmsDesc1,wmsDesc2 as Bultos,exported as E,case when wmsProduct=units then 0 else picPath end as 'check' from wmspositionmaptbl 
+SELECT verified as v,rack as R,wmsposition,pos,wmsproduct,CASE WHEN units IS NULL then '' else units end as unit,wmsDesc as C,wmsDesc1,wmsDesc2 as Bultos,exported as E,case when wmsProduct=units then 0 else picPath end as 'check' from wmspositionmaptbl 
 left join (
 select distinct positions.pos,positions.rack,positions.palletType,units,unit.nivel,camera,picPath,verified,exported from (
-		Select distinct substring(codePos,1,12) AS pos,rack, CASE when LENGTH(codePos)>12 then substring(codePos,11,2) else '__' end as palletType ,nivel,picPath	from inventorymaptbl 
+		Select distinct substring(codePos,1,14) AS pos,rack, CASE when LENGTH(codePos)>12 then substring(codePos,11,2) else '__' end as palletType ,nivel,picPath	from inventorymaptbl 
         where 
 			codePos not like '' AND
-			codePos not like 'UBG0%' AND
+			codePos  like 'UBG1%' AND
             codePos not like '%XX%' AND
             substring(codePos,11,2) not like '01' and
-            length(codePos)>=10 and   
+            length(codePos)>=12 and   
 
             id_inspection=@id_inspection
+             group by pos
 		order by rack,nivel,codePos
         
         ) as positions
