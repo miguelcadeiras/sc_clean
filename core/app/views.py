@@ -61,7 +61,7 @@ def inspections(request):
 def all(request):
     picpath = []
     id_inspection = request.GET['id_inspection']
-    id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
+    id_warehouse = querys.mysqlQuery("select id_warehouse from inspectionmaptbl where id_inspection = "+str(id_inspection))[0][0][0]
     levels = []
     # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
