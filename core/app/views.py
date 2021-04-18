@@ -65,7 +65,7 @@ def all(request):
     levels = []
     # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
-        print('in Get - matching =0')
+        # print('in Get - matching =0')
         data, description = querys.getRunningPositionsCenco(id_inspection,'all','all','all',request.GET['offset'], request.GET['qty'],)
         description = description[0]
         data = data[0]
@@ -109,7 +109,7 @@ def all(request):
         # print('warehouseRatio',warehouseRatio)
 
     if request.method == "POST":
-        print("in Post method")
+        # print("in Post method")
         if 'applyFilter' in request.POST:
 
             if request.GET['matching'] == '0':

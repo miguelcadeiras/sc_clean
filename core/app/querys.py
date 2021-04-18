@@ -261,7 +261,9 @@ def getMatching(id_inspection,*kargs):
 
     queryFilter = """
     set @id_inspection = """+str(id_inspection)+ """, @asile='%"""+str(asile)+ """%',@nivel='%"""+str(nivel)+ """%';
-SELECT verified as v,rack as R,wmsposition,pos,wmsproduct,CASE WHEN units IS NULL then '' else units end as unit,wmsDesc as C,wmsDesc1,wmsDesc2 as Bultos,exported as E,case when wmsProduct=units then 0 else picPath end as 'check' from wmspositionmaptbl 
+    with filteredWmsPositionMapTbl as (select * from wmspositionmaptbl where id_inspection=@id_inspection)
+
+SELECT verified as v,rack as R,wmsposition,pos,wmsproduct,CASE WHEN units IS NULL then '' else units end as unit,wmsDesc as C,wmsDesc1,wmsDesc2 as Bultos,exported as E,case when wmsProduct=units then 0 else picPath end as 'check' from filteredWmsPositionMapTbl 
 left join (
 select distinct positions.pos,positions.rack,positions.palletType,units,unit.nivel,camera,picPath,verified,exported from (
 		Select distinct substring(codePos,1,14) AS pos,rack, CASE when LENGTH(codePos)>12 then substring(codePos,11,2) else '__' end as palletType ,nivel,picPath	from inventorymaptbl 
@@ -290,7 +292,7 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
 		on positions.rack=unit.rack and positions.nivel=unit.nivel
         
         order by pos) as readedPositions
-        on wmspositionmaptbl.wmsPosition=readedPositions.pos
+        on filteredWmsPositionMapTbl.wmsPosition=readedPositions.pos
         where id_inspection=@id_inspection and rack IS NOT NULL
         and substring(wmsposition,5,3) like @asile 
         and substring(wmsposition,11,2) like @nivel
@@ -300,7 +302,8 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
     query = """
 
 set @id_inspection = """+str(id_inspection)+""";
-SELECT verified as v,rack as R,wmsposition,pos,wmsproduct,CASE WHEN units IS NULL then '' else units end as unit,wmsDesc as C,wmsDesc1,wmsDesc2 as Bultos,exported as E,case when wmsProduct=units then 0 else picPath end as 'check' from wmspositionmaptbl 
+with filteredWmsPositionMapTbl as (select * from wmspositionmaptbl where id_inspection=@id_inspection)
+SELECT verified as v,rack as R,wmsposition,pos,wmsproduct,CASE WHEN units IS NULL then '' else units end as unit,wmsDesc as C,wmsDesc1,wmsDesc2 as Bultos,exported as E,case when wmsProduct=units then 0 else picPath end as 'check' from filteredWmsPositionMapTbl
 left join (
 select distinct positions.pos,positions.rack,positions.palletType,units,unit.nivel,camera,picPath,verified,exported from (
 		Select distinct substring(codePos,1,14) AS pos,rack, CASE when LENGTH(codePos)>12 then substring(codePos,11,2) else '__' end as palletType ,nivel,picPath	from inventorymaptbl 
@@ -329,20 +332,20 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
 		on positions.rack=unit.rack and positions.nivel=unit.nivel
         
         order by pos) as readedPositions
-        on wmspositionmaptbl.wmsPosition=readedPositions.pos
+        on filteredWmsPositionMapTbl.wmsPosition=readedPositions.pos
         where id_inspection=@id_inspection and rack IS NOT NULL
         ;
     """
     # print(query)
     if len(kargs) == 2:
 
-        # print(queryFilter)
+        print(queryFilter)
         result = mysqlQuery(queryFilter, True)
 
     else:
         result = mysqlQuery(query, True)
         # print("this query")
-        # print(query)
+        print(query)
         # print("result",result)
 
     # print("res 1: ",result[1])
