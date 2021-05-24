@@ -1,4 +1,8 @@
+"""
+STORE SECRET PASSWORDS
+"""
 
+TEST_VAR = 3
 # acceso al servidor remoto
 mysql_schema = 'inventory'
 mysql_user = 'smartcubik'

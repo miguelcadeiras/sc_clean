@@ -6,7 +6,6 @@ from sqlalchemy import create_engine
 import secrets
 import openpyxl
 
-
 # # acceso al servidor remoto
 # mysql_schema = 'inventory'
 # mysql_user = 'smartcubik'
