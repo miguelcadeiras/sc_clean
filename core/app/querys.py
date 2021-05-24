@@ -38,6 +38,7 @@ def connect():
         print("succes")
         cnx.close()
 
+
 def openConnection():
     hostname = socket.gethostname()
     IPAddr = socket.gethostbyname(hostname)
@@ -62,7 +63,6 @@ def openConnection():
 
 
     return cnx,cursor
-
 
 
 def mysqlQuery(query, *kargs):
@@ -148,6 +148,7 @@ def execute(query):
             return 'error'
     return True
 
+
 def executeMulti(query):
     try:
         cnx, cursor = openConnection()
@@ -173,6 +174,7 @@ def executeMulti(query):
             print(err)
             return 'error'
     return True
+
 
 def getClientID(clientName):
     query = "SELECT id_client FROM clienttbl where clientName like '" + str(clientName) + "';"
@@ -234,6 +236,7 @@ def getRunningPositions(*args):
     # print(result)
     return result
 
+
 def getRunningPositionsCenco(id_inspection,id_asile,id_N,id_pos,offset,qty):
     # PROCEDURE REQUIEREMENTS MYSQL
     # PROCEDURE `runningPositionsCenco`(IN idInsp INT, in idAsile varchar(10), IN idN varchar(10),in idPos varchar(20), IN offset int, in QTY int)
@@ -245,12 +248,13 @@ def getRunningPositionsCenco(id_inspection,id_asile,id_N,id_pos,offset,qty):
     if qty == 0:
        qty = mysqlQuery('select count(distinct(codePos)) from inventorymaptbl where id_inspection='+str(id_inspection))[0][0][0]
 
-    query = 'CALL runningpositionsCenco(' + id_inspection + ',' + idAsile+ ',' +idN+ ',' +idPos+ ',' + str(offset) + ',' + str(qty) + ');'
+    query = 'CALL runningpositionsCencoFull (' + id_inspection + ',' + idAsile+ ',' +idN+ ',' +idPos+ ',' + str(offset) + ',' + str(qty) + ');'
     print("query",query)
     result = mysqlQuery(query, True)
 
     # print(result)
     return result
+
 
 def getMatching(id_inspection,*kargs):
     asile = ''
@@ -294,9 +298,10 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
         order by pos) as readedPositions
         on filteredWmsPositionMapTbl.wmsPosition=readedPositions.pos
         where id_inspection=@id_inspection and rack IS NOT NULL
+        
         and substring(wmsposition,5,3) like @asile 
         and substring(wmsposition,11,2) like @nivel
-        
+        group by wmsposition
         ;
     """
     query = """
@@ -334,6 +339,7 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
         order by pos) as readedPositions
         on filteredWmsPositionMapTbl.wmsPosition=readedPositions.pos
         where id_inspection=@id_inspection and rack IS NOT NULL
+        group by wmsposition
         ;
     """
     # print(query)
@@ -356,6 +362,7 @@ select distinct positions.pos,positions.rack,positions.palletType,units,unit.niv
 #   levels = mysqlQuery(query)
 #   # print(levels[0])
 #   return levels[0]
+
 
 def getLevels(id_inspection):
     query = "call inventory.levels(" + str(id_inspection) + ");"
@@ -456,6 +463,7 @@ def importData(myfile,id_inspection):
           t1_stop - t1_start)
     return True
 
+
 def importDataBulk(myfile,id_inspection):
     # try:
     # Start the stopwatch / counter
@@ -503,6 +511,7 @@ def importDataBulk(myfile,id_inspection):
           t1_stop - t1_start)
     return True
 
+
 def deleteData(id_inspection):
     try:
         query = "DELETE  FROM wmspositionmaptbl where id_inspection ="+str(id_inspection)+";"
@@ -512,9 +521,11 @@ def deleteData(id_inspection):
         print("someError")
         return False
 
+
 def getWMSData(id_inspection):
     query = "select wmsposition,wmsproduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionmaptbl where id_inspection = "+str(id_inspection)+" limit 1000;"
     return mysqlQuery(query,False)
+
 
 def deleteWMSData(id_inspection):
     query = "delete form wmspositiontable where id_inspection="+str(id_inspection)

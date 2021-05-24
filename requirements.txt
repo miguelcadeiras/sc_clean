@@ -21,3 +21,6 @@ toml==0.10.2
 Unipath==1.1
 whitenoise==5.2.0
 
+
+PyMySQL~=1.0.2
+SQLAlchemy~=1.4.15
