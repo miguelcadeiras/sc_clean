@@ -33,7 +33,7 @@ def runningPositionsRaw(id_inspection):
     :param id_inspection:
     :return:
     """
-    posQuery = """ select distinct(codePos),(substring(codePos,1,10)) as Pos,rack,nivel from inventorymaptbl 
+    posQuery = """ select distinct(codePos),(substring(codePos,1,10)) as Pos,rack,nivel,picPath as Ppic from inventorymaptbl 
     where id_inspection = """+str(id_inspection)+""" and
     length(codePos)>=12 and
     codePos not like 'UBG0%%'
@@ -204,7 +204,7 @@ def dedupMiddle(dfD, mid, th):
 
     return (newPos, pa)
 
-def dedupMiddleR1(dfD, mid, th):
+def dedupMiddleR1(dfD):
     """
     returns a new dataFrame, with deduplicated Rack values. Using AI to understand
     whether was on the next or before. It works only with simple sized pallets (double pallets positions are ignored).
@@ -239,13 +239,7 @@ def dedupMiddleR1(dfD, mid, th):
         return pos0,pa0
 
 
-
-
-
-
-
-
-def fullDeDup(id_inspection,mid,th,levelfactor):
+def fullDeDup(id_inspection,levelfactor):
     """
     :param id_inspection:
     :param mid: middle of the rack where it should change
@@ -294,8 +288,8 @@ def fullDeDup(id_inspection,mid,th,levelfactor):
                 #       print(rack,dfDup['codePos'].str.len())
                 oldPos = dfDup['algoPos'].values[0]
                 # print(" >>s_______________<<< ")
-                newPos, pa = dedupMiddleR1(dfDup, mid, th)
-                print("dev:",newPos,pa)
+                newPos, pa = dedupMiddleR1(dfDup)
+                # print("dev:",newPos,pa)
                 # print(" >>s_______________<<< ")
                 # print(df2Copy[df2Copy["codeUnit"].str.contains(pa,na=False).values[0]])
                 if oldPos != newPos:
@@ -307,7 +301,7 @@ def fullDeDup(id_inspection,mid,th,levelfactor):
                     except:
                         pass
 
-    print("<<<>>>>>pd<<<<>>>>>>")
+    print("<<<>>>>>Deduplication Completed Successfully<<<<>>>>>>")
 
     return pd.concat(df_N)
 
@@ -386,36 +380,93 @@ def testFullDeDup(id_inspection,mid,th,levelfactor,rack):
     return pd.concat(df_N)
 
 
+def decodeMach(id_inspection,levelfactor={2:0,3:0,4:0,5:0},export_to_excel=False):
+    dfBeforeDeDup = correctionFactor(levelFactor, id_inspection)
+
+    ddp = fullDeDup(id_inspection, levelFactor)
+
+    dbConnection = sqlEngine.connect()
+    dfwms = pd.read_sql(
+        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsdesc2 from wmspositionMapTbl where id_inspection =" + str(
+            id_inspection),
+        dbConnection)
+    dbConnection.close()
+
+    resMergeWms = pd.merge(ddp, dfwms, left_on="codeUnit", right_on="wmsProduct", how="outer")
+
+    # print(resMergeWms)
+    if export_to_excel:
+        resMergeWms.to_excel("full_join_algo_dedup_r2.xlsx", sheet_name='Merge Data')
+
+    return resMergeWms
+
+
+def pasilloNivel(id_inspection,levelFactor,pasillo,nivel):
+    df = decodeMach(id_inspection, levelFactor, False)
+    pas = '%03.f' % pasillo
+    dfPasNiv = df[
+        df['wmsPosition'].str[4:7].str.contains(pas, na=False) & df['wmsPosition'].str[11:12].str.contains(str(nivel),
+                                                                                                             na=False)]
+
+    return dfPasNiv
+
+
 # print(testFullDeDup(27,1.5,0.1,{2:0,3:0,4:0.2,5:0.3},681))
 
 # print(fullDeDup(27,1.5,0.3,{2:0,3:0,4:0.2,5:0.3}))
 
 # ----------------------
 # ---------------------
+
+
 id_inspection = 27
 levelFactor = {2:0,3:0,4:0.2,5:0.3}
 
-dfBeforeDeDup = correctionFactor(levelFactor,id_inspection)
-
-
-ddp = fullDeDup(id_inspection,1.5,0.2,levelFactor)
-
-dbConnection = sqlEngine.connect()
-dfwms = pd.read_sql(
-    "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsdesc2 from wmspositionMapTbl where id_inspection =" + str(
-        id_inspection),
-    dbConnection)
-dbConnection.close()
-
-resMergeWms = pd.merge(ddp, dfwms, left_on="codeUnit", right_on="wmsProduct", how="outer")
-
-# print(resMergeWms)
-resMergeWms.to_excel("full_join_algo_dedup_r2.xlsx",sheet_name='Merge Data')
+# dfBeforeDeDup = correctionFactor(levelFactor,id_inspection)
+#
+#
+# ddp = fullDeDup(id_inspection,1.5,0.2,levelFactor)
+#
+# dbConnection = sqlEngine.connect()
+# dfwms = pd.read_sql(
+#     "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsdesc2 from wmspositionMapTbl where id_inspection =" + str(
+#         id_inspection),
+#     dbConnection)
+# dbConnection.close()
+#
+# resMergeWms = pd.merge(ddp, dfwms, left_on="codeUnit", right_on="wmsProduct", how="outer")
+#
+# # print(resMergeWms)
+# resMergeWms.to_excel("full_join_algo_dedup_r2.xlsx",sheet_name='Merge Data')
 # ------------------------------
 # ----------------------------
 
-beforeDeDupMerge = pd.merge(dfBeforeDeDup,dfwms, left_on="codeUnit", right_on="wmsProduct", how="outer")
-beforeDeDupMerge.to_excel("full_join_before-algo_dedup_r2.xlsx",sheet_name='Merge Data')
+df = decodeMach(27, {2:0,3:0,4:0,5:0}, False)
+
+print("------")
+# SOLO PASILLOS
+# print(df['wmsPosition'].str[4:7])
+# print #SOLO POSICION
+# print(df['wmsPosition'].str[8:10])
+# print SOLO NIVEL
+# print(df['wmsPosition'].str[11:12])
+
+# print(df[df['wmsPosition'].str[4:7].str.contains("002", na=False)])
+# print(df[df['wmsPosition'].str[11:12].str.contains("2",na=False)])
+
+dfPasNiv = df[df['wmsPosition'].str[4:7].str.contains("002", na=False) & df['wmsPosition'].str[11:12].str.contains("2",na=False)]
+
+dfPasNiv.info()
+dfPasNiv.shape
+
+
+
+# df = df[df['nivel_y']==2 and df['wmsPositon'].str.contains( "003")]
+
+# print(df)
+
+# beforeDeDupMerge = pd.merge(dfBeforeDeDup,dfwms, left_on="codeUnit", right_on="wmsProduct", how="outer")
+# beforeDeDupMerge.to_excel("full_join_before-algo_dedup_r2.xlsx",sheet_name='Merge Data')
 
 
 
