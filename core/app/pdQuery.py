@@ -396,10 +396,10 @@ def decodeMach(id_inspection,levelfactor={2:0,3:0,4:0,5:0},export_to_excel=False
     dbConnection.close()
 
     resMergeWms = pd.merge(ddp, dfwms, left_on="codeUnit", right_on="wmsProduct", how="outer")
-
+    # print("warehouse data", resMergeWms)
     # print(resMergeWms)
     if export_to_excel:
-        resMergeWms.to_excel("full_join_algo_dedup_r2.xlsx", sheet_name='Merge Data')
+        resMergeWms.to_excel("exportedData.xlsx", sheet_name='Merge Data')
 
     return resMergeWms
 
