@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+<!--hola-->
+
+{% load static %}
+{% load mathfilters %}
+
+{% block title %} {{request.user.profile.client}}   INSPECTION {{inspection.0.0.0}} {% endblock%}
+
+{% block PageTitle %}{{request.user.profile.client}} || {{warehouseName.0.0.0}} {% endblock %}
+
+{% block PageInfo %}
+
+{% endblock %}
+
+
+{% block indicators %}
+<div class="row">
+    <div class="col-lg-4" >
+        <span>
+<!--            {{warehouseName.0.0.1}},{{warehouseName.0.0.2}},<br>{{warehouseName.0.0.3}}<br>-->
+            Inspection date:{{inspection.0.0.1}} || Description : {{inspection.0.0.0}} </span>
+    </div>
+
+
+</div>
+{% endblock %}
+
+{% block content %}
+
+
+<div class="row">
+    <!-- Left col -->
+    <section class="col-lg-10   connectedSortable">
+        <!-- Custom tabs (TABLE)-->
+        <div class="card">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-3"><h3 class="card-title text-bold">Position | Unit match</h3></div>
+                            <div class="col-lg-6">
+                                {% include '_includes/searchBox.html' %}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="table1" name="example1" class="table table-bordered table-striped dataTable " role="grid" aria-describedby="table1_info" style="width:100%">
+                        <thead>
+                        <tr role="row">
+                            {% for col in description %}
+                            {% if forloop.last  %}
+                            {% if request.GET.pic == '0' %}
+                             <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+
+                            {% else %}
+                            <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+
+                            {% endif %}
+                            {% else %}
+                            <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
+                            {% endif %}
+                            {% endfor %}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in data %}
+                        <tr role="row" class="odd {% if request.GET.matching == '1' and row.4 != row.5  %}bg-danger{% endif %}">
+                            {% for item in row %}
+
+                            {% if forloop.last  %}
+                                {% if request.GET.pic == '1' %}
+                                <td>
+                                    <div class="text-center">
+                                        {% if row.4 != row.5  %}
+                                        <a href="media/smarti/{{item}}" ><img src="media/smarti/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                {% else %}
+                                <td>
+                                    {% if item != '0' and row.4 != row.5%}
+                                    <a href="media/smarti/{{item}}" ><i class="fa fa-camera" aria-hidden="true"></i></a>
+                                    {% endif %}
+                                </td>
+                                {% endif %}
+
+                            {% else %}
+                            <td>
+                                {% if forloop.first  %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="{{row.5}}">
+                                </div>
+                                {% else %}
+                                    {{item}}
+                                {% endif %}
+                            </td>
+
+                            {% endif %}
+
+                            {% endfor %}
+
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                        <!--                        <tfoot>-->
+                        <!--                        <tr role="row">-->
+                        <!--                            {% for col in description %}-->
+                        <!--                            <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>-->
+                        <!--                            {% endfor %}-->
+                        <!--                        </tr>-->
+                        <!--                        </tfoot>-->
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+
+            <!-- /.card -->
+            <!-- /.card -->
+    </section>
+
+    <div class="col-md-2">
+        <div class="row">
+            <div class="col">
+                <form method = "post" action="">
+                    {% csrf_token %}
+                    <button type="submit" name="exportData" id="exportData" class="btn btn-block btn-secondary">Export all Data</button>
+                </form><br>
+            </div>
+        </div>
+        {% include '_includes/indicators.html' %}
+    </div>
+
+
+    <!-- /.Left col -->
+    <!-- right col (We are only adding the ID to make the widgets sortable)-->
+
+    <!-- right col -->
+</div>
+
+{% endblock %}
+
+{% block pageScripts %}
+<script>
+  $(document).ready(function() {
+   // Setup - add a text input to each footer cell
+<!--    $('#table1 thead th').each( function () {-->
+<!--        var title = $(this).text();-->
+<!--        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );-->
+<!--    } );-->
+
+    $("#table1").DataTable({
+
+      "responsive": true,
+      "autoWidth": true,
+      "lengthMenu": [[50, 100, 500, -1], [50, 100, 500, "All"]]
+    });
+
+<!--        var table = $('#example').DataTable({-->
+<!--        initComplete: function () {-->
+<!--            // Apply the search-->
+<!--            this.api().columns().every( function () {-->
+<!--                var that = this;-->
+
+<!--                $( 'input', this.footer() ).on( 'keyup change clear', function () {-->
+<!--                    if ( that.search() !== this.value ) {-->
+<!--                        that-->
+<!--                            .search( this.value )-->
+<!--                            .draw();-->
+<!--                    }-->
+<!--                } );-->
+<!--            } );-->
+<!--        }-->
+<!--    });-->
+
+} );
+</script>
+{% endblock %}

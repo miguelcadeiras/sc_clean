@@ -9,7 +9,8 @@ urlpatterns = [
    # The home page
     path('', views.index, name='home'),
     path('inspections',views.inspections,name='inspections'),
-    path('all',views.all,name='all'),
+    path('all',views.allPD,name='all'),
+    path('allPD',views.allPD,name='allPD'),
     path('level', views.level, name='level'),
     path('test',views.testPage, name='testpage'),
     path('importWMS',views.importWMS,name='importWMS')

@@ -85,7 +85,7 @@
               <div class="card-body">
                 <div id="example1_wrapper" class="dataTables_wrapper dt-bootstrap4"><div class="row">
 
-                  <table id="table1" name="example1" class="table table-bordered table-striped dataTable dtr-inline" role="grid" aria-describedby="table1_info">
+                  <table id="table1" name="example1" class="table table-bordered table-striped dataTable dtr-inline " style="width:100%" >
                   <thead>
                   <tr role="row">
                       {% for col in description %}
@@ -279,8 +279,11 @@
 
     $("#table1").DataTable({
       "responsive": true,
-      "autoWidth": false,
+      "autoWidth":false,
+      "bAutoWidth": true,
     });
+
 } );
 </script>
+
 {% endblock %}

@@ -12,8 +12,8 @@ from django import template
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 
-import csv,os
-from . import querys, utils
+import csv, os
+from . import querys,utils,pdQuery
 from .models import *
 
 
@@ -65,7 +65,7 @@ def all(request):
     levels = []
     # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
-        print('in Get - matching =0')
+        # print('in Get - matching =0')
         data, description = querys.getRunningPositionsCenco(id_inspection,'all','all','all',request.GET['offset'], request.GET['qty'],)
         description = description[0]
         data = data[0]
@@ -109,7 +109,7 @@ def all(request):
         # print('warehouseRatio',warehouseRatio)
 
     if request.method == "POST":
-        print("in Post method")
+        # print("in Post method")
         if 'applyFilter' in request.POST:
 
             if request.GET['matching'] == '0':
@@ -184,6 +184,136 @@ def all(request):
 
     return render(request, 'all.html', context)
 
+
+@login_required(login_url="/login/")
+def allPD(request):
+    picpath = []
+    levels = []
+    id_inspection = request.GET['id_inspection']
+    id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
+    levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
+
+    # levels = querys.getLevels(id_inspection)
+    if request.GET['matching'] == '0':
+        # print('in Get - matching =0')
+        df = pdQuery.fullDeDup(id_inspection,levelFactor)
+        df = df[['rack','algoPos','codeUnit','nivel_y','Ppic']]
+        description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
+        # print(df)
+        # table = df.to_html(classes="table table-bordered table-striped dataTable ",table_id="table1")
+        # print(table)
+    else:
+        df = pdQuery.decodeMach(id_inspection, levelFactor,False)
+        df = df[['rack','wmsProduct','codeUnit','nivel_y','algoPos','wmsPosition','wmsDesc','wmsDesc1','wmsDesc2','Ppic']]
+        description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsD  esc2','pic']
+        # print("else",df)
+        # table = df[['algoPos','codeUnit','nivel_y','wmsProduct','wmsDesc','Ppic']].to_html(classes="table", table_id="table1")
+
+    data = df.values.tolist()
+    # description = list(df.columns.values)
+
+    query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection=' + str(id_inspection)
+    warehouseTotalPositions = querys.mysqlQuery(query)[0][0][0]
+    # print( 'warehouseTotalPositions',warehouseTotalPositions)
+    query = "select count(wmsProduct) from wmspositionmaptbl where wmsproduct not like '' and id_inspection=" + str(
+        id_inspection)
+    warehouseUnitCount = querys.mysqlQuery(query)[0][0][0]
+    # print('warehouseTotalCount',warehouseUnitCount)
+    # en esta query hay que tener encuenta que en cencosud hay etiquetas que son  XX, etiquetas del primer nivel tambien, terminan en 01 y tienen 12 caracteres.
+    query = "select count(distinct(codePos)) from inventorymaptbl where codePos not like '' and codePos not like '%XX%' and substring(codePos,11,2) not like '01'  and id_inspection=" + str(
+        id_inspection)
+    readedPositions = querys.mysqlQuery(query)[0][0][0]
+    # print('readedPositions',readedPositions)
+    query = "select count(distinct(codeUnit)) from inventorymaptbl where codeUnit not like ''  and id_inspection=" + str(id_inspection)
+    readedCount = querys.mysqlQuery(query)[0][0][0]
+    # print('readedCount',readedCount)
+    # print(data)
+    readedRatio = 0
+
+    if int(readedCount) > 0:
+        readedRatio = round(readedCount / readedPositions, 2) * 100
+        # print('readedRatio',readedRatio)
+
+    warehouseRatio = 0
+    if warehouseTotalPositions > 0:
+        warehouseRatio = round(warehouseUnitCount / warehouseTotalPositions, 2) * 100
+        # print('warehouseRatio',warehouseRatio)
+
+    if request.method == "POST":
+        # print("in Post method")
+        if 'applyFilter' in request.POST:
+
+            if request.GET['matching'] == '0':
+                print("here")
+                data, description = querys.getRunningPositionsCenco(id_inspection, request.POST['asile'], request.POST['level'], request.POST['position'],
+                                                                    request.GET['offset'], 0)
+                description = description[0]
+                data = data[0]
+
+            else:
+                level = request.POST['level']
+                data, description = querys.getMatching(id_inspection, request.POST['asile'], '' if level == 'All' else level)
+                description = description[1]
+                data = data[1]
+
+        if 'exportData' in request.POST:
+            if request.GET['matching'] == '0':
+
+                exportData, desc = querys.getRunningPositionsCenco(id_inspection, 'all', 'all', 'all',0, 0)
+                desc = desc[0]
+                exportData = exportData[0]
+            else:
+                # print("in here")
+                exportData,desc = querys.getMatching(id_inspection)
+                desc = desc[1]
+                # print("desc",desc)
+                exportData = exportData[1]
+                # print("exportData",exportData)
+
+
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+
+            queryUpdateExported = "UPDATE inventorymaptbl set exported = (case codeUnit "
+
+            writer = csv.writer(response)
+            writer.writerow(desc)
+
+            for row in exportData:
+
+                writer.writerow(row)
+                if request.GET['matching'] == '1':
+                    queryUpdateExported += " when '" +str(row[4])+"' then 1 \n"
+                    # print("row",row)
+                else:
+                    queryUpdateExported += " when '" + str(row[4]) + "' then 1 \n"
+
+
+            messages.success(request, 'Data Exported ')
+            queryUpdateExported+= " end) where id_inspection="+str(id_inspection)+";"
+            # print(queryUpdateExported)
+
+            querys.execute(queryUpdateExported)
+
+            return response
+
+    context = {'data':data,
+               'description':description,
+               'clientName': request.user.profile.client,
+               'id_warehouse':id_warehouse,
+               'warehouseName': querys.getWarehouseName(request.GET['id_inspection']),
+               'warehouseTotalPositions': warehouseTotalPositions,
+               'warehouseTotalCount': warehouseUnitCount,
+               'warehouseRatio': warehouseRatio,
+               'readedPositions': readedPositions,
+               'readedCount': readedCount,
+               'readedRatio': readedRatio,
+               'inspection': querys.getInspectionData(request.GET['id_inspection']),
+               'picpath': picpath,
+               'levels': levels,
+               }
+
+    return render(request, 'allPD.html', context)
 
 @login_required(login_url="/login/")
 def level(request):
