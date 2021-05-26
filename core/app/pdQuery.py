@@ -5,6 +5,8 @@ import pymysql
 from sqlalchemy import create_engine
 import secrets
 import openpyxl
+from django.conf import settings
+import socket
 
 # # acceso al servidor remoto
 # mysql_schema = 'inventory'
@@ -17,7 +19,14 @@ import openpyxl
 # mysql_userDev = 'webuser'
 # mysql_passwordDev = 'Smartcubik1web'
 # mysql_hostDev = 'localhost'
-mysql_alchemyDevConString =  'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
+
+hostname = socket.gethostname()
+IPAddr = socket.gethostbyname(hostname)
+if not IPAddr == '151.106.108.129' :
+    mysql_alchemyDevConString =  'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
+else:
+    mysql_alchemyDevConString = 'mysql+pymysql://Smartcubik1Root!:smartcubik@151.106.108.129/inventory'
+
 
 # mysql_alchemyDevConString = secrets.mysql_alchemyDevConString
 
@@ -396,10 +405,10 @@ def decodeMach(id_inspection,levelfactor={2:0,3:0,4:0,5:0},export_to_excel=False
     dbConnection.close()
 
     resMergeWms = pd.merge(ddp, dfwms, left_on="codeUnit", right_on="wmsProduct", how="outer")
-    # print("warehouse data", resMergeWms)
+
     # print(resMergeWms)
     if export_to_excel:
-        resMergeWms.to_excel("exportedData.xlsx", sheet_name='Merge Data')
+        resMergeWms.to_excel("full_join_algo_dedup_r2.xlsx", sheet_name='Merge Data')
 
     return resMergeWms
 
