@@ -5,6 +5,8 @@ import pymysql
 from sqlalchemy import create_engine
 import secrets
 import openpyxl
+from django.conf import settings
+import socket
 
 # # acceso al servidor remoto
 # mysql_schema = 'inventory'
@@ -17,7 +19,14 @@ import openpyxl
 # mysql_userDev = 'webuser'
 # mysql_passwordDev = 'Smartcubik1web'
 # mysql_hostDev = 'localhost'
-mysql_alchemyDevConString =  'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
+
+hostname = socket.gethostname()
+IPAddr = socket.gethostbyname(hostname)
+if not IPAddr == '151.106.108.129' :
+    mysql_alchemyDevConString =  'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
+else:
+    mysql_alchemyDevConString = 'mysql+pymysql://Smartcubik1Root!:smartcubik@151.106.108.129/inventory'
+
 
 # mysql_alchemyDevConString = secrets.mysql_alchemyDevConString
 
