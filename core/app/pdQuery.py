@@ -20,20 +20,26 @@ import socket
 # mysql_passwordDev = 'Smartcubik1web'
 # mysql_hostDev = 'localhost'
 
-hostname = socket.gethostname()
-IPAddr = socket.gethostbyname(hostname)
-# if not IPAddr != '151.106.108.129' :
-#     mysql_alchemyDevConString = 'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
-# else:
+def engine():
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
+    print(IPAddr,hostname)
+    if IPAddr != '151.106.108.129' :
+        print(" here")
+        mysql_alchemyDevConString = 'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
+    else:
+        print(" 2here")
+        mysql_alchemyDevConString = 'mysql+pymysql://Smartcubik1Root!:smartcubik@151.106.108.129/inventory'
 
-mysql_alchemyDevConString = 'mysql+pymysql://Smartcubik1Root!:smartcubik@151.106.108.129/inventory'
+    sqlEngine = create_engine(mysql_alchemyDevConString)
 
+    return sqlEngine
 
 # mysql_alchemyDevConString = secrets.mysql_alchemyDevConString
 
 # print(secrets.mysql_schema)
 
-sqlEngine = create_engine(mysql_alchemyDevConString)
+
 
 # dbConnection = sqlEngine.connect()
 # df = pd.read_sql("select * from inventorymapTbl where id_inspection=27", dbConnection)
@@ -60,6 +66,7 @@ def runningPositionsRaw(id_inspection):
       where codeunit not like ''
     	group by codeUnit
     """
+    sqlEngine = engine()
     dbConnection = sqlEngine.connect()
     dfUnits = pd.read_sql(unitsQuery, dbConnection)
     dfPos = pd.read_sql(posQuery, dbConnection)
@@ -82,6 +89,7 @@ def machingPositionsRaw(id_inspection):
     :return:
     """
     rp = runningPositionsRaw(id_inspection)
+    sqlEngine = engine()
     dbConnection = sqlEngine.connect()
     dfwms = pd.read_sql(
         "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionMapTbl where id_inspection ="+str(id_inspection),
@@ -148,6 +156,7 @@ def correctionFactor(levelFactor,id_inspection):
     df2 = df.assign(algoPos=values)
     # print(df2)
     ## hasta aca corregimos la posición.. ahora hay que hacer el merge con el wms.
+    sqlEngine = engine()
     dbConnection = sqlEngine.connect()
     dfwms = pd.read_sql(
         "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionMapTbl where id_inspection =" + str(
@@ -398,6 +407,7 @@ def decodeMach(id_inspection,levelfactor={2:0,3:0,4:0,5:0},export_to_excel=False
 
     ddp = fullDeDup(id_inspection, levelFactor)
 
+    sqlEngine = engine()
     dbConnection = sqlEngine.connect()
     dfwms = pd.read_sql(
         "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionMapTbl where id_inspection =" + str(
