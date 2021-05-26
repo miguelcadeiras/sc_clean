@@ -22,10 +22,11 @@ import socket
 
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
-if not IPAddr != '151.106.108.129' :
-    mysql_alchemyDevConString =  'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
-else:
-    mysql_alchemyDevConString = 'mysql+pymysql://Smartcubik1Root!:smartcubik@151.106.108.129/inventory'
+# if not IPAddr != '151.106.108.129' :
+#     mysql_alchemyDevConString = 'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
+# else:
+
+mysql_alchemyDevConString = 'mysql+pymysql://Smartcubik1Root!:smartcubik@151.106.108.129/inventory'
 
 
 # mysql_alchemyDevConString = secrets.mysql_alchemyDevConString
