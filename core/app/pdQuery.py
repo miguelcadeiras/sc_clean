@@ -19,7 +19,10 @@ import openpyxl
 # mysql_hostDev = 'localhost'
 mysql_alchemyDevConString =  'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
 
+# mysql_alchemyDevConString = secrets.mysql_alchemyDevConString
+
 # print(secrets.mysql_schema)
+
 sqlEngine = create_engine(mysql_alchemyDevConString)
 
 # dbConnection = sqlEngine.connect()
@@ -71,7 +74,7 @@ def machingPositionsRaw(id_inspection):
     rp = runningPositionsRaw(id_inspection)
     dbConnection = sqlEngine.connect()
     dfwms = pd.read_sql(
-        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsdesc2 from wmspositionMapTbl where id_inspection ="+str(id_inspection),
+        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionMapTbl where id_inspection ="+str(id_inspection),
         dbConnection)
 
     dbConnection.close()
@@ -137,7 +140,7 @@ def correctionFactor(levelFactor,id_inspection):
     ## hasta aca corregimos la posición.. ahora hay que hacer el merge con el wms.
     dbConnection = sqlEngine.connect()
     dfwms = pd.read_sql(
-        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsdesc2 from wmspositionMapTbl where id_inspection =" + str(
+        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionMapTbl where id_inspection =" + str(
             id_inspection),
         dbConnection)
     dbConnection.close()
@@ -387,7 +390,7 @@ def decodeMach(id_inspection,levelfactor={2:0,3:0,4:0,5:0},export_to_excel=False
 
     dbConnection = sqlEngine.connect()
     dfwms = pd.read_sql(
-        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsdesc2 from wmspositionMapTbl where id_inspection =" + str(
+        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionMapTbl where id_inspection =" + str(
             id_inspection),
         dbConnection)
     dbConnection.close()
@@ -441,9 +444,9 @@ levelFactor = {2:0,3:0,4:0.2,5:0.3}
 # ------------------------------
 # ----------------------------
 
-df = decodeMach(27, {2:0,3:0,4:0,5:0}, False)
+# df = decodeMach(27, {2:0,3:0,4:0,5:0}, False)
 
-print("------")
+# print("------")
 # SOLO PASILLOS
 # print(df['wmsPosition'].str[4:7])
 # print #SOLO POSICION
@@ -454,10 +457,10 @@ print("------")
 # print(df[df['wmsPosition'].str[4:7].str.contains("002", na=False)])
 # print(df[df['wmsPosition'].str[11:12].str.contains("2",na=False)])
 
-dfPasNiv = df[df['wmsPosition'].str[4:7].str.contains("002", na=False) & df['wmsPosition'].str[11:12].str.contains("2",na=False)]
+# dfPasNiv = df[df['wmsPosition'].str[4:7].str.contains("002", na=False) & df['wmsPosition'].str[11:12].str.contains("2",na=False)]
 
-dfPasNiv.info()
-dfPasNiv.shape
+# dfPasNiv.info()
+# dfPasNiv.shape
 
 
 
