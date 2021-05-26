@@ -191,7 +191,10 @@ def allPD(request):
     levels = []
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
-    levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
+    if id_inspection == 27:
+        levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
+    else:
+        levelFactor = {2: 0, 3: 0, 4: 0, 5:  0}
 
     # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
@@ -264,36 +267,38 @@ def allPD(request):
                 exportData = exportData[0]
             else:
                 # print("in here")
-                exportData,desc = querys.getMatching(id_inspection)
-                desc = desc[1]
+                # print("id_inspection",id_inspection, "levelFactor",levelFactor)
+                df = pdQuery.decodeMach(id_inspection, levelFactor, True)
+                # exportData,desc = querys.getMatching(id_inspection)
+                # desc = desc[1]
                 # print("desc",desc)
-                exportData = exportData[1]
+                # exportData = exportData[1]
                 # print("exportData",exportData)
 
 
-            response = HttpResponse(content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+            response = HttpResponse(content_type='xlsx')
+            response['Content-Disposition'] = 'attachment; filename="exportedData.xlsx"'
 
             queryUpdateExported = "UPDATE inventorymaptbl set exported = (case codeUnit "
 
-            writer = csv.writer(response)
-            writer.writerow(desc)
-
-            for row in exportData:
-
-                writer.writerow(row)
-                if request.GET['matching'] == '1':
-                    queryUpdateExported += " when '" +str(row[4])+"' then 1 \n"
-                    # print("row",row)
-                else:
-                    queryUpdateExported += " when '" + str(row[4]) + "' then 1 \n"
+            # writer = csv.writer(response)
+            # writer.writerow(desc)
+            #
+            # for row in exportData:
+            #
+            #     writer.writerow(row)
+            #     if request.GET['matching'] == '1':
+            #         queryUpdateExported += " when '" +str(row[4])+"' then 1 \n"
+            #         # print("row",row)
+            #     else:
+            #         queryUpdateExported += " when '" + str(row[4]) + "' then 1 \n"
 
 
             messages.success(request, 'Data Exported ')
-            queryUpdateExported+= " end) where id_inspection="+str(id_inspection)+";"
+            # queryUpdateExported+= " end) where id_inspection="+str(id_inspection)+";"
             # print(queryUpdateExported)
 
-            querys.execute(queryUpdateExported)
+            # querys.execute(queryUpdateExported)
 
             return response
 
@@ -353,13 +358,15 @@ def importWMS(request):
     id_inspection = request.GET['id_inspection']
 
     if request.method == "POST":
+        print( "hola")
+        print(request.POST.keys)
         # print("myfile", request.POST['myfile'])
 
         myfile = request.FILES['myfile']
         print("myfile: ",myfile,myfile.name)
         fs = FileSystemStorage()
         filename = fs.save(myfile.name,myfile)
-        print(filename)
+        print(  "aqui",filename)
         # uploaded_file_url = fs.url(filename)
         # print(uploaded_file_url)
         importBool = querys.importDataBulk(os.path.join(settings.MEDIA_ROOT,filename),id_inspection)
