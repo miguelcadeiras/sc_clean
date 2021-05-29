@@ -58,8 +58,10 @@
                     <form method = "post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <label for="myfile">Select a file:</label><br>
-                        <input type="file" name="myfile" class = "btn btn-warning" id="myfile" " ><br><br>
-                        <input type="submit" class ="btn btn-primary">
+                        <input type="file" name="myfile" class = "btn btn-warning" id="myfile" ><br><br>
+
+                        <button type="submit" name = "Upload" class ="btn btn-primary">Upload</button>
+                        <button type="submit" name="Delete" class="btn btn-danger">Delete</button>
                     </form>
                 </div>
 

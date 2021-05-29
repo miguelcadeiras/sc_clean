@@ -207,7 +207,11 @@ def allPD(request):
 
     else:
         'True to debug. and export file on DecodeMach'
-        df = pdQuery.decodeMach(id_inspection, levelFactor,False)
+        if 'fullDATA' in request.GET:
+            df = pdQuery.decodeMach(id_inspection, levelFactor,True)
+        else:
+            df = pdQuery.decodeMach(id_inspection, levelFactor,False)
+
         df = df[['rack','wmsProduct','codeUnit','nivel_y','AGVpos','wmsPosition','wmsDesc','wmsDesc1','wmsDesc2','match','Ppic']]
         description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsDesc2','c','pic']
 
@@ -321,23 +325,33 @@ def importWMS(request):
     id_inspection = request.GET['id_inspection']
 
     if request.method == "POST":
-        print( "hola")
-        print(request.POST.keys)
-        # print("myfile", request.POST['myfile'])
 
-        myfile = request.FILES['myfile']
-        print("myfile: ",myfile,myfile.name)
-        fs = FileSystemStorage()
-        filename = fs.save(myfile.name,myfile)
-        print(  "aqui",filename)
-        # uploaded_file_url = fs.url(filename)
-        # print(uploaded_file_url)
-        importBool = querys.importDataBulk(os.path.join(settings.MEDIA_ROOT,filename),id_inspection)
-        os.remove(os.path.join(settings.MEDIA_ROOT,filename))
-        if importBool:
-            messages.success(request,"Your Data has been Imported correctly")
+
+        if 'Upload' in request.POST.keys():
+            # print("myfile", request.POST['myfile'])
+
+            myfile = request.FILES.get('myfile', False)
+            print("myfile: ",myfile)
+            if myfile != False:
+                fs = FileSystemStorage()
+                filename = fs.save(myfile.name,myfile)
+                print(  "aqui",filename)
+                # uploaded_file_url = fs.url(filename)
+                # print(uploaded_file_url)
+                importBool = querys.importDataBulk(os.path.join(settings.MEDIA_ROOT,filename),id_inspection)
+                os.remove(os.path.join(settings.MEDIA_ROOT,filename))
+                if importBool:
+                    messages.success(request,"Your Data has been Imported correctly")
+                else:
+                    messages.error(request,"Check your file, we couldn't import it")
+            else:
+                messages.warning(request,"Please select a file to import")
         else:
-            messages.error(request,"Check your file, we couldn't import it")
+            if 'Delete' in request.POST.keys():
+                qy = "delete from wmsPositionMapTbl where id_inspection = "+ id_inspection+"; "
+                print(qy)
+                querys.execute(qy)
+                messages.success(request, "WMS Data Deleted")
 
 
 
