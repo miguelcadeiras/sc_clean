@@ -24,7 +24,7 @@ def index(request):
     clientUser = request.user.profile.client
 
     id_client, cols = querys.getClientID(clientUser)
-    # print(id_client)
+    print(id_client)
     data, description = querys.getWarehouses(id_client[0][0])
     # print("data", data)
     # print("description:,", description)
@@ -189,6 +189,8 @@ def all(request):
 def allPD(request):
     picpath = []
     levels = []
+
+
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
     if id_inspection == 27:
@@ -200,17 +202,15 @@ def allPD(request):
     if request.GET['matching'] == '0':
         # print('in Get - matching =0')
         df = pdQuery.fullDeDup(id_inspection,levelFactor)
-        df = df[['rack','algoPos','codeUnit','nivel_y','Ppic']]
+        df = df[['rack','AGVpos','codeUnit','nivel_y','Ppic']]
         description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
-        # print(df)
-        # table = df.to_html(classes="table table-bordered table-striped dataTable ",table_id="table1")
-        # print(table)
+
     else:
+        'True to debug. and export file on DecodeMach'
         df = pdQuery.decodeMach(id_inspection, levelFactor,False)
-        df = df[['rack','wmsProduct','codeUnit','nivel_y','algoPos','wmsPosition','wmsDesc','wmsDesc1','wmsDesc2','Ppic']]
-        description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsD  esc2','pic']
-        # print("else",df)
-        # table = df[['algoPos','codeUnit','nivel_y','wmsProduct','wmsDesc','Ppic']].to_html(classes="table", table_id="table1")
+        df = df[['rack','wmsProduct','codeUnit','nivel_y','AGVpos','wmsPosition','wmsDesc','wmsDesc1','wmsDesc2','match','Ppic']]
+        description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsDesc2','c','pic']
+
 
     data = df.values.tolist()
     # description = list(df.columns.values)
@@ -245,60 +245,23 @@ def allPD(request):
     if request.method == "POST":
         # print("in Post method")
         if 'applyFilter' in request.POST:
+            for key in request.POST:
+                print(key,request.POST[key])
 
-            if request.GET['matching'] == '0':
-                print("here")
-                data, description = querys.getRunningPositionsCenco(id_inspection, request.POST['asile'], request.POST['level'], request.POST['position'],
-                                                                    request.GET['offset'], 0)
-                description = description[0]
-                data = data[0]
+            if request.POST['level']=="All":
+                dff = df[df['level'].str.contains("2",na=False)]
+                print(dff.shape())
+            # dff = df[df['AGVpos'].str.contains(request.POST['asile']) & df['nivel_y'].astype('str').str.contains(request.POST['level'],na=false) & df['AGVpos'].str.contains(request.POST['position'])]
+            data = dff.values.tolist()
 
-            else:
-                level = request.POST['level']
-                data, description = querys.getMatching(id_inspection, request.POST['asile'], '' if level == 'All' else level)
-                description = description[1]
-                data = data[1]
 
         if 'exportData' in request.POST:
-            if request.GET['matching'] == '0':
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename=exportedData_'+str(id_inspection)+'.csv'
 
-                exportData, desc = querys.getRunningPositionsCenco(id_inspection, 'all', 'all', 'all',0, 0)
-                desc = desc[0]
-                exportData = exportData[0]
-            else:
-                # print("in here")
-                # print("id_inspection",id_inspection, "levelFactor",levelFactor)
-                df = pdQuery.decodeMach(id_inspection, levelFactor, True)
-                # exportData,desc = querys.getMatching(id_inspection)
-                # desc = desc[1]
-                # print("desc",desc)
-                # exportData = exportData[1]
-                # print("exportData",exportData)
-
-
-            response = HttpResponse(content_type='xlsx')
-            response['Content-Disposition'] = 'attachment; filename="exportedData.xlsx"'
-
-            queryUpdateExported = "UPDATE inventorymaptbl set exported = (case codeUnit "
-
-            # writer = csv.writer(response)
-            # writer.writerow(desc)
-            #
-            # for row in exportData:
-            #
-            #     writer.writerow(row)
-            #     if request.GET['matching'] == '1':
-            #         queryUpdateExported += " when '" +str(row[4])+"' then 1 \n"
-            #         # print("row",row)
-            #     else:
-            #         queryUpdateExported += " when '" + str(row[4]) + "' then 1 \n"
-
+            df.to_csv(path_or_buf=response, sep=',', float_format='%.2f', index=False, decimal=".")
 
             messages.success(request, 'Data Exported ')
-            # queryUpdateExported+= " end) where id_inspection="+str(id_inspection)+";"
-            # print(queryUpdateExported)
-
-            # querys.execute(queryUpdateExported)
 
             return response
 

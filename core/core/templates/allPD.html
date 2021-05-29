@@ -68,7 +68,7 @@
                         </thead>
                         <tbody>
                         {% for row in data %}
-                        <tr role="row" class="odd {% if request.GET.matching == '1' and row.4 != row.5  %}bg-danger{% endif %}">
+                        <tr role="row" class="odd {% if request.GET.matching == '1' and row.9 == False  %}bg-danger{% endif %}">
                             {% for item in row %}
 
                             {% if forloop.last  %}
