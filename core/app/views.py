@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import numpy as np
 
 # Create your views here.
 from django.conf import settings
@@ -249,15 +250,43 @@ def allPD(request):
     if request.method == "POST":
         # print("in Post method")
         if 'applyFilter' in request.POST:
+            level = request.POST['level']
+            asile = request.POST['asile'].zfill(3)
+            position = request.POST['position'].zfill(3)
+            matching = request.GET['matching']
+
             for key in request.POST:
                 print(key,request.POST[key])
 
-            if request.POST['level']=="All":
-                dff = df[df['level'].str.contains("2",na=False)]
-                print(dff.shape())
-            # dff = df[df['AGVpos'].str.contains(request.POST['asile']) & df['nivel_y'].astype('str').str.contains(request.POST['level'],na=false) & df['AGVpos'].str.contains(request.POST['position'])]
-            data = dff.values.tolist()
+            if level != "All":
+                df = df[(df['nivel_y'] == int(level))]
+                # data = df.values.tolist()
 
+            if asile != "000":
+                print("in asile:",asile)
+                if matching == "0":
+                    print("in asile 1:", asile)
+                    df = df[df["AGVpos"].str[4:7] == asile]
+                    # df = df[df["AGVpos"] ]
+                else:
+                    print("in asile 2:", asile)
+                    df = df[df["wmsPosition"].str[4:7] ==asile]
+
+                data = df.values.tolist()
+
+            if position != '000':
+                print("in position:",position)
+
+                if matching == "0":
+                    print("in position1:", position)
+                    print(df["AGVpos"].str[8:10])
+                    df = df[df["AGVpos"].str[7:10] == position]
+                else:
+                    print("in position2:", position)
+
+                    df = df[df["wmsPosition"].str[8:10] == position]
+
+            data = df.values.tolist()
 
         if 'exportData' in request.POST:
             response = HttpResponse(content_type='text/csv')
@@ -286,6 +315,75 @@ def allPD(request):
                }
 
     return render(request, 'allPD.html', context)
+
+
+@login_required(login_url="/login/")
+def levelPics(request):
+    picpath = []
+    levels = []
+
+    id_inspection = request.GET['id_inspection']
+    id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
+    if id_inspection == 27:
+        levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
+    else:
+        levelFactor = {2: 0, 3: 0, 4: 0, 5: 0}
+
+    df = pdQuery.decodeMach(id_inspection, levelFactor, False)
+    df = df[
+        ['rack', 'wmsProduct', 'codeUnit', 'nivel_y', 'AGVpos', 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
+         'match', 'Ppic']]
+    description = ['rack', 'wmsProduct', 'codeUnit', 'N', 'AGVpos', 'wmsPos', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
+                   'c', 'pic']
+
+    dfx = df[df["wmsPosition"].notnull()]
+    dfa = dfx["wmsPosition"].str[4:7].unique()
+    dfl = dfx["wmsPosition"].str[10:12].unique()
+    levels = dfl.tolist()
+    # print(levels)
+    gdf = []
+    for level in levels:
+        # print(level)
+        dfy = df.sort_values(by=['wmsPosition'],ascending = True)
+        # print("...")
+        dfy = dfy[dfy["wmsPosition"].str[10:12] == level]
+        dfa = dfy["wmsPosition"].str[4:7].unique()
+        print("level",level,"..afer",dfa)
+        for asile in dfa:
+            # para cada pasillo hay que ver cada posición.
+            dfLevel = dfy[dfy["wmsPosition"].str[4:7] == asile].sort_values(by=['wmsPosition'],ascending = True)
+            dfLevel['wmsPos'] = dfLevel["wmsPosition"].str[4:10]
+            dfEven = dfLevel["wmsPos"].fillna(0)
+            # dfOdd = dfLevel[int(dfLevel["wmsPos"]) % 2 != 0]
+
+            print(dfEven)
+            # dfLevel["wmsPOS"]
+            # print(dfLevel.info())
+            gdf.append([level,asile,dfLevel[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()])
+            # gdf.append([level,asile,dfEven[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()])
+            # gdf.append([level,asile,dfOdd[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()])
+
+            # print("for asile "+ asile +" in data: ",dfLevel["wmsPosition"].str[7:10])
+
+    # print("gdf", gdf)
+    data = gdf
+    # description = df["wmsPosition"].str[7:10].unique().tolist()
+    # print("description",description)
+    # print(levels)
+
+
+    context = {'data': data,
+               'description': description,
+               'clientName': request.user.profile.client,
+               'id_warehouse': id_warehouse,
+               'warehouseName': querys.getWarehouseName(request.GET['id_inspection']),
+               'inspection': querys.getInspectionData(request.GET['id_inspection']),
+               'picpath': picpath,
+               'levels': levels,
+               }
+
+    return render(request, 'levelPics.html', context)
+
 
 @login_required(login_url="/login/")
 def level(request):
