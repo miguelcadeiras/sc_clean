@@ -160,7 +160,7 @@ def correctionFactor(levelFactor,id_inspection):
     sqlEngine = engine()
     dbConnection = sqlEngine.connect()
     dfwms = pd.read_sql(
-        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionMapTbl where id_inspection =" + str(
+        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionmaptbl where id_inspection =" + str(
             id_inspection),
         dbConnection)
     dbConnection.close()
@@ -416,7 +416,7 @@ def decodeMach(id_inspection,levelFactor = {2:0,3:0,4:0,5:0},export_to_excel=Fal
     sqlEngine = engine()
     dbConnection = sqlEngine.connect()
     dfwms = pd.read_sql(
-        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionMapTbl where id_inspection =" + str(
+        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionmaptbl where id_inspection =" + str(
             id_inspection),
         dbConnection)
     dbConnection.close()
