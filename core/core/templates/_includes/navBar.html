@@ -18,6 +18,12 @@
       <li class="nav-item d-none d-sm-inline-block">
         <a href="importWMS?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}" class="nav-link">WMS Data</a>
       </li>
+            <li class="nav-item d-none d-sm-inline-block">
+        <a href="levelPics?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}" class="nav-link">Map</a>
+      </li>
+            <li class="nav-item d-none d-sm-inline-block">
+        <a href="carrousel?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}&asile=0" class="nav-link">Images</a>
+      </li>
       {% endif %}
       {% if 'matching' in request.GET %}
       <li class="nav-item d-none d-sm-inline-block">

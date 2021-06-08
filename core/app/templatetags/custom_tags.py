@@ -17,3 +17,11 @@ def getList_value(list,value):
         return list[value]
     else:
         return ''
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+@register.filter
+def get_itemIndex(dictionary, key):
+    return dictionary.get(key[0])[key[1]]

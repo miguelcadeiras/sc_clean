@@ -12,6 +12,7 @@ urlpatterns = [
     path('all',views.allPD,name='all'),
     path('allPD',views.allPD,name='allPD'),
     path('levelPics',views.levelPics,name='levelPics'),
+    path('carrousel', views.carrousel, name='carrousel'),
     path('level', views.level, name='level'),
     path('test',views.testPage, name='testpage'),
     path('importWMS',views.importWMS,name='importWMS')

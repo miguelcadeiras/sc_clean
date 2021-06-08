@@ -1,5 +1,6 @@
 from django.shortcuts import render
 import numpy as np
+import pandas as pd
 
 # Create your views here.
 from django.conf import settings
@@ -324,7 +325,7 @@ def levelPics(request):
 
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
-    if id_inspection == 27:
+    if id_inspection == 27 or id_inspection == 34:
         levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
     else:
         levelFactor = {2: 0, 3: 0, 4: 0, 5: 0}
@@ -383,6 +384,117 @@ def levelPics(request):
                }
 
     return render(request, 'levelPics.html', context)
+
+@login_required(login_url="/login/")
+def carrousel(request):
+    picpath = []
+    levels = []
+
+    id_inspection = request.GET['id_inspection']
+    id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
+    if id_inspection == 27 or id_inspection == 34:
+        levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
+    else:
+        levelFactor = {2: 0, 3: 0, 4: 0, 5: 0}
+
+    df = pdQuery.decodeMach(id_inspection, levelFactor, False)
+    df = df[
+        ['rack', 'wmsProduct', 'codeUnit', 'nivel_y', 'AGVpos', 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
+         'match', 'Ppic']]
+    description = ['rack', 'wmsProduct', 'codeUnit', 'N', 'AGVpos', 'wmsPos', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
+                   'c', 'pic']
+
+    dfx = df[df["wmsPosition"].notnull()]
+    dfa = dfx["wmsPosition"].str[4:7].unique()
+    # print("dfa",dfa)
+    # pd.set_option("display.max_rows", None, "display.max_columns", None)
+    # pd.reset_option('all')
+    # print("dfx",dfx["wmsPosition"])
+    dfl = dfx["wmsPosition"].str[10:12].unique()
+    levels = dfl.tolist()
+    levels.remove('')
+    # print(levels)
+    gdf = []
+    gdfe = []
+    gdfo = []
+    dfe = {}
+    dfo = {}
+    asiles = dfa.tolist()
+    asiles.remove('')
+
+    if request.method == "GET":
+        if 'asile' in request.GET:
+            print(request.GET['asile'])
+            dfa = []
+            dfa.append(request.GET['asile'])
+
+
+
+    for level in levels:
+        # print(level)
+        dfy = df.sort_values(by=['wmsPosition'],ascending = True)
+        # print("...")
+        dfy = dfy[dfy["wmsPosition"].str[10:12] == level]
+        dfa = dfy["wmsPosition"].str[4:7].unique()
+        # print("level",level,"..afer",dfa)
+
+        for asile in dfa:
+            # para cada pasillo hay que ver cada posición.
+
+            dfLevel = dfy[dfy["wmsPosition"].str[4:7] == asile].sort_values(by=['wmsPosition'],ascending = True)
+            dfLevel['wmsPos'] = dfLevel["wmsPosition"].str[4:10]
+            dfLevel['wmsPos'] = dfLevel["wmsPos"].replace('',np.nan)
+            dfLevel['wmsPos'] = dfLevel["wmsPos"].fillna(0)
+            # dfEven = dfLevel["wmsPos"].fillna(0)
+
+            dfOdd = dfLevel[dfLevel["wmsPos"].astype('int64') % 2 != 0]
+            dfEven = dfLevel[dfLevel["wmsPos"].astype('int64') % 2 == 0]
+
+
+            # dfOdd = dfEven[dfEven.astype('int64') % 2 != 0]
+            # dfOdd = dfEven[dfEven.astype('int64') % 2 == 0]
+            # print("2")
+            # print("dfOdd -OOOOODDDDDDDDDD-:",dfOdd)
+            # print("dfOdd -EEEEVVEEEEENNNN-:",dfEven)
+            # pass
+
+            # dfLevel["wmsPOS"]
+            # print(dfLevel.info())
+            # gdf.append([level,asile,dfLevel[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()])
+            gdfe.append([level,asile,dfEven[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()])
+            gdfo.append([level,asile,dfOdd[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()])
+            # gdf.append([[level,asile,dfEven[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()],[level,asile,dfOdd[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()]])
+            dfe[level] = [level,asile,dfEven[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()]
+            dfo[level] = [level, asile, dfOdd[["wmsPosition", 'match', 'codeUnit', 'Ppic']].values.tolist()]
+            # print("for asile "+ asile +" in data: ",dfLevel["wmsPosition"].str[7:10])
+
+    # print("gdf", gdf)
+    data = gdf
+    dataEven = dfe
+    dataOdd = dfo
+    # description = df["wmsPosition"].str[7:10].unique().tolist()
+    # print("description",description)
+    # print(levels)
+
+    # print("dataEven",data)
+
+
+    context = {
+            'data': data,
+            'asiles': asiles,
+            'levels' : levels,
+            'dataEven':dataEven,
+            'dataOdd': dataOdd,
+            'description': description,
+            'clientName': request.user.profile.client,
+            'id_warehouse': id_warehouse,
+            'warehouseName': querys.getWarehouseName(request.GET['id_inspection']),
+            'inspection': querys.getInspectionData(request.GET['id_inspection']),
+            'picpath': picpath,
+            'levels': levels,
+            }
+
+    return render(request, 'carrousel.html', context)
 
 
 @login_required(login_url="/login/")
