@@ -62,7 +62,7 @@ def runningPositionsRaw(id_inspection):
      select distinct rack from inventorymaptbl where id_inspection ="""+str(id_inspection)+"""
       )
       select fullRack.rack,x,codeUnit,nivel,picpath as upic from fullRack left Join (
-      select distinct(codeUnit),rack,x,nivel,camera,picpath from inventorymapTbl where id_inspection = """+str(id_inspection)+""") as units
+      select distinct(codeUnit),rack,x,nivel,camera,picpath from inventorymaptbl where id_inspection = """+str(id_inspection)+""") as units
       on fullRack.rack=units.rack 
       where codeunit not like ''
     	group by codeUnit
