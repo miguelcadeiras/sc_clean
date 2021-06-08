@@ -29,7 +29,7 @@ def engine():
         mysql_alchemyDevConString = 'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
     else:
         # print(" 2here")
-        mysql_alchemyDevConString = 'mysql+pymysql://Smartcubik1Root!:smartcubik@151.106.108.129/inventory'
+        mysql_alchemyDevConString = 'mysql+pymysql://smartcubik:Smartcubik1Root!@151.106.108.129/inventory'
 
     sqlEngine = create_engine(mysql_alchemyDevConString)
 
