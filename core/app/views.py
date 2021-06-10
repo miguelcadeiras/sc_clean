@@ -214,7 +214,7 @@ def allPD(request):
         else:
             df = pdQuery.decodeMach(id_inspection, levelFactor,False)
 
-        df = df[['rack','wmsProduct','codeUnit','nivel_y','AGVpos','wmsPosition','wmsDesc','wmsDesc1','wmsDesc2','match','Ppic']]
+        df = df[['rack','wmsProduct','codeUnit','nivel_y','AGVpos','wmsPosition','wmsDesc','wmsDesc1','wmsDesc2','match','Wpic']]
         description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsDesc2','c','pic']
 
 
@@ -341,6 +341,8 @@ def levelPics(request):
     dfa = dfx["wmsPosition"].str[4:7].unique()
     dfl = dfx["wmsPosition"].str[10:12].unique()
     levels = dfl.tolist()
+    levels.sort()
+
     # print(levels)
     gdf = []
     for level in levels:
@@ -349,15 +351,21 @@ def levelPics(request):
         # print("...")
         dfy = dfy[dfy["wmsPosition"].str[10:12] == level]
         dfa = dfy["wmsPosition"].str[4:7].unique()
-        print("level",level,"..afer",dfa)
+        cleanDfa = []
         for asile in dfa:
+            if len(asile) == 3:
+                cleanDfa.append(asile)
+        # print("level",level,"..afer",dfa)
+        cleanDfa.sort()
+
+        for asile in cleanDfa:
             # para cada pasillo hay que ver cada posición.
             dfLevel = dfy[dfy["wmsPosition"].str[4:7] == asile].sort_values(by=['wmsPosition'],ascending = True)
             dfLevel['wmsPos'] = dfLevel["wmsPosition"].str[4:10]
             dfEven = dfLevel["wmsPos"].fillna(0)
             # dfOdd = dfLevel[int(dfLevel["wmsPos"]) % 2 != 0]
 
-            print(dfEven)
+            # print(dfEven)
             # dfLevel["wmsPOS"]
             # print(dfLevel.info())
             gdf.append([level,asile,dfLevel[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()])
@@ -398,9 +406,10 @@ def carrousel(request):
         levelFactor = {2: 0, 3: 0, 4: 0, 5: 0}
 
     df = pdQuery.decodeMach(id_inspection, levelFactor, False)
+    # print(df.columns)
     df = df[
         ['rack', 'wmsProduct', 'codeUnit', 'nivel_y', 'AGVpos', 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
-         'match', 'Ppic']]
+         'match','Wpic', 'Ppic','upic']]
     description = ['rack', 'wmsProduct', 'codeUnit', 'N', 'AGVpos', 'wmsPos', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
                    'c', 'pic']
 
@@ -412,22 +421,36 @@ def carrousel(request):
     # print("dfx",dfx["wmsPosition"])
     dfl = dfx["wmsPosition"].str[10:12].unique()
     levels = dfl.tolist()
+    # print(levels)
     levels.remove('')
+    levels.sort()
+
     # print(levels)
     gdf = []
     gdfe = []
     gdfo = []
     dfe = {}
     dfo = {}
+
+    #quito los pasillos que por posiciones mal ingresadas no tienen la cantidad de caracteres necesarios.
+    # no entiendo por qué es que llegan hasta aca..
+    asiles3 = []
     asiles = dfa.tolist()
+    # print(asiles)
     asiles.remove('')
+    for asile in asiles:
+        # print(asile,": len: ",len(asile))
+        if len(asile.strip()) == 3:
+            asiles3.append(asile)
+
+    asiles3.sort()
 
     if request.method == "GET":
-        if 'asile' in request.GET:
-            print(request.GET['asile'])
-            dfa = []
-            dfa.append(request.GET['asile'])
-
+        getAsile = request.GET['asile']
+        if getAsile != '0':
+            dfa = [getAsile]
+        else:
+            dfa = [dfa[-1]]
 
 
     for level in levels:
@@ -435,7 +458,7 @@ def carrousel(request):
         dfy = df.sort_values(by=['wmsPosition'],ascending = True)
         # print("...")
         dfy = dfy[dfy["wmsPosition"].str[10:12] == level]
-        dfa = dfy["wmsPosition"].str[4:7].unique()
+        # dfa = dfy["wmsPosition"].str[4:7].unique()
         # print("level",level,"..afer",dfa)
 
         for asile in dfa:
@@ -451,38 +474,23 @@ def carrousel(request):
             dfEven = dfLevel[dfLevel["wmsPos"].astype('int64') % 2 == 0]
 
 
-            # dfOdd = dfEven[dfEven.astype('int64') % 2 != 0]
-            # dfOdd = dfEven[dfEven.astype('int64') % 2 == 0]
-            # print("2")
-            # print("dfOdd -OOOOODDDDDDDDDD-:",dfOdd)
-            # print("dfOdd -EEEEVVEEEEENNNN-:",dfEven)
-            # pass
-
-            # dfLevel["wmsPOS"]
-            # print(dfLevel.info())
-            # gdf.append([level,asile,dfLevel[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()])
-            gdfe.append([level,asile,dfEven[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()])
-            gdfo.append([level,asile,dfOdd[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()])
-            # gdf.append([[level,asile,dfEven[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()],[level,asile,dfOdd[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()]])
-            dfe[level] = [level,asile,dfEven[["wmsPosition",'match','codeUnit','Ppic']].values.tolist()]
-            dfo[level] = [level, asile, dfOdd[["wmsPosition", 'match', 'codeUnit', 'Ppic']].values.tolist()]
+            gdfe.append([level,asile,dfEven[["wmsPosition",'AGVpos','match','codeUnit','Wpic','upic', 'wmsProduct']].values.tolist()])
+            gdfo.append([level,asile,dfOdd[["wmsPosition",'AGVpos','match','codeUnit','Wpic','upic', 'wmsProduct']].values.tolist()])
+            dfe[level] = [level,asile,dfEven[["wmsPosition",'AGVpos','match','codeUnit','Wpic','upic', 'wmsProduct']].values.tolist()]
+            dfo[level] = [level, asile, dfOdd[["wmsPosition",'AGVpos', 'match', 'codeUnit', 'Wpic','upic', 'wmsProduct']].values.tolist()]
             # print("for asile "+ asile +" in data: ",dfLevel["wmsPosition"].str[7:10])
 
     # print("gdf", gdf)
     data = gdf
     dataEven = dfe
     dataOdd = dfo
-    # description = df["wmsPosition"].str[7:10].unique().tolist()
-    # print("description",description)
-    # print(levels)
 
-    # print("dataEven",data)
 
 
     context = {
             'data': data,
-            'asiles': asiles,
-            'levels' : levels,
+            'asiles': asiles3,
+            'levels': levels,
             'dataEven':dataEven,
             'dataOdd': dataOdd,
             'description': description,

@@ -25,3 +25,10 @@ def get_item(dictionary, key):
 @register.filter
 def get_itemIndex(dictionary, key):
     return dictionary.get(key[0])[key[1]]
+
+@register.filter
+def divisiblePor(value, divisor):
+    if value % divisor == 0:
+        return True
+    else:
+        return  False

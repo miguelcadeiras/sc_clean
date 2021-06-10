@@ -57,11 +57,15 @@ def runningPositionsRaw(id_inspection):
     length(codePos)>=12 and
     codePos not like 'UBG0%%' and
     substring(codePos,11,2) not like '01'
-    group by rack"""
+    
+    group by rack
+    order by rack asc, length(codePos) desc
+    """
+
     unitsQuery = """ with fullRack as(
      select distinct rack from inventorymaptbl where id_inspection ="""+str(id_inspection)+"""
       )
-      select fullRack.rack,x,codeUnit,nivel,picpath as upic from fullRack left Join (
+      select fullRack.rack,x,codeUnit,nivel,camera,picpath as upic from fullRack left Join (
       select distinct(codeUnit),rack,x,nivel,camera,picpath from inventorymaptbl where id_inspection = """+str(id_inspection)+""") as units
       on fullRack.rack=units.rack 
       where codeunit not like ''
@@ -412,22 +416,53 @@ def decodeMach(id_inspection,levelFactor = {2:0,3:0,4:0,5:0},export_to_excel=Fal
     # dfBeforeDeDup = correctionFactor(levelFactor, id_inspection)
 
     ddp = fullDeDup(id_inspection, levelFactor)
+    #
+    # juntamos las imagenes de las posiciones obtenidas con las del wms
+    posFullQuery = """ select distinct codePos,picPath as Wpic from inventorymaptbl 
+    where id_inspection = """ + str(id_inspection) + """
+     and codePos not like '';
+    """
+    wmsQuery = "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionmaptbl where id_inspection =" + str(
+        id_inspection)
 
     sqlEngine = engine()
     dbConnection = sqlEngine.connect()
-    dfwms = pd.read_sql(
-        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionmaptbl where id_inspection =" + str(
-            id_inspection),
-        dbConnection)
+    dfwms0 = pd.read_sql(wmsQuery, dbConnection)
+    dfFullPos = pd.read_sql(posFullQuery,dbConnection)
     dbConnection.close()
+
     # print(dfwms)
+    #asigno aqui la foto para cada uno de en wPic para cada posicion.. sino en la otra query queda vacio
+    dfwms  = result = pd.merge(dfwms0,dfFullPos,
+                  left_on="wmsPosition",
+                  right_on="codePos",
+                  how="outer"
+                  )
+
+    #### FIN JUNTADA DE IMAGENES ###
 
     resMergeWms = pd.merge(ddp, dfwms, left_on="codeUnit", right_on="wmsProduct", how="outer")
     # print(resMergeWms.info())
     resMergeWms = resMergeWms.replace(np.nan, '', regex=True)
 
+    resMergeWms['double'] = resMergeWms['wmsPosition'].str.len() == 14
+
+    # ARREGLO LOS MEDIO PALLETS.. COPIO LOS ÚLTIMOS 2 DE LA POSICION DEL WMS..
+    # HABRIA QUE VERLO CON LA CAMARA.. QUE ESTA ANDANDO BIEN.. PERO HABRIA QUE ENTENDER LA LÓGICA.
+
+    resMergeWms
+    # print("here")
+    # df['name_match'] = df['First_name'].apply(lambda x: 'Match' if x == 'Bill' else 'Mismatch')
+    # df.loc[df['First_name'] == 'Bill', 'name_match'] = 'Match'
+    resMergeWms.loc[(resMergeWms['double'] == True) & (resMergeWms['AGVpos']!=''), 'AGVpos'] = resMergeWms['AGVpos'].astype('string') + resMergeWms['wmsPosition'].str[12:14]
+    resMergeWms.loc[resMergeWms['double'] == False, 'AGVpos'] = resMergeWms['AGVpos']
+    resMergeWms['AGVpos'] = resMergeWms['AGVpos'].replace(np.nan, '', regex=True)
+
+
+    # print("double",resMergeWms[['double','wmsPosition','AGVpos','camera']])
+
     resMergeWms['match'] = resMergeWms['wmsPosition'].values == resMergeWms['AGVpos'].values
-    print(resMergeWms.describe())
+    # print(resMergeWms.describe())
     resMergeWms.loc[(resMergeWms.wmsProduct == '') & (resMergeWms.codeUnit == ''),"match"] = True
     # resMergeWms = resMergeWms[resMergeWms['wmsProduct'] != '']
 
@@ -451,5 +486,37 @@ def pasilloNivel(id_inspection,levelFactor,pasillo,nivel):
 
 
 
+# ########################################################################
+def testing(id_inspection):
+
+    wmsQuery = "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionmaptbl where id_inspection =" + str(id_inspection)
+    posFullQuery = """ select distinct codePos,picPath as Wpic from inventorymaptbl 
+    where id_inspection = """ + str(id_inspection) + """
+     and codePos not like '';
+    """
+
+
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+
+    dfwms = pd.read_sql(wmsQuery,    dbConnection)
+
+    dfFullPos = pd.read_sql(posFullQuery,    dbConnection)
+    dfFullPos.to_excel("testData.xlsx", sheet_name='Pos')
+
+    dbConnection.close()
+
+    dfRuningPos = runningPositionsRaw(id_inspection)
+    # print(dfRuningPos.columns)
+    dfPos1 = decodeMach(id_inspection,{2:0,3:0,4:0,5:0})
+    # print("dfPos1:",dfPos1.info())
+    result = pd.merge(dfwms,dfFullPos,
+                      left_on="wmsPosition",
+                      right_on="codePos",
+                      how="inner"
+                      )
+    result.to_excel("testDataResult.xlsx", sheet_name='result')
+    # print("result:",result)
+    # print(result.columns)
 
 
