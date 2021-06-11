@@ -310,6 +310,7 @@ def allPD(request):
                'readedPositions': readedPositions,
                'readedCount': readedCount,
                'readedRatio': readedRatio,
+               'readMissMach':"{:.1f}".format((1-(readedCount/warehouseUnitCount))*100) if warehouseUnitCount>0 else "0",
                'inspection': querys.getInspectionData(request.GET['id_inspection']),
                'picpath': picpath,
                'levels': levels,
