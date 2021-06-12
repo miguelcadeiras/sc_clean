@@ -199,7 +199,7 @@ def allPD(request):
     if id_inspection == 27:
         levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
     else:
-        levelFactor = {2: 0, 3: 0, 4: 0, 5:  0}
+        levelFactor = {2: 0, 3: 0, 4: 0, 5:  0,6:0}
     print("002")
     # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
