@@ -217,9 +217,11 @@ def allPD(request):
         df = df[['rack','wmsProduct','codeUnit','nivel_y','AGVpos','wmsPosition','wmsDesc','wmsDesc1','wmsDesc2','match','Wpic']]
         description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsDesc2','c','pic']
 
+    print("001")
 
     data = df.values.tolist()
     # description = list(df.columns.values)
+    print("002")
 
     query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection=' + str(id_inspection)
     warehouseTotalPositions = querys.mysqlQuery(query)[0][0][0]
@@ -238,6 +240,7 @@ def allPD(request):
     # print('readedCount',readedCount)
     # print(data)
     readedRatio = 0
+    print("003")
 
     if int(readedCount) > 0:
         readedRatio = round(readedCount / readedPositions, 2) * 100
@@ -247,7 +250,7 @@ def allPD(request):
     if warehouseTotalPositions > 0:
         warehouseRatio = round(warehouseUnitCount / warehouseTotalPositions, 2) * 100
         # print('warehouseRatio',warehouseRatio)
-
+    print("004")
     if request.method == "POST":
         # print("in Post method")
         if 'applyFilter' in request.POST:
@@ -299,6 +302,7 @@ def allPD(request):
 
             return response
 
+    print("005")
     context = {'data':data,
                'description':description,
                'clientName': request.user.profile.client,
