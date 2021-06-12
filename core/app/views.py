@@ -192,7 +192,7 @@ def allPD(request):
     picpath = []
     levels = []
 
-
+    print("000")
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
     if id_inspection == 27:
