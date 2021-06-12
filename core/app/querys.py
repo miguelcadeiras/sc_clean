@@ -469,10 +469,10 @@ def importDataBulk(myfile,id_inspection):
     # Start the stopwatch / counter
     t1_start = process_time()
 
-    with open(myfile, 'r') as csv_file:
+    with open(myfile, 'r',encoding='utf-8') as csv_file:
             header = "insert into wmspositionmaptbl (wmsposition,wmsproduct,wmsdesc,wmsdesc1,wmsdesc2,id_inspection) values"
             query= header
-            reader = csv.reader(csv_file, delimiter=',', quotechar='|',encoding='utf-8')
+            reader = csv.reader(csv_file, delimiter=',', quotechar='|')
 
             rowCount = 0
             r=0
