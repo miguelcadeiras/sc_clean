@@ -195,15 +195,18 @@ def allPD(request):
     print("000")
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
+    print("001")
     if id_inspection == 27:
         levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
     else:
         levelFactor = {2: 0, 3: 0, 4: 0, 5:  0}
-
+    print("002")
     # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
         # print('in Get - matching =0')
+        print("003")
         df = pdQuery.fullDeDup(id_inspection,levelFactor)
+        print("004")
         df = df[['rack','AGVpos','codeUnit','nivel_y','Ppic']]
         description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
 
@@ -217,11 +220,11 @@ def allPD(request):
         df = df[['rack','wmsProduct','codeUnit','nivel_y','AGVpos','wmsPosition','wmsDesc','wmsDesc1','wmsDesc2','match','Wpic']]
         description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsDesc2','c','pic']
 
-    print("001")
 
+    print("005")
     data = df.values.tolist()
     # description = list(df.columns.values)
-    print("002")
+
 
     query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection=' + str(id_inspection)
     warehouseTotalPositions = querys.mysqlQuery(query)[0][0][0]
@@ -240,7 +243,7 @@ def allPD(request):
     # print('readedCount',readedCount)
     # print(data)
     readedRatio = 0
-    print("003")
+
 
     if int(readedCount) > 0:
         readedRatio = round(readedCount / readedPositions, 2) * 100
@@ -250,7 +253,7 @@ def allPD(request):
     if warehouseTotalPositions > 0:
         warehouseRatio = round(warehouseUnitCount / warehouseTotalPositions, 2) * 100
         # print('warehouseRatio',warehouseRatio)
-    print("004")
+
     if request.method == "POST":
         # print("in Post method")
         if 'applyFilter' in request.POST:
@@ -302,7 +305,7 @@ def allPD(request):
 
             return response
 
-    print("005")
+
     context = {'data':data,
                'description':description,
                'clientName': request.user.profile.client,
