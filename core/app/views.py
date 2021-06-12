@@ -192,21 +192,21 @@ def allPD(request):
     picpath = []
     levels = []
 
-    print("000")
+    # print("000")
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
-    print("001")
+    # print("001")
     if id_inspection == 27:
         levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
     else:
         levelFactor = {2: 0, 3: 0, 4: 0, 5:  0,6:0}
-    print("002")
+    # print("002")
     # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
         # print('in Get - matching =0')
-        print("003")
+        # print("003")
         df = pdQuery.fullDeDup(id_inspection,levelFactor)
-        print("004")
+        # print("004")
         df = df[['rack','AGVpos','codeUnit','nivel_y','Ppic']]
         description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
 
@@ -221,7 +221,7 @@ def allPD(request):
         description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsDesc2','c','pic']
 
 
-    print("005")
+    # print("005")
     data = df.values.tolist()
     # description = list(df.columns.values)
 
@@ -565,6 +565,7 @@ def importWMS(request):
                 # uploaded_file_url = fs.url(filename)
                 # print(uploaded_file_url)
                 importBool = querys.importDataBulk(os.path.join(settings.MEDIA_ROOT,filename),id_inspection)
+                print("001")
                 os.remove(os.path.join(settings.MEDIA_ROOT,filename))
                 if importBool:
                     messages.success(request,"Your Data has been Imported correctly")

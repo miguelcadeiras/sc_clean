@@ -472,10 +472,11 @@ def importDataBulk(myfile,id_inspection):
     with open(myfile, 'r') as csv_file:
             header = "insert into wmspositionmaptbl (wmsposition,wmsproduct,wmsdesc,wmsdesc1,wmsdesc2,id_inspection) values"
             query= header
-            reader = csv.reader(csv_file, delimiter=',', quotechar='|')
+            reader = csv.reader(csv_file, delimiter=',', quotechar='|',encoding='utf-8')
 
             rowCount = 0
             r=0
+            print("here")
             for index,row in enumerate(reader):
 
                 if index == 0:
@@ -499,11 +500,11 @@ def importDataBulk(myfile,id_inspection):
                 rowCount += 1
                 r +=1
 
-            # print("query", query)
+            print("query", query)
             if len(query) > len(header):
                 execute(query[:-1])
 
-            # print("import Process Finished")
+            print("import Process Finished")
 
     # Stop the stopwatch / counter
     t1_stop = process_time()
