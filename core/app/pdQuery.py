@@ -76,6 +76,7 @@ def runningPositionsRaw(id_inspection):
     dfUnits = pd.read_sql(unitsQuery, dbConnection)
     dfPos = pd.read_sql(posQuery, dbConnection)
 
+
     dbConnection.close()
 
     result = pd.merge(dfPos,
@@ -83,6 +84,8 @@ def runningPositionsRaw(id_inspection):
                       on="rack",
                       how="outer"
                       )
+    # result.to_excel("runningPositions.xlsx", sheet_name='Merge Data')
+
     return result
 
 
@@ -337,6 +340,85 @@ def fullDeDup(id_inspection, levelFactor):
 
     return dfC
 
+def fullDeDupR1(id_inspection, levelFactor,useDedup=True):
+    """
+    :param id_inspection:
+    :param mid: middle of the rack where it should change
+    :param th: middle threshold
+    :param levelFactor: dictionary for correction factor{level:cm,...,level_n:cm}
+    :return: dataFrame
+    """
+
+    df2 = correctionFactor(levelFactor, id_inspection)
+    print(df2.columns)
+    # obtengo los niveles de los datos corregidos
+    dfNiveles = df2[df2["nivel_y"].notnull()]["nivel_y"].sort_values().unique().astype(int)
+    # print(">>------")
+    # print(dfNiveles)
+    # separamos un df para cada nivel
+    df_N = []
+    for level in dfNiveles:
+        df_N.append(df2[df2["nivel_y"] == level])
+
+    # print(">>>>>>>>>>>>")
+    # print(df_N)
+    # print("<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>")
+
+
+    # df_N5 = df2[df2["nivel_y"] == 5]
+    # df_N4 = df2[df2["nivel_y"] == 4]
+    # df_N3 = df2[df2["nivel_y"] == 3]
+    # df_N2 = df2[df2["nivel_y"] == 2]
+
+    for df in df_N:
+        df_N2 = df[df["codePos"].str.len() <= 12]
+
+        df2_duplicated = df_N2[df_N2.duplicated(['algoPos'])].sort_values(by=['algoPos'])
+        # print (df2_duplicated["algoPos"])
+        df2_duplicated = df2_duplicated[df2_duplicated.purePos.notnull()]
+        # mid = 1.5
+        # th = 0.2
+        # df2Copy = df2.copy()
+
+        print("3.------------------")
+        if useDedup:
+            print("usingDedup")
+            for rack in df2_duplicated["rack"]:
+                dfDup = df_N2[df_N2['rack'] == rack]
+                # print(dfDup[["algoPos","purePos","rack",'x','codeUnit']])
+
+
+                if dfDup.shape[0] == 2:
+                    #       print(rack,dfDup['codePos'].str.len())
+                    oldPos = dfDup['algoPos'].values[0]
+                    # print(" >>s_______________<<< ")
+                    newPos, pa = dedupMiddleR1(dfDup)
+                    # print("dev:",newPos,pa)
+                    # print(" >>s_______________<<< ")
+                    # print(df2Copy[df2Copy["codeUnit"].str.contains(pa,na=False).values[0]])
+                    if oldPos != newPos:
+                        try:
+                            index = df.index[df["codeUnit"].str.contains(pa,na=False)].values[0]
+                            # print(index)
+                            df.at[index, 'algoPos'] = '%06.f' % (newPos)
+                            # print(newPos, pa, oldPos, rack, dfDup['codeUnit'].values[0], dfDup['x'].values[0])
+                        except:
+                            pass
+
+    print("<<<>>>>>Deduplication Completed Successfully<<<<>>>>>>")
+    dfC = pd.concat(df_N)
+    dfC = df2
+    print('back to df2')
+    # dfC.describe()
+    # dfC["AGVFullPos"] = 'UBG1' + dfC['algoPos'] + dfC['nivel_y']
+
+    dfC["AGVpos"] = dfC['codePos'].str[:4] + dfC['algoPos'] + '0' + dfC["nivel_y"].fillna(0).astype(np.int8).astype(str)
+    print(dfC.columns)
+    # print(dfC['AGVpos'])
+
+
+    return dfC
+
 
 def testFullDeDup(id_inspection, mid, th, levelFactor, rack):
     """
@@ -412,10 +494,10 @@ def testFullDeDup(id_inspection, mid, th, levelFactor, rack):
     return pd.concat(df_N)
 
 
-def decodeMach(id_inspection,levelFactor = {2:0,3:0,4:0,5:0},export_to_excel=False):
+def decodeMach(id_inspection,levelFactor = {2:0,3:0,4:0,5:0,6:0},export_to_excel=False):
     # dfBeforeDeDup = correctionFactor(levelFactor, id_inspection)
 
-    ddp = fullDeDup(id_inspection, levelFactor)
+    ddp = fullDeDupR1(id_inspection, levelFactor,False)
     #
     # juntamos las imagenes de las posiciones obtenidas con las del wms
     posFullQuery = """ select distinct codePos,picPath as Wpic from inventorymaptbl 
@@ -433,6 +515,8 @@ def decodeMach(id_inspection,levelFactor = {2:0,3:0,4:0,5:0},export_to_excel=Fal
 
     # print(dfwms)
     #asigno aqui la foto para cada uno de en wPic para cada posicion.. sino en la otra query queda vacio
+
+    # algo aca no esta funcionando
     dfwms  = result = pd.merge(dfwms0,dfFullPos,
                   left_on="wmsPosition",
                   right_on="codePos",

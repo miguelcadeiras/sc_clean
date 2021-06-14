@@ -68,6 +68,7 @@
                         </thead>
                         <tbody>
                         {% for row in data %}
+                        {% if forloop.counter < 3000 %}
                         <tr role="row" class="odd {% if request.GET.matching == '1' and row.9 == False  %}bg-danger{% endif %}">
                             {% for item in row %}
 
@@ -104,6 +105,7 @@
                             {% endfor %}
 
                         </tr>
+                        {% endif %}
                         {% endfor %}
                         </tbody>
                         <!--                        <tfoot>-->

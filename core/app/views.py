@@ -192,36 +192,29 @@ def allPD(request):
     picpath = []
     levels = []
 
-    # print("000")
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
-    # print("001")
     if id_inspection == 27:
         levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
     else:
-        levelFactor = {2: 0, 3: 0, 4: 0, 5:  0,6:0}
-    # print("002")
+        levelFactor = {2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
     # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
         # print('in Get - matching =0')
-        # print("003")
         df = pdQuery.fullDeDup(id_inspection,levelFactor)
-        # print("004")
         df = df[['rack','AGVpos','codeUnit','nivel_y','Ppic']]
         description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
-
     else:
         'True to debug. and export file on DecodeMach'
         if 'fullDATA' in request.GET:
-            df = pdQuery.decodeMach(id_inspection, levelFactor,True)
+            df = pdQuery.decodeMach(id_inspection, levelFactor,False)
         else:
             df = pdQuery.decodeMach(id_inspection, levelFactor,False)
 
-        df = df[['rack','wmsProduct','codeUnit','nivel_y','AGVpos','wmsPosition','wmsDesc','wmsDesc1','wmsDesc2','match','Wpic']]
+        df = df[['rack','wmsProduct','codeUnit','nivel_y','AGVpos','wmsPosition','wmsDesc','wmsDesc1','wmsDesc2','match','Ppic']]
         description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsDesc2','c','pic']
 
 
-    # print("005")
     data = df.values.tolist()
     # description = list(df.columns.values)
 
@@ -296,8 +289,11 @@ def allPD(request):
             data = df.values.tolist()
 
         if 'exportData' in request.POST:
+            print("009")
+
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename=exportedData_'+str(id_inspection)+'.csv'
+            print("010")
 
             df.to_csv(path_or_buf=response, sep=',', float_format='%.2f', index=False, decimal=".")
 
@@ -305,6 +301,7 @@ def allPD(request):
 
             return response
 
+    print("011")
 
     context = {'data':data,
                'description':description,
@@ -313,10 +310,10 @@ def allPD(request):
                'warehouseName': querys.getWarehouseName(request.GET['id_inspection']),
                'warehouseTotalPositions': warehouseTotalPositions,
                'warehouseTotalCount': warehouseUnitCount,
-               'warehouseRatio': warehouseRatio,
+               'warehouseRatio': "{:.1f}".format(warehouseRatio),
                'readedPositions': readedPositions,
                'readedCount': readedCount,
-               'readedRatio': readedRatio,
+               'readedRatio': "{:.1f}".format(readedRatio),
                'readMissMach':"{:.1f}".format((1-(readedCount/warehouseUnitCount))*100) if warehouseUnitCount>0 else "0",
                'inspection': querys.getInspectionData(request.GET['id_inspection']),
                'picpath': picpath,
@@ -336,7 +333,7 @@ def levelPics(request):
     if id_inspection == 27 or id_inspection == 34:
         levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
     else:
-        levelFactor = {2: 0, 3: 0, 4: 0, 5: 0}
+        levelFactor = {2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
 
     df = pdQuery.decodeMach(id_inspection, levelFactor, False)
     df = df[
@@ -411,10 +408,11 @@ def carrousel(request):
     if id_inspection == 27 or id_inspection == 34:
         levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
     else:
-        levelFactor = {2: 0, 3: 0, 4: 0, 5: 0}
+        levelFactor = {2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
 
     df = pdQuery.decodeMach(id_inspection, levelFactor, False)
-    # print(df.columns)
+    print("carrousel df,")
+    print(df.columns)
     df = df[
         ['rack', 'wmsProduct', 'codeUnit', 'nivel_y', 'AGVpos', 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
          'match','Wpic', 'Ppic','upic']]
