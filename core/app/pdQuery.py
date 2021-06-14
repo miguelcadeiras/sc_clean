@@ -522,6 +522,8 @@ def decodeMach(id_inspection,levelFactor = {2:0,3:0,4:0,5:0,6:0},export_to_excel
                   right_on="codePos",
                   how="outer"
                   )
+    #quito de la memoria el otro df.. es muy grande.
+    dfwms0 = []
 
     #### FIN JUNTADA DE IMAGENES ###
 
