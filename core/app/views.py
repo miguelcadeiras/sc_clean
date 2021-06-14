@@ -415,7 +415,7 @@ def carrousel(request):
     print(df.columns)
     df = df[
         ['rack', 'wmsProduct', 'codeUnit', 'nivel_y', 'AGVpos', 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
-         'match','Wpic', 'Ppic','upic']]
+         'match', 'Ppic','upic']]
     description = ['rack', 'wmsProduct', 'codeUnit', 'N', 'AGVpos', 'wmsPos', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
                    'c', 'pic']
 
