@@ -509,7 +509,7 @@ def decodeMach(id_inspection,levelFactor = {2:0,3:0,4:0,5:0,6:0},export_to_excel
 
     sqlEngine = engine()
     dbConnection = sqlEngine.connect()
-    dfwms0 = pd.read_sql(wmsQuery, dbConnection)
+    dfwms = pd.read_sql(wmsQuery, dbConnection)
     dfFullPos = pd.read_sql(posFullQuery,dbConnection)
     dbConnection.close()
 
@@ -517,11 +517,11 @@ def decodeMach(id_inspection,levelFactor = {2:0,3:0,4:0,5:0,6:0},export_to_excel
     #asigno aqui la foto para cada uno de en wPic para cada posicion.. sino en la otra query queda vacio
 
     # algo aca no esta funcionando
-    dfwms  = result = pd.merge(dfwms0,dfFullPos,
-                  left_on="wmsPosition",
-                  right_on="codePos",
-                  how="outer"
-                  )
+    # dfwms  = result = pd.merge(dfwms0,dfFullPos,
+    #               left_on="wmsPosition",
+    #               right_on="codePos",
+    #               how="outer"
+    #               )
     #quito de la memoria el otro df.. es muy grande.
     dfwms0 = []
 
