@@ -57,7 +57,6 @@ def runningPositionsRaw(id_inspection):
     length(codePos)>=12 and
     codePos not like 'UBG0%%' and
     substring(codePos,11,2) not like '01'
-    
     group by rack
     order by rack asc, length(codePos) desc
     """
@@ -343,14 +342,13 @@ def fullDeDup(id_inspection, levelFactor):
 def fullDeDupR1(id_inspection, levelFactor,useDedup=True):
     """
     :param id_inspection:
-    :param mid: middle of the rack where it should change
-    :param th: middle threshold
     :param levelFactor: dictionary for correction factor{level:cm,...,level_n:cm}
+    :param useDedup: use or Not the algorithm
     :return: dataFrame
     """
 
     df2 = correctionFactor(levelFactor, id_inspection)
-    print(df2.columns)
+    # print(df2.columns)
     # obtengo los niveles de los datos corregidos
     dfNiveles = df2[df2["nivel_y"].notnull()]["nivel_y"].sort_values().unique().astype(int)
     # print(">>------")
@@ -380,20 +378,18 @@ def fullDeDupR1(id_inspection, levelFactor,useDedup=True):
         # th = 0.2
         # df2Copy = df2.copy()
 
-        print("3.------------------")
+        # print("3.------------------")
         if useDedup:
             print("usingDedup")
             for rack in df2_duplicated["rack"]:
                 dfDup = df_N2[df_N2['rack'] == rack]
                 # print(dfDup[["algoPos","purePos","rack",'x','codeUnit']])
-
-
                 if dfDup.shape[0] == 2:
                     #       print(rack,dfDup['codePos'].str.len())
                     oldPos = dfDup['algoPos'].values[0]
                     # print(" >>s_______________<<< ")
                     newPos, pa = dedupMiddleR1(dfDup)
-                    # print("dev:",newPos,pa)
+                    # print("dev:",newPos,oldPos,pa)
                     # print(" >>s_______________<<< ")
                     # print(df2Copy[df2Copy["codeUnit"].str.contains(pa,na=False).values[0]])
                     if oldPos != newPos:
@@ -407,8 +403,8 @@ def fullDeDupR1(id_inspection, levelFactor,useDedup=True):
 
     print("<<<>>>>>Deduplication Completed Successfully<<<<>>>>>>")
     dfC = pd.concat(df_N)
-    dfC = df2
-    print('back to df2')
+    # dfC = df2
+    # print('back to df2')
     # dfC.describe()
     # dfC["AGVFullPos"] = 'UBG1' + dfC['algoPos'] + dfC['nivel_y']
 
@@ -498,45 +494,92 @@ def decodeMach(id_inspection,levelFactor = {2:0,3:0,4:0,5:0,6:0},export_to_excel
     # dfBeforeDeDup = correctionFactor(levelFactor, id_inspection)
 
     ddp = fullDeDupR1(id_inspection, levelFactor,False)
+    # ddp = ddp.drop(columns='codePos')
+    # print(".............DDP DATAFRAME")
+    # print(".............DDP DATAFRAME")
+    # print(".............DDP DATAFRAME")
+    # print(ddp)
+    # print(ddp.info())
+    ddp.to_excel("DDP.xlsx", sheet_name='Merge Data')
+
     #
     # juntamos las imagenes de las posiciones obtenidas con las del wms
     posFullQuery = """ select distinct codePos,picPath as Wpic from inventorymaptbl 
     where id_inspection = """ + str(id_inspection) + """
-     and codePos not like '';
+     and codePos not like '' and
+     substring(codePos,11,2) not like '01' and
+     substring(codePos,11,2) not like 'XX' AND
+     substring(codePos,11,2) not like '00'
+     group by codePos
+     ;
     """
+
     wmsQuery = "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsDesc2 from wmspositionmaptbl where id_inspection =" + str(
         id_inspection)
-
     sqlEngine = engine()
     dbConnection = sqlEngine.connect()
-    dfwms = pd.read_sql(wmsQuery, dbConnection)
+    # print('geting df wms0 -----------------------------------')
+    dfwms0 = pd.read_sql(wmsQuery, dbConnection)
+    # print('end of dfwms0 -----------------------------------')
+    # print('GETTING ... dfFullPos -----------------------------------')
     dfFullPos = pd.read_sql(posFullQuery,dbConnection)
+    # print('dfFullPos -----------------------------------')
     dbConnection.close()
-
     # print(dfwms)
     #asigno aqui la foto para cada uno de en wPic para cada posicion.. sino en la otra query queda vacio
 
     # algo aca no esta funcionando ademas.. hay un problema con la cantidad de memoria que se utiliza.. explota el Web Server.
-    # dfwms  = result = pd.merge(dfwms0,dfFullPos,
-    #               left_on="wmsPosition",
-    #               right_on="codePos",
-    #               how="outer"
-    #               )
+    dfwms = result = pd.merge(dfwms0,dfFullPos,
+                  left_on="wmsPosition",
+                  right_on="codePos",
+                  how="outer"
+
+                  )
     #quito de la memoria el otro df.. es muy grande.
     dfwms0 = []
-
+    # print("dfwms---------------")
+    # print("dfwms---------------")
+    # print("dfwms---------------")
+    # print("dfwms---------------")
+    # print(dfwms)
+    # dfwms.to_excel("dfwms.xlsx", sheet_name='Merge Data')
+    # print(dfwms.info())
+    # print(dfwms.describe())
     #### FIN JUNTADA DE IMAGENES ###
+    # print("resMergeWms ------------------")
+    # print("resMergeWms ------------------")
+    # print("resMergeWms ------------------")
+    # print("resMergeWms ------------------")
+
+
+
+    dfwms = dfwms.drop(columns = 'codePos')
+    # dfwms.to_excel("dfwms.xlsx", sheet_name='Merge Data')
+    ddp = ddp.drop(columns = ['codePos','Pos','nivel_x'])
+    # ddp.to_excel("DDP.xlsx", sheet_name='Merge Data')
 
     resMergeWms = pd.merge(ddp, dfwms, left_on="codeUnit", right_on="wmsProduct", how="outer")
+    # print("filter")
+    # print("ResMerge INFO")
     # print(resMergeWms.info())
+    resMergeWms = resMergeWms[resMergeWms['wmsPosition'].notnull()]
+    # resMergeWms = resMergeWms[resMergeWms['b']==True]
+    # resMergeWms.to_excel("resMergeWms.xlsx", sheet_name='ddp_dfwms_onCodeUnit-wmsProduct')
+    # print("ResMerge DF")
+    # print(resMergeWms)
+    # print("ResMerge INFO")
+    # print(resMergeWms.info())
+    # print("ResMerge dESCRIBE")
+    # print(resMergeWms.describe())
+    # print("006")
     resMergeWms = resMergeWms.replace(np.nan, '', regex=True)
-
+    # print("007")
     resMergeWms['double'] = resMergeWms['wmsPosition'].str.len() == 14
 
     # ARREGLO LOS MEDIO PALLETS.. COPIO LOS ÚLTIMOS 2 DE LA POSICION DEL WMS..
     # HABRIA QUE VERLO CON LA CAMARA.. QUE ESTA ANDANDO BIEN.. PERO HABRIA QUE ENTENDER LA LÓGICA.
 
-    resMergeWms
+    # resMergeWms
     # print("here")
     # df['name_match'] = df['First_name'].apply(lambda x: 'Match' if x == 'Bill' else 'Mismatch')
     # df.loc[df['First_name'] == 'Bill', 'name_match'] = 'Match'
@@ -553,7 +596,7 @@ def decodeMach(id_inspection,levelFactor = {2:0,3:0,4:0,5:0,6:0},export_to_excel
     # resMergeWms = resMergeWms[resMergeWms['wmsProduct'] != '']
 
     # print(resMergeWms[['wmsPosition','AGVpos','match']])
-
+    # print("009")
     if export_to_excel:
         resMergeWms.to_csv("exportedData.csv")
 

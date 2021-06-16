@@ -211,6 +211,10 @@ def allPD(request):
         else:
             df = pdQuery.decodeMach(id_inspection, levelFactor,False)
 
+        #################################################################
+        #EXPORT FULL INFO TO DEBUG
+        # df.to_excel("resMergeWms.xlsx", sheet_name='ddp_dfwms_onCodeUnit-wmsProduct')
+        ###################################################################
         df = df[['rack','wmsProduct','codeUnit','nivel_y','AGVpos','wmsPosition','wmsDesc','wmsDesc1','wmsDesc2','match','Ppic']]
         description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsDesc2','c','pic']
 
@@ -411,24 +415,27 @@ def carrousel(request):
         levelFactor = {2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
 
     df = pdQuery.decodeMach(id_inspection, levelFactor, False)
-    print("carrousel df,")
-    print(df.columns)
+    # print("carrousel df,")
+    # print(df.columns)
     df = df[
         ['rack', 'wmsProduct', 'codeUnit', 'nivel_y', 'AGVpos', 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
-         'match', 'Ppic','upic']]
+         'match','Wpic', 'Ppic','upic']]
     description = ['rack', 'wmsProduct', 'codeUnit', 'N', 'AGVpos', 'wmsPos', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
                    'c', 'pic']
 
     dfx = df[df["wmsPosition"].notnull()]
+    print('dfx: ',dfx)
     dfa = dfx["wmsPosition"].str[4:7].unique()
-    # print("dfa",dfa)
+    print("dfa",dfa)
     # pd.set_option("display.max_rows", None, "display.max_columns", None)
     # pd.reset_option('all')
     # print("dfx",dfx["wmsPosition"])
     dfl = dfx["wmsPosition"].str[10:12].unique()
+    print("dfl: ",dfl)
     levels = dfl.tolist()
-    # print(levels)
-    levels.remove('')
+    print("levels: ",levels)
+    if '' in levels:
+        levels.remove('')
     levels.sort()
 
     # print(levels)
@@ -443,7 +450,8 @@ def carrousel(request):
     asiles3 = []
     asiles = dfa.tolist()
     # print(asiles)
-    asiles.remove('')
+    if '' in asiles:
+        asiles.remove('')
     for asile in asiles:
         # print(asile,": len: ",len(asile))
         if len(asile.strip()) == 3:
