@@ -500,7 +500,7 @@ def decodeMach(id_inspection,levelFactor = {2:0,3:0,4:0,5:0,6:0},export_to_excel
     # print(".............DDP DATAFRAME")
     # print(ddp)
     # print(ddp.info())
-    ddp.to_excel("DDP.xlsx", sheet_name='Merge Data')
+    # ddp.to_excel("DDP.xlsx", sheet_name='Merge Data')
 
     #
     # juntamos las imagenes de las posiciones obtenidas con las del wms
