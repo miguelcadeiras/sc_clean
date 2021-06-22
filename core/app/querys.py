@@ -209,7 +209,7 @@ def getInspections(id_warehouse):
 
 
 def getInspectionData(id_inspection):
-    query = 'SELECT description,inspectionDate FROM inspectionTbl where id_inspection=' + str(
+    query = 'SELECT description,inspectionDate FROM inspectiontbl where id_inspection=' + str(
         id_inspection) + ';'
     result = mysqlQuery(query)
     # print(query)
