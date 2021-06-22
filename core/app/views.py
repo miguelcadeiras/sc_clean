@@ -306,7 +306,7 @@ def allPD(request):
             return response
 
     print("011")
-
+    inspectionData = querys.getInspectionData(request.GET['id_inspection'])[0][0]
     context = {'data':data,
                'description':description,
                'clientName': request.user.profile.client,
@@ -319,7 +319,7 @@ def allPD(request):
                'readedCount': readedCount,
                'readedRatio': "{:.1f}".format(readedRatio),
                'readMissMach':"{:.1f}".format((1-(readedCount/warehouseUnitCount))*100) if warehouseUnitCount>0 else "0",
-               'inspection': querys.getInspectionData(request.GET['id_inspection']),
+               'inspection': inspectionData ,
                'picpath': picpath,
                'levels': levels,
                }
@@ -389,13 +389,14 @@ def levelPics(request):
     # print("description",description)
     # print(levels)
 
+    inspectionData =  querys.getInspectionData(request.GET['id_inspection'])[0][0]
 
     context = {'data': data,
                'description': description,
                'clientName': request.user.profile.client,
                'id_warehouse': id_warehouse,
                'warehouseName': querys.getWarehouseName(request.GET['id_inspection']),
-               'inspection': querys.getInspectionData(request.GET['id_inspection']),
+               'inspection': inspectionData,
                'picpath': picpath,
                'levels': levels,
                }
@@ -499,7 +500,7 @@ def carrousel(request):
     dataEven = dfe
     dataOdd = dfo
 
-
+    inspectionData = querys.getInspectionData(request.GET['id_inspection'])[0][0]
 
     context = {
             'data': data,
@@ -511,7 +512,7 @@ def carrousel(request):
             'clientName': request.user.profile.client,
             'id_warehouse': id_warehouse,
             'warehouseName': querys.getWarehouseName(request.GET['id_inspection']),
-            'inspection': querys.getInspectionData(request.GET['id_inspection']),
+            'inspection':inspectionData,
             'picpath': picpath,
             'levels': levels,
             }
