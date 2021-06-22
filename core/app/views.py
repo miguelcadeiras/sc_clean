@@ -390,7 +390,7 @@ def levelPics(request):
     # print(levels)
 
     inspectionData =  querys.getInspectionData(request.GET['id_inspection'])[0][0]
-
+    print("inspectionData",inspectionData)
     context = {'data': data,
                'description': description,
                'clientName': request.user.profile.client,
