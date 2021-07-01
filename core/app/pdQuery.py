@@ -7,6 +7,7 @@ import secrets
 import openpyxl
 from django.conf import settings
 import socket
+import matplotlib.pyplot as plt
 
 # # acceso al servidor remoto
 # mysql_schema = 'inventory'
@@ -647,5 +648,140 @@ def testing(id_inspection):
     result.to_excel("testDataResult.xlsx", sheet_name='result')
     # print("result:",result)
     # print(result.columns)
+ #####################################
+
+def agregates(id_inspection):
+    """
+    The idea in this page is to show reliable info so when running an inspection we can understand
+    what is going on on real time
+    :param request:
+    :return: json_array
+
+    """
+    # id_inspection = request.GET['id_inspection']
+    # id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
+
+    # hay que corregir esto para que se fije en la query los level Factos
+
+    json_array = []
+    if id_inspection == 27 or id_inspection == 34:
+        levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
+    else:
+        levelFactor = {2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
+
+    df = decodeMach(id_inspection, levelFactor, False)
+    # print("carrousel df,")
+    # print(df.columns)
+    df = df[
+        ['rack', 'wmsProduct', 'codeUnit', 'nivel_y', 'AGVpos', 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
+         'match', 'Wpic', 'Ppic', 'upic']]
+    df['asile'] = df['wmsPosition'].str[4:7]
+    df['position'] = df['wmsPosition'].str[8:11]
+    df['level'] = df['wmsPosition'].str[10:12]
+
+    # dfx = df[df["wmsPosition"].notnull()]
+    # print('dfx: ', dfx)
+    # dfa = dfx["wmsPosition"].str[4:7].unique()
+    # print("dfa", dfa)
+
+
+    # print(df[['wmsPosition','asile','level']])
+    dfnan = df.replace(r'', np.NaN)
+    # print('dfnan ##' *5)
+    # print(dfnan[['asile','level','wmsProduct','codeUnit']])
+
+    # PLOTING ..  BY LEVEL AND BY ASILE
+    # print('Ploting by Asile...')
+    dfagg = dfnan[['asile','wmsProduct','codeUnit']].groupby(['asile'])
+    dfCount = dfagg.count()
+    json_array.append(dfCount.to_json(orient='split'))
+    # dfCount.plot(kind='bar',title='Pasillos y Lecturas', ylabel='Observed PA',
+    #              xlabel='Asile',figsize=(14,6))
+    # print('Ploting by LEVEL...')
+
+    dfagg = dfnan[['level','wmsProduct','codeUnit']].groupby(['level'])
+    dfCount = dfagg.count()
+    json_array.append(dfCount.to_json(orient='split'))
+    # dfCount.plot(kind='bar', title='Niveles y Lecturas', ylabel='Observed PA',
+    #              xlabel='level')
+
+    ## TRYING TO PLOT ALL ASILES BY EACH LEVEL
+    # print('Ploting ASILES BY LEVEL...')
+
+    dfagg = dfnan[['asile','level','wmsProduct','codeUnit']].groupby(['level','asile'])
+    dfCount = dfagg.count()
+    json_array.append(dfCount.to_json(orient='split'))
+
+    # print('plotting by level XXXXXXXXXXXXXXXX')
+    # print(dfnan['level'].unique())
+    # print('____before for:')
+
+
+    for level in dfnan['level'].unique():
+        # print(level)
+        dfagg = dfnan[dfnan['level']==level]
+        dfagg = dfagg[['asile', 'wmsProduct', 'codeUnit']].groupby([ 'asile'])
+        dfCount = dfagg.count()
+        # dfCount.plot(kind='bar', title='NIVEL '+str(level)+' - Pasillos y Lecturas', ylabel='Observed PA',
+        #              xlabel='Asile', figsize=(14, 6))
+        json_array.append(dfCount.to_json(orient='split'))
+
+
+    return json_array
+
+def readAggregate(id_inspection):
+    json_array = []
+
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+
+    posFullQuery = """ select distinct codeUnit, codePos,nivel from inventorymaptbl 
+    where id_inspection = """ + str(id_inspection) + """
+     and codePos not like '' and
+     substring(codePos,11,2) not like '01' and
+     substring(codePos,11,2) not like 'XX' AND
+     substring(codePos,11,2) not like '00'
+     group by rack
+     ;
+    """
+    # df = pd.read_sql(posFullQuery, dbConnection)
+    if id_inspection == 27 or id_inspection == 34:
+        levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
+    else:
+        levelFactor = {2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
+
+    df = fullDeDupR1(id_inspection, levelFactor, False)
+    # print(df)
+    df = df.replace(r'', np.NaN)
+    df['asile'] = df['codePos'].str[4:7]
+    df['position'] = df['codePos'].str[8:11]
+    df['level'] = df['codePos'].str[10:12]
+
+
+    # PLOTING ..  BY LEVEL AND BY ASILE
+    # print('Ploting by Asile...')
+
+    dfagg = df[['asile','codeUnit']].groupby(['asile'])
+    dfCount = dfagg.count()
+    # print(dfCount)
+    json_array.append(dfCount.to_json(orient='split'))
+    # dfCount.plot(kind='bar',title='Pasillos y Lecturas', ylabel='Observed PA',
+    #              xlabel='Asile',figsize=(14,6))
+    # print('Ploting by LEVEL...')
+
+    dfagg = df[['nivel_y','codeUnit']].groupby(['nivel_y'])
+    dfCount = dfagg.count()
+    # print(dfCount)
+    json_array.append(dfCount.to_json(orient='split'))
+
+    # print (json_array)
+    return json_array
+
+
+
+
+
+
+
 
 

@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render
 import numpy as np
 import pandas as pd
@@ -233,6 +235,7 @@ def allPD(request):
     # en esta query hay que tener encuenta que en cencosud hay etiquetas que son  XX, etiquetas del primer nivel tambien, terminan en 01 y tienen 12 caracteres.
     query = "select count(distinct(codePos)) from inventorymaptbl where codePos not like '' and codePos not like '%XX%' and substring(codePos,11,2) not like '01'  and id_inspection=" + str(
         id_inspection)
+    # query = "SELECT distinct SUBSTRING(codePos,1,12) from inventorymaptbl where id_inspection = "+id_inspection+" AND codePos not like '%XX%';"
     readedPositions = querys.mysqlQuery(query)[0][0][0]
     # print('readedPositions',readedPositions)
     query = "select count(distinct(codeUnit)) from inventorymaptbl where codeUnit not like ''  and id_inspection=" + str(id_inspection)
@@ -402,6 +405,75 @@ def levelPics(request):
                }
 
     return render(request, 'levelPics.html', context)
+
+# @login_requierd(login_url="/login/")
+def readedAnalysis(request):
+    """
+    The idea in this page is to show reliable info so when running an inspection we can understand
+    what is going on on real time
+    :param request:
+    :return:
+
+    """
+
+    id_inspection = request.GET['id_inspection']
+    id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
+    wms_data = querys.mysqlQuery("select count(distinct wmsposition) from wmspositionmaptbl where id_inspection = "+str(id_inspection))[0][0][0]
+    jsonData = []
+    if wms_data > 0:
+        jsonData = pdQuery.agregates(id_inspection)
+        barDict = json.loads(jsonData[0])
+    else:
+        jsonData = pdQuery.readAggregate(id_inspection)
+        barDict = json.loads(jsonData[0])
+
+
+    print("barDict: ",barDict)
+    # ORGANIZO LAS SERIES PARA DATASETS DE CHART.JS NO VAN EN PARES SINO EN SETS DIFERENTES
+    sd = []
+    totalDatasets = len(barDict["data"][0])
+    # print("totalDatasets:",totalDatasets)
+    for i in range(0,totalDatasets):
+        sd.append([])
+    for item in barDict["data"]:
+
+        for index,value in enumerate(item):
+            # print(value,index)
+            sd[index].append(value)
+    #####################################################
+    ## para el chart agregado por nivel
+    ##############################################
+    barLevelDict = json.loads(jsonData[1])
+    print("barLevelDict: ",barLevelDict)
+    # ORGANIZO LAS SERIES PARA DATASETS DE CHART.JS NO VAN EN PARES SINO EN SETS DIFERENTES
+    sdLevel = []
+    totalDatasets = len(barLevelDict["data"][0])
+    # print("totalDatasets:",totalDatasets)
+    for i in range(0, totalDatasets):
+        sdLevel.append([])
+    for item in barLevelDict["data"]:
+
+        for index, value in enumerate(item):
+            # print(value,index)
+            sdLevel[index].append(value)
+    #####################################################
+
+    print("barLevelSeries",barLevelDict["columns"])
+    print('barLevelX', barLevelDict["index"])
+    print('barLevelDataSets', sdLevel)
+    context = {
+            'barSeries':barDict["columns"],
+            'barX':barDict["index"],
+            'barDataSets': sd,
+            'barLevelSeries':barLevelDict["columns"],
+            'barLevelX': barLevelDict["index"],
+            'barLevelDataSets': sdLevel,
+            'wmsDataBool': True if wms_data>0 else False,
+            }
+
+    return render(request, 'readedAnalysis.html', context)
+
+
 
 @login_required(login_url="/login/")
 def carrousel(request):

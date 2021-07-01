@@ -15,5 +15,6 @@ urlpatterns = [
     path('carrousel', views.carrousel, name='carrousel'),
     path('level', views.level, name='level'),
     path('test',views.testPage, name='testpage'),
-    path('importWMS',views.importWMS,name='importWMS')
+    path('importWMS',views.importWMS,name='importWMS'),
+    path('readedAnalysis', views.readedAnalysis, name='readedAnalysis')
 ]

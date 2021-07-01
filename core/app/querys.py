@@ -66,6 +66,12 @@ def openConnection():
 
 
 def mysqlQuery(query, *kargs):
+    """
+
+    :param query:
+    :param kargs: True or False, multi Results parameter.
+    :return:
+    """
     # print(kargs)
     result = 'none'
     field_names = []
@@ -532,3 +538,14 @@ def deleteWMSData(id_inspection):
     query = "delete form wmspositiontable where id_inspection="+str(id_inspection)
     mysqlQuery(query, False)
     return
+
+def getLevelFactor(id_inspection):
+    """
+    for a given inspection returns levelFactor correction in case the mast wasn't correctly align when doing
+    the inspection
+    :param id_inspection:
+    :return:
+    """
+    levelFactorQuery = "select levelFactor from inspectiontbl where id_inspection = "+ str(id_inspection)
+
+    return mysqlQuery(levelFactorQuery,False)

@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+<!--hola-->
+
+{% load static %}
+{% load mathfilters %}
+
+{% block title %} {{request.user.profile.client}}   INSPECTION {{inspection.0.0.0}} {% endblock%}
+
+{% block PageTitle %}{{request.user.profile.client}} || {{warehouseName.0.0.0}} {% endblock %}
+
+{% block PageInfo %}
+
+{% endblock %}
+
+
+{% block indicators %}
+<div class="row">
+    <div class="col-lg-4" >
+        <span>
+<!--            {{warehouseName.0.0.1}},{{warehouseName.0.0.2}},<br>{{warehouseName.0.0.3}}<br>-->
+            Inspection date:{{inspection.0.0.1}} || Description : {{inspection.0.0.0}} </span>
+    </div>
+
+
+</div>
+{% endblock %}
+
+{% block content %}
+
+
+<div class="row">
+    <!-- Left col -->
+    <section class="col-lg-10  ">
+        <!-- Custom tabs (TABLE)-->
+        <div class="card">
+            <div class="card-header">
+               Aggregate CHART - Differences by Asile
+                <div class="card-body">
+                  <canvas id="myChartAsile" width="600" height="300"></canvas>
+                </div>
+                <!-- /.card-body -->
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+               Aggregate CHART - Differences by Level
+                <div class="card-body">
+                  <canvas id="myChartLevel" width="600" height="300"></canvas>
+                </div>
+                <!-- /.card-body -->
+            </div>
+        </div>
+            <!-- /.card -->
+            <!-- /.card -->
+    </section>
+
+
+
+    <!-- /.Left col -->
+    <!-- right col (We are only adding the ID to make the widgets sortable)-->
+
+    <!-- right col -->
+</div>
+
+{% endblock %}
+
+{% block pageScripts %}
+<script>
+
+</script>
+<!--aggregate Charts-->
+<!--by asile-->
+<script>
+var ctx = document.getElementById("myChartAsile").getContext("2d");
+var index = 0;
+var data = {
+  labels: {{barX|safe}},
+  datasets: [
+  {
+    label: ["{{barSeries.0|safe}}"] ,
+    backgroundColor: 'rgba(0, 99, 132, 0.6)',
+    data: {{barDataSets.0|safe}}
+  },
+   {% if wmsDataBool %}
+    {
+    label: ["{{barSeries.1|safe}}"] ,
+    backgroundColor: 'rgba(99, 132, 0, 0.6)',
+    data: {{barDataSets.1|safe}}
+  },
+  {% endif %}
+
+   ]
+};
+
+var myBarChart = new Chart(ctx, {
+  type: 'bar',
+  data: data,
+  options: {
+    barValueSpacing: 20,
+    scales: {
+      yAxes: [{
+        ticks: {
+          min: 0,
+        }
+      }]
+    }
+  }
+});
+
+
+</script>
+<!--by Level-->
+<script>
+var ctx = document.getElementById("myChartLevel").getContext("2d");
+
+var data = {
+  labels: {{barLevelX|safe}},
+  datasets: [
+  {
+    label: ["{{barLevelSeries.0|safe}}"] ,
+    backgroundColor: 'rgba(0, 99, 132, 0.6)',
+    data: {{barLevelDataSets.0|safe}}
+  },
+  {% if wmsDataBool %}
+    {
+    label: ["{{barLevelSeries.1|safe}}"] ,
+    backgroundColor: 'rgba(99, 132, 0, 0.6)',
+    data: {{barLevelDataSets.1|safe}}
+  },
+  {% endif %}
+   ]
+};
+
+var myBarChart = new Chart(ctx, {
+  type: 'bar',
+  data: data,
+  options: {
+    barValueSpacing: 20,
+    scales: {
+      yAxes: [{
+        ticks: {
+          min: 0,
+        }
+      }]
+    }
+  }
+});
+
+
+</script>
+{% endblock %}
