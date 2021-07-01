@@ -197,9 +197,9 @@ def allPD(request):
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
     if id_inspection == 27:
-        levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
+        levelFactor = {1:0,2: 0, 3: 0, 4: 0.2, 5: 0.3}
     else:
-        levelFactor = {2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
+        levelFactor = {1:0,2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
     # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
         # print('in Get - matching =0')
@@ -338,9 +338,9 @@ def levelPics(request):
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
     if id_inspection == 27 or id_inspection == 34:
-        levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
+        levelFactor = {1:0,2: 0, 3: 0, 4: 0.2, 5: 0.3}
     else:
-        levelFactor = {2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
+        levelFactor = {1:0,2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
 
     df = pdQuery.decodeMach(id_inspection, levelFactor, False)
     df = df[
@@ -483,9 +483,9 @@ def carrousel(request):
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
     if id_inspection == 27 or id_inspection == 34:
-        levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
+        levelFactor = {1:0,2: 0, 3: 0, 4: 0.2, 5: 0.3}
     else:
-        levelFactor = {2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
+        levelFactor = {1:0,2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
 
     df = pdQuery.decodeMach(id_inspection, levelFactor, False)
     # print("carrousel df,")

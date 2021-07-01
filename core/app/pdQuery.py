@@ -124,11 +124,12 @@ def correctionFactor(levelFactor,id_inspection):
 
     # solo nos quedamos con los 6 digitos
     df['purePos'] = df['Pos'].str[4:]
-
+    # print(df)
     values = []
     modified = 0
     cfM = 0
     # print(values)
+    print("rerwrw",df["nivel_y"][2])
     for count, r in enumerate(df["purePos"]):
         purePos = float(r)
 
@@ -139,14 +140,18 @@ def correctionFactor(levelFactor,id_inspection):
             values.append('%06.f' % purePos)
         else:
             x = df["x"][count]
-            #         print(df["nivel_x"][count],x)
+            # print(df["nivel_x"][count],x)
             if pd.isna(df["nivel_y"][count]):
                 cf = 0
             else:
+
                 cf = correctionFactor[float(df["nivel_y"][count])]
 
-            #         print(x,cf,int(df["nivel_y"][count]))
+
+            # print("x",x,type(x),"cf",cf,type(cf),int(df["nivel_y"][count]))
+
             if x < cf or (x > 1.5 and x < 1.5 + cf):
+
                 if (purePos % 2) == 0:
 
                     #                 print(purePos,purePos-2)
@@ -277,7 +282,7 @@ def fullDeDup(id_inspection, levelFactor):
     :param levelFactor: dictionary for correction factor{level:cm,...,level_n:cm}
     :return: dataFrame
     """
-
+    # print("levelFactor: ",levelFactor)
     df2 = correctionFactor(levelFactor, id_inspection)
     # obtengo los niveles de los datos corregidos
     dfNiveles = df2[df2["nivel_y"].notnull()]["nivel_y"].sort_values().unique().astype(int)
@@ -491,7 +496,7 @@ def testFullDeDup(id_inspection, mid, th, levelFactor, rack):
     return pd.concat(df_N)
 
 
-def decodeMach(id_inspection,levelFactor = {2:0,3:0,4:0,5:0,6:0},export_to_excel=False):
+def decodeMach(id_inspection,levelFactor = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0},export_to_excel=False):
     # dfBeforeDeDup = correctionFactor(levelFactor, id_inspection)
 
     ddp = fullDeDupR1(id_inspection, levelFactor,False)
@@ -665,9 +670,9 @@ def agregates(id_inspection):
 
     json_array = []
     if id_inspection == 27 or id_inspection == 34:
-        levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
+        levelFactor = {1:0,2: 0, 3: 0, 4: 0.2, 5: 0.3}
     else:
-        levelFactor = {2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
+        levelFactor = {1:0,2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
 
     df = decodeMach(id_inspection, levelFactor, False)
     # print("carrousel df,")
@@ -746,9 +751,9 @@ def readAggregate(id_inspection):
     """
     # df = pd.read_sql(posFullQuery, dbConnection)
     if id_inspection == 27 or id_inspection == 34:
-        levelFactor = {2: 0, 3: 0, 4: 0.2, 5: 0.3}
+        levelFactor = {1:0,2: 0, 3: 0, 4: 0.2, 5: 0.3}
     else:
-        levelFactor = {2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
+        levelFactor = {1:0,2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
 
     df = fullDeDupR1(id_inspection, levelFactor, False)
     # print(df)
