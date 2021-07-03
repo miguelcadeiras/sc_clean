@@ -100,10 +100,24 @@ var myBarChart = new Chart(ctx, {
     barValueSpacing: 20,
     scales: {
       yAxes: [{
+      scaleLabel: {
+            display: true,
+            labelString: 'Bins'
+          },
         ticks: {
           min: 0,
+
         }
-      }]
+      }],
+      xAxes: [{
+      scaleLabel: {
+            display: true,
+            labelString: 'Asile'
+          },
+
+      }],
+
+
     }
   }
 });
@@ -139,10 +153,21 @@ var myBarChart = new Chart(ctx, {
     barValueSpacing: 20,
     scales: {
       yAxes: [{
+      scaleLabel: {
+            display: true,
+            labelString: 'Bins'
+          },
         ticks: {
           min: 0,
         }
-      }]
+      }],
+      xAxes: [{
+      scaleLabel: {
+            display: true,
+            labelString: 'Level'
+          },
+
+      }],
     }
   }
 });
