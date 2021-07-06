@@ -196,22 +196,22 @@ def allPD(request):
 
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
-    if id_inspection == 27:
-        levelFactor = {1:0,2: 0, 3: 0, 4: 0.2, 5: 0.3}
-    else:
-        levelFactor = {1:0,2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
-    # levels = querys.getLevels(id_inspection)
+    # if id_inspection == 27:
+    #     levelFactor = {1:0,2: 0, 3: 0, 4: 0.2, 5: 0.3}
+    # else:
+    #     levelFactor = {1:0,2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
+    # # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
         # print('in Get - matching =0')
-        df = pdQuery.fullDeDup(id_inspection,levelFactor)
+        df = pdQuery.fullDeDupR1(id_inspection)
         df = df[['rack','AGVpos','codeUnit','nivel_y','Ppic']]
         description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
     else:
         'True to debug. and export file on DecodeMach'
         if 'fullDATA' in request.GET:
-            df = pdQuery.decodeMach(id_inspection, levelFactor,False)
+            df = pdQuery.decodeMach(id_inspection,False)
         else:
-            df = pdQuery.decodeMach(id_inspection, levelFactor,False)
+            df = pdQuery.decodeMach(id_inspection,False)
 
         #################################################################
         #EXPORT FULL INFO TO DEBUG
@@ -337,12 +337,12 @@ def levelPics(request):
 
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
-    if id_inspection == 27 or id_inspection == 34:
-        levelFactor = {1:0,2: 0, 3: 0, 4: 0.2, 5: 0.3}
-    else:
-        levelFactor = {1:0,2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
+    # if id_inspection == 27 or id_inspection == 34:
+    #     levelFactor = {1:0,2: 0, 3: 0, 4: 0.2, 5: 0.3}
+    # else:
+    #     levelFactor = {1:0,2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
 
-    df = pdQuery.decodeMach(id_inspection, levelFactor, False)
+    df = pdQuery.decodeMach(id_inspection, False)
     df = df[
         ['rack', 'wmsProduct', 'codeUnit', 'nivel_y', 'AGVpos', 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsDesc2',
          'match', 'Ppic']]
@@ -420,15 +420,17 @@ def readedAnalysis(request):
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
     wms_data = querys.mysqlQuery("select count(distinct wmsposition) from wmspositionmaptbl where id_inspection = "+str(id_inspection))[0][0][0]
     jsonData = []
+    reqAsile = request.GET['asile']
+    reqLevel = request.GET['level']
     if wms_data > 0:
-        jsonData = pdQuery.agregates(id_inspection)
+        jsonData = pdQuery.agregates(id_inspection,reqAsile,reqLevel)
         barDict = json.loads(jsonData[0])
     else:
         jsonData = pdQuery.readAggregate(id_inspection)
         barDict = json.loads(jsonData[0])
 
-
-    print("barDict: ",barDict)
+    print(jsonData,type(jsonData))
+    # print("barDict: ",barDict)
     # ORGANIZO LAS SERIES PARA DATASETS DE CHART.JS NO VAN EN PARES SINO EN SETS DIFERENTES
     sd = []
     totalDatasets = len(barDict["data"][0])
@@ -444,7 +446,7 @@ def readedAnalysis(request):
     ## para el chart agregado por nivel
     ##############################################
     barLevelDict = json.loads(jsonData[1])
-    print("barLevelDict: ",barLevelDict)
+    # print("barLevelDict: ",barLevelDict)
     # ORGANIZO LAS SERIES PARA DATASETS DE CHART.JS NO VAN EN PARES SINO EN SETS DIFERENTES
     sdLevel = []
     totalDatasets = len(barLevelDict["data"][0])
@@ -457,10 +459,7 @@ def readedAnalysis(request):
             # print(value,index)
             sdLevel[index].append(value)
     #####################################################
-
-    print("barLevelSeries",barLevelDict["columns"])
-    print('barLevelX', barLevelDict["index"])
-    print('barLevelDataSets', sdLevel)
+    # print(sd)
     context = {
             'barSeries':barDict["columns"],
             'barX':barDict["index"],
@@ -469,6 +468,8 @@ def readedAnalysis(request):
             'barLevelX': barLevelDict["index"],
             'barLevelDataSets': sdLevel,
             'wmsDataBool': True if wms_data>0 else False,
+            'levels': barLevelDict["index"],
+            'asiles': barDict["index"],
             }
 
     return render(request, 'readedAnalysis.html', context)
@@ -487,7 +488,7 @@ def carrousel(request):
     else:
         levelFactor = {1:0,2: 0, 3: 0, 4: 0, 5:0,6:0,7:0,8:0}
 
-    df = pdQuery.decodeMach(id_inspection, levelFactor, False)
+    df = pdQuery.decodeMach(id_inspection, False)
     # print("carrousel df,")
     # print(df.columns)
     df = df[

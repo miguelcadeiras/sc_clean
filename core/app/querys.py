@@ -1,3 +1,5 @@
+import json
+
 import mysql.connector
 import csv
 from mysql.connector import errorcode,constants
@@ -189,6 +191,7 @@ def getClientID(clientName):
     return result
 
 
+
 def getWarehouses(id_client):
     query = 'SELECT warehousestbl.name,address,city,country,id_warehouse FROM warehousestbl where id_client=' + str(
         id_client) + ';'
@@ -214,6 +217,7 @@ def getInspections(id_warehouse):
     return result
 
 
+
 def getInspectionData(id_inspection):
     query = 'SELECT description,inspectionDate FROM inspectiontbl where id_inspection=' + str(
         id_inspection) + ';'
@@ -222,6 +226,40 @@ def getInspectionData(id_inspection):
     # print(result)
     return result
 
+def getLevelFactor(id_inspection):
+    query = 'SELECT levelFactor FROM inspectiontbl where id_inspection=' + str(
+        id_inspection) + ';'
+    result = mysqlQuery(query)
+    # print("%"*30)
+    # print( "result:",result)
+    rt = result[0][0][0]
+
+    rt = rt[1:-1]
+    rtList = rt.split(",")
+    rtDict = {}
+    for item in rtList:
+        vals = item.split(":")
+
+
+        rtDict[int(vals[0])] = float(vals[1])
+
+    # print("rt",rtDict,type(rt))
+
+    return rtDict
+
+
+def getUseDeDup(id_inspection):
+    query = 'SELECT useDeDup FROM inspectiontbl where id_inspection=' + str(
+        id_inspection) + ';'
+    result = mysqlQuery(query)
+    # print(query)
+    rt = result[0][0][0]
+    if rt == 1:
+        rt = True
+    else:
+        rt = False
+
+    return rt
 
 def getRunningPositions(*args):
     id_inspection = 0
@@ -539,13 +577,13 @@ def deleteWMSData(id_inspection):
     mysqlQuery(query, False)
     return
 
-def getLevelFactor(id_inspection):
-    """
-    for a given inspection returns levelFactor correction in case the mast wasn't correctly align when doing
-    the inspection
-    :param id_inspection:
-    :return:
-    """
-    levelFactorQuery = "select levelFactor from inspectiontbl where id_inspection = "+ str(id_inspection)
-
-    return mysqlQuery(levelFactorQuery,False)
+# def getLevelFactor(id_inspection):
+#     """
+#     for a given inspection returns levelFactor correction in case the mast wasn't correctly align when doing
+#     the inspection
+#     :param id_inspection:
+#     :return:
+#     """
+#     levelFactorQuery = "select levelFactor from inspectiontbl where id_inspection = "+ str(id_inspection)
+#
+#     return mysqlQuery(levelFactorQuery,False)

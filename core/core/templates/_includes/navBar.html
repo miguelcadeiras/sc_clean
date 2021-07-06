@@ -25,7 +25,7 @@
         <a href="carrousel?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}&asile=0" class="nav-link">Images</a>
       </li>
        <li class="nav-item d-none d-sm-inline-block">
-        <a href="readedAnalysis?id_inspection={{request.GET.id_inspection}}" class="nav-link">Aggregates</a>
+        <a href="readedAnalysis?id_inspection={{request.GET.id_inspection}}&asile=All&level=All" class="nav-link">Aggregates</a>
       </li>
       {% endif %}
       {% if 'matching' in request.GET %}

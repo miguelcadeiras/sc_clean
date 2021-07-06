@@ -8,6 +8,7 @@ import openpyxl
 from django.conf import settings
 import socket
 import matplotlib.pyplot as plt
+from . import querys
 
 # # acceso al servidor remoto
 # mysql_schema = 'inventory'
@@ -129,7 +130,7 @@ def correctionFactor(levelFactor,id_inspection):
     modified = 0
     cfM = 0
     # print(values)
-    print("rerwrw",df["nivel_y"][2])
+    # print("rerwrw",df["nivel_y"][2])
     for count, r in enumerate(df["purePos"]):
         purePos = float(r)
 
@@ -144,7 +145,8 @@ def correctionFactor(levelFactor,id_inspection):
             if pd.isna(df["nivel_y"][count]):
                 cf = 0
             else:
-
+                # print(correctionFactor)
+                # print(float(df["nivel_y"][count]))
                 cf = correctionFactor[float(df["nivel_y"][count])]
 
 
@@ -345,13 +347,18 @@ def fullDeDup(id_inspection, levelFactor):
 
     return dfC
 
-def fullDeDupR1(id_inspection, levelFactor,useDedup=True):
+
+def fullDeDupR1(id_inspection):
     """
     :param id_inspection:
     :param levelFactor: dictionary for correction factor{level:cm,...,level_n:cm}
     :param useDedup: use or Not the algorithm
     :return: dataFrame
     """
+
+    levelFactor = querys.getLevelFactor(id_inspection)
+    # print("LevelFactor: ->",levelFactor,type(levelFactor))
+    useDeDup = querys.getUseDeDup(id_inspection)
 
     df2 = correctionFactor(levelFactor, id_inspection)
     # print(df2.columns)
@@ -385,7 +392,7 @@ def fullDeDupR1(id_inspection, levelFactor,useDedup=True):
         # df2Copy = df2.copy()
 
         # print("3.------------------")
-        if useDedup:
+        if useDeDup:
             print("usingDedup")
             for rack in df2_duplicated["rack"]:
                 dfDup = df_N2[df_N2['rack'] == rack]
@@ -415,7 +422,7 @@ def fullDeDupR1(id_inspection, levelFactor,useDedup=True):
     # dfC["AGVFullPos"] = 'UBG1' + dfC['algoPos'] + dfC['nivel_y']
 
     dfC["AGVpos"] = dfC['codePos'].str[:4] + dfC['algoPos'] + '0' + dfC["nivel_y"].fillna(0).astype(np.int8).astype(str)
-    print(dfC.columns)
+    # print(dfC.columns)
     # print(dfC['AGVpos'])
 
 
@@ -496,10 +503,10 @@ def testFullDeDup(id_inspection, mid, th, levelFactor, rack):
     return pd.concat(df_N)
 
 
-def decodeMach(id_inspection,levelFactor = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0},export_to_excel=False):
+def decodeMach(id_inspection,export_to_excel=False):
     # dfBeforeDeDup = correctionFactor(levelFactor, id_inspection)
 
-    ddp = fullDeDupR1(id_inspection, levelFactor,False)
+    ddp = fullDeDupR1(id_inspection)
     # ddp = ddp.drop(columns='codePos')
     # print(".............DDP DATAFRAME")
     # print(".............DDP DATAFRAME")
@@ -610,15 +617,13 @@ def decodeMach(id_inspection,levelFactor = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0}
 
 
 def pasilloNivel(id_inspection,levelFactor,pasillo,nivel):
-    df = decodeMach(id_inspection, levelFactor, False)
+    df = decodeMach(id_inspection, False)
     pas = '%03.f' % pasillo
     dfPasNiv = df[
         df['wmsPosition'].str[4:7].str.contains(pas, na=False) & df['wmsPosition'].str[11:12].str.contains(str(nivel),
                                                                                                              na=False)]
 
     return dfPasNiv
-
-
 
 
 # ########################################################################
@@ -643,7 +648,7 @@ def testing(id_inspection):
 
     dfRuningPos = runningPositionsRaw(id_inspection)
     # print(dfRuningPos.columns)
-    dfPos1 = decodeMach(id_inspection,{2:0,3:0,4:0,5:0})
+    dfPos1 = decodeMach(id_inspection)
     # print("dfPos1:",dfPos1.info())
     result = pd.merge(dfwms,dfFullPos,
                       left_on="wmsPosition",
@@ -655,7 +660,7 @@ def testing(id_inspection):
     # print(result.columns)
  #####################################
 
-def agregates(id_inspection):
+def agregates(id_inspection,reqAsile,reqLevel):
     """
     The idea in this page is to show reliable info so when running an inspection we can understand
     what is going on on real time
@@ -663,18 +668,14 @@ def agregates(id_inspection):
     :return: json_array
 
     """
-    # id_inspection = request.GET['id_inspection']
-    # id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
-
-    # hay que corregir esto para que se fije en la query los level Factos
+    # print("reqAsile",reqAsile)
+    # print("reqLevel",reqLevel)
 
     json_array = []
-    if id_inspection == 27 or id_inspection == 34:
-        levelFactor = {1:0,2: 0, 3: 0, 4: 0.2, 5: 0.3}
-    else:
-        levelFactor = {1:0,2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
 
-    df = decodeMach(id_inspection, levelFactor, False)
+    levelFactor = querys.getLevelFactor(id_inspection)
+
+    df = decodeMach(id_inspection, False)
     # print("carrousel df,")
     # print(df.columns)
     df = df[
@@ -697,14 +698,33 @@ def agregates(id_inspection):
 
     # PLOTING ..  BY LEVEL AND BY ASILE
     # print('Ploting by Asile...')
-    dfagg = dfnan[['asile','wmsProduct','codeUnit']].groupby(['asile'])
+    if reqLevel != 'All':
+        # print("asile not All:",reqAsile)
+        dfnanF = dfnan[dfnan['level'] == reqLevel]
+        # print(dfnanF)
+    else:
+        dfnanF = dfnan
+    dfagg = dfnanF[['asile','wmsProduct','codeUnit']].groupby(['asile'])
+
+
     dfCount = dfagg.count()
+    # print("(("*30)
+    # print(dfCount)
     json_array.append(dfCount.to_json(orient='split'))
     # dfCount.plot(kind='bar',title='Pasillos y Lecturas', ylabel='Observed PA',
     #              xlabel='Asile',figsize=(14,6))
     # print('Ploting by LEVEL...')
 
-    dfagg = dfnan[['level','wmsProduct','codeUnit']].groupby(['level'])
+    if reqAsile != 'All':
+        # print("level not All",reqLevel)
+        dfnanF = dfnan[dfnan['asile'] == reqAsile]
+        # print(dfnanF)
+    else:
+        dfnanF = dfnan
+
+    dfagg = dfnanF[['level','wmsProduct','codeUnit']].groupby(['level'])
+
+
     dfCount = dfagg.count()
     json_array.append(dfCount.to_json(orient='split'))
     # dfCount.plot(kind='bar', title='Niveles y Lecturas', ylabel='Observed PA',
@@ -713,7 +733,8 @@ def agregates(id_inspection):
     ## TRYING TO PLOT ALL ASILES BY EACH LEVEL
     # print('Ploting ASILES BY LEVEL...')
 
-    dfagg = dfnan[['asile','level','wmsProduct','codeUnit']].groupby(['level','asile'])
+    dfagg = dfnanF[['asile','level','wmsProduct','codeUnit']].groupby(['level','asile'])
+
     dfCount = dfagg.count()
     json_array.append(dfCount.to_json(orient='split'))
 
@@ -724,7 +745,7 @@ def agregates(id_inspection):
 
     for level in dfnan['level'].unique():
         # print(level)
-        dfagg = dfnan[dfnan['level']==level]
+        dfagg = dfnanF[dfnan['level']==level]
         dfagg = dfagg[['asile', 'wmsProduct', 'codeUnit']].groupby([ 'asile'])
         dfCount = dfagg.count()
         # dfCount.plot(kind='bar', title='NIVEL '+str(level)+' - Pasillos y Lecturas', ylabel='Observed PA',
@@ -737,25 +758,8 @@ def agregates(id_inspection):
 def readAggregate(id_inspection):
     json_array = []
 
-    sqlEngine = engine()
-    dbConnection = sqlEngine.connect()
 
-    posFullQuery = """ select distinct codeUnit, codePos,nivel from inventorymaptbl 
-    where id_inspection = """ + str(id_inspection) + """
-     and codePos not like '' and
-     substring(codePos,11,2) not like '01' and
-     substring(codePos,11,2) not like 'XX' AND
-     substring(codePos,11,2) not like '00'
-     group by rack
-     ;
-    """
-    # df = pd.read_sql(posFullQuery, dbConnection)
-    if id_inspection == 27 or id_inspection == 34:
-        levelFactor = {1:0,2: 0, 3: 0, 4: 0.2, 5: 0.3}
-    else:
-        levelFactor = {1:0,2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}
-
-    df = fullDeDupR1(id_inspection, levelFactor, False)
+    df = fullDeDupR1(id_inspection)
     # print(df)
     df = df.replace(r'', np.NaN)
     df['asile'] = df['codePos'].str[4:7]
