@@ -655,7 +655,7 @@ def importWMS(request):
                 messages.warning(request,"Please select a file to import")
         else:
             if 'Delete' in request.POST.keys():
-                qy = "delete from wmsPositionMapTbl where id_inspection = "+ id_inspection+"; "
+                qy = "delete from wmspositionmaptbl where id_inspection = "+ id_inspection+"; "
                 print(qy)
                 querys.execute(qy)
                 messages.success(request, "WMS Data Deleted")
