@@ -536,9 +536,10 @@ def importDataBulk(myfile,id_inspection):
                         next
 
                     if rowCount > 5000:
-                        # print("ROWWW:",r)
-                        # print("query", query[:-1])
+                        print("ROWWW:",r)
+                        print("query", query[:-1])
                         execute(query[:-1])
+                        print("executed")
                         query = header
                         rowCount = 0
                 rowCount += 1
