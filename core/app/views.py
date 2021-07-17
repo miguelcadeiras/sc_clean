@@ -424,12 +424,13 @@ def readedAnalysis(request):
     reqLevel = request.GET['level']
     if wms_data > 0:
         jsonData = pdQuery.agregates(id_inspection,reqAsile,reqLevel)
+        # print(jsonData)
         barDict = json.loads(jsonData[0])
     else:
         jsonData = pdQuery.readAggregate(id_inspection)
         barDict = json.loads(jsonData[0])
 
-    print(jsonData,type(jsonData))
+    # print(jsonData,type(jsonData))
     # print("barDict: ",barDict)
     # ORGANIZO LAS SERIES PARA DATASETS DE CHART.JS NO VAN EN PARES SINO EN SETS DIFERENTES
     sd = []
@@ -460,17 +461,29 @@ def readedAnalysis(request):
             sdLevel[index].append(value)
     #####################################################
     # print(sd)
+    table = []
+    # print(barDict["index"])
+    for index,row in enumerate(barDict["index"]):
+        # print("index,row",index,row,sd[0])
+        # print(sd)
+
+        table.append([row,sd[0][index],sd[1][index],int(sd[0][index])-int(sd[1][index])])
+
+    # print("table",table)
     context = {
             'barSeries':barDict["columns"],
             'barX':barDict["index"],
             'barDataSets': sd,
+            'table':table,
             'barLevelSeries':barLevelDict["columns"],
             'barLevelX': barLevelDict["index"],
             'barLevelDataSets': sdLevel,
             'wmsDataBool': True if wms_data>0 else False,
             'levels': barLevelDict["index"],
             'asiles': barDict["index"],
-            }
+            'inspection': querys.getInspectionData(request.GET['id_inspection']),
+
+    }
 
     return render(request, 'readedAnalysis.html', context)
 

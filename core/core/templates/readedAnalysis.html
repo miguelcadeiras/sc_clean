@@ -19,7 +19,8 @@
     <div class="col-lg-4" >
         <span>
 <!--            {{warehouseName.0.0.1}},{{warehouseName.0.0.2}},<br>{{warehouseName.0.0.3}}<br>-->
-            Inspection date:{{inspection.0.0.1}} || Description : {{inspection.0.0.0}} </span>
+            Inspection date:{{inspection.0.0.1}} || Description :<a href="/all?id_inspection={{request.GET.id_inspection}}&qty=500&offset=0&matching=1&pic=0"> {{inspection.0.0.0}}</a> </span>
+
     </div>
 
 
@@ -36,10 +37,10 @@
         <div class="card">
             <div class="card-header">
 
-               Aggregate CHART - Differences by Asile
+                <h4>Aggregate CHART - Differences by Asile , Level: {{request.GET.level}}</h4>
                 <ul class="pagination pagination-sm">
 <!--                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>-->
-                    <li class="page-item {% if request.GET.level == 'All' %}active{% endif %}"><a class="page-link" href="readedAnalysis?id_inspection={{request.GET.id_inspection}}&asile={{asile}}&level=All">All</a></li>
+                    <li class="page-item {% if request.GET.level == 'All' %}active{% endif %}"><a class="page-link" href="readedAnalysis?id_inspection={{request.GET.id_inspection}}&asile={{request.GET.asile}}&level=All">All</a></li>
 
                     {% for level in levels %}
                     <li class="page-item {% if level == request.GET.level %}active{% endif %}"><a class="page-link" href="readedAnalysis?id_inspection={{request.GET.id_inspection}}&asile={{request.GET.asile}}&level={{level}}">{{level}}</a></li>
@@ -56,7 +57,7 @@
         </div>
         <div class="card">
             <div class="card-header">
-               Aggregate CHART - Differences by
+                <H4>Aggregate CHART - Differences by Level, Asile: {{request.GET.asile}}</H4>
                 <ul class="pagination pagination-sm">
 <!--                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>-->
                     <li class="page-item {% if request.GET.asile == 'All' %}active{% endif %}"><a class="page-link" href="readedAnalysis?id_inspection={{request.GET.id_inspection}}&asile=All&level=All">All</a></li>
@@ -78,18 +79,9 @@
         <!-- Custom tabs (TABLE)-->
         <div class="card">
             <div class="card-header">
-               Aggregate CHART - Differences by
-                <ul class="pagination pagination-sm">
-<!--                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>-->
-                    <li class="page-item {% if request.GET.asile == 'All' %}active{% endif %}"><a class="page-link" href="readedAnalysis?id_inspection={{request.GET.id_inspection}}&asile=All&level=All">All</a></li>
+                <h4>Aggregate DATA - Level: {{request.GET.level}}</h4>
 
-                    {% for asile in asiles %}
-                    <li class="page-item {% if asile == request.GET.asile %}active{% endif %}"><a class="page-link" href="readedAnalysis?id_inspection={{request.GET.id_inspection}}&asile={{asile}}&level={{request.GET.level}}">{{asile}}</a></li>
-                    {% if forloop.counter|divisiblePor:25 %} </ul><ul class="pagination pagination-sm"> {% endif %}
 
-                {% endfor %}
-<!--                <li class="page-item"><a class="page-link" href="#">Next</a></li>-->
-            </ul>
                                <div class="card-body">
                     <table id="table1" name="example1" class="table table-bordered table-striped dataTable " role="grid" aria-describedby="table1_info" style="width:100%">
                         <thead>
@@ -98,18 +90,19 @@
                             {% for col in barSeries %}
                              <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">{{col}}</th>
                             {% endfor %}
+                            <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">DELTA</th>
+
                         </tr>
                         </thead>
                         <tbody>
-                        {% for row in barX %}
+                        {% for row in table %}
+
                         <tr role="row" class="odd">
-                            {% for item in row %}
-                            <td>{{item}}</td>
 
-                            <td>        {{sd.forloop.counter.0}}             jljk           </td>
-                            <td>        {{sd.forloop.counter.0}}      2       jljk           </td>
-
-                            {% endfor %}
+                            <td>{{row.0}}</td>
+                            <td>{{row.1}}</td>
+                            <td>{{row.2}}</td>
+                            <td>{{row.3}}</td>
 
                         </tr>
                         {% endfor %}
@@ -250,5 +243,14 @@ var myBarChart = new Chart(ctx, {
 });
 
 
+</script>
+<script>
+    $(document).ready(function() {
+    $('#table1').DataTable(
+    {
+        "lengthMenu": [[50, 75, 100, -1], [50, 75, 100, "All"]]
+    }
+    );
+} );
 </script>
 {% endblock %}

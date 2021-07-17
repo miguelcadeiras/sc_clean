@@ -359,7 +359,7 @@ def fullDeDupR1(id_inspection):
     levelFactor = querys.getLevelFactor(id_inspection)
     # print("LevelFactor: ->",levelFactor,type(levelFactor))
     useDeDup = querys.getUseDeDup(id_inspection)
-
+    print("useDeDup",useDeDup)
     df2 = correctionFactor(levelFactor, id_inspection)
     # print(df2.columns)
     # obtengo los niveles de los datos corregidos
@@ -414,7 +414,11 @@ def fullDeDupR1(id_inspection):
                         except:
                             pass
 
-    print("<<<>>>>>Deduplication Completed Successfully<<<<>>>>>>")
+            print("<<<>>>>>Deduplication Completed Successfully<<<<>>>>>>")
+        else:
+            print("<<<<<<<<<Deduplication Skipped>>>>>>>>>>>>>>>>>>>>>>>>")
+
+
     dfC = pd.concat(df_N)
     # dfC = df2
     # print('back to df2')
@@ -694,7 +698,8 @@ def agregates(id_inspection,reqAsile,reqLevel):
     # print(df[['wmsPosition','asile','level']])
     dfnan = df.replace(r'', np.NaN)
     # print('dfnan ##' *5)
-    # print(dfnan[['asile','level','wmsProduct','codeUnit']])
+
+    # print(dfnan[['asile','level','wmsProduct','codeUnit','match']])
 
     # PLOTING ..  BY LEVEL AND BY ASILE
     # print('Ploting by Asile...')
@@ -706,7 +711,7 @@ def agregates(id_inspection,reqAsile,reqLevel):
         dfnanF = dfnan
     dfagg = dfnanF[['asile','wmsProduct','codeUnit']].groupby(['asile'])
 
-
+    # print(dfagg)
     dfCount = dfagg.count()
     # print("(("*30)
     # print(dfCount)
@@ -714,6 +719,18 @@ def agregates(id_inspection,reqAsile,reqLevel):
     # dfCount.plot(kind='bar',title='Pasillos y Lecturas', ylabel='Observed PA',
     #              xlabel='Asile',figsize=(14,6))
     # print('Ploting by LEVEL...')
+
+    ### COUNTING MATCHING BY ASILE
+    print("not matching + readed and unreaded")
+    dfagg = dfnanF[['asile', 'wmsPosition','codeUnit', 'match']].groupby(['asile'])
+    print(dfagg.match.value_counts())
+    # print(dfnanF)
+    dfreadedAgg = dfnanF[dfnanF.codeUnit.notnull()]
+    # print(dfreadedAgg)
+    dfagg = dfreadedAgg[['asile', 'wmsPosition', 'codeUnit','match']].groupby(['asile'])
+    print("not matching"+"^^"*30)
+    print(dfagg.match.value_counts())
+    #####
 
     if reqAsile != 'All':
         # print("level not All",reqLevel)
