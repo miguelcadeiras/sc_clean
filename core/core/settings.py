@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'app',   # Enable the inner app
     'mathfilters',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -60,6 +61,7 @@ ROOT_URLCONF = 'core.urls'
 
 LOGIN_REDIRECT_URL = "home"   # Route defined in app/urls.py
 LOGOUT_REDIRECT_URL = "home"  # Route defined in app/urls.py
+
 TEMPLATE_DIR = os.path.join(BASE_DIR, "core/templates")  # ROOT dir for templates
 
 TEMPLATES = [
@@ -126,8 +128,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-
 #############################################################
 # SRC: https://devcenter.heroku.com/articles/django-assets
 
@@ -143,8 +143,29 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'core/static'),
 )
 
-MEDIA_URL = '/media/'
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+# SESSION_IDLE_TIMEOUT = 1000
+# SESSION_EXPIRE_SECONDS = 1000  # 300 seconds = 5 minutes
+# SESSION_SECURITY_EXPIRE_AFTER = 1000
+# SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
+#
+#
+# SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+#################################################
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'miguel@kreometrology.com'
+EMAIL_HOST_PASSWORD = 'xkxoifjwrcakcqlk'
+EMAIL_USE_TLS = True
+####################################################
+
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'core/media')
+MEDIA_URL = '/media/'
 #############################################################
 #############################################################
 
@@ -155,3 +176,5 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+

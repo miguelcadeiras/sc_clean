@@ -358,7 +358,10 @@ def fullDeDupR1(id_inspection):
 
     levelFactor = querys.getLevelFactor(id_inspection)
     # print("LevelFactor: ->",levelFactor,type(levelFactor))
+
+    #Chequeamos en la base de datos si usamos o no el Deduplicador y cuardamos en useDeDup
     useDeDup = querys.getUseDeDup(id_inspection)
+    print("useDeDupDebug","**"*30)
     print("useDeDup",useDeDup)
     df2 = correctionFactor(levelFactor, id_inspection)
     # print(df2.columns)
@@ -398,7 +401,7 @@ def fullDeDupR1(id_inspection):
                 dfDup = df_N2[df_N2['rack'] == rack]
                 # print(dfDup[["algoPos","purePos","rack",'x','codeUnit']])
                 if dfDup.shape[0] == 2:
-                    #       print(rack,dfDup['codePos'].str.len())
+                    # print(rack,dfDup['codePos'].str.len())
                     oldPos = dfDup['algoPos'].values[0]
                     # print(" >>s_______________<<< ")
                     newPos, pa = dedupMiddleR1(dfDup)
@@ -697,9 +700,17 @@ def agregates(id_inspection,reqAsile,reqLevel):
 
     # print(df[['wmsPosition','asile','level']])
     dfnan = df.replace(r'', np.NaN)
-    # print('dfnan ##' *5)
+    # print(dfnan.info())
+    dfnan["ex"] = np.NaN
+    dfnan["ex"]  = dfnan["match"]*1
+    dfnan= dfnan.replace(1,np.NaN)
+    # print(dfnan["ex"].count)
 
-    # print(dfnan[['asile','level','wmsProduct','codeUnit','match']])
+    # print('dfnan ##' *5)
+    # print()
+
+
+    # print(dfnan[['asile','level','wmsProduct','codeUnit','ex']])
 
     # PLOTING ..  BY LEVEL AND BY ASILE
     # print('Ploting by Asile...')
@@ -709,10 +720,12 @@ def agregates(id_inspection,reqAsile,reqLevel):
         # print(dfnanF)
     else:
         dfnanF = dfnan
-    dfagg = dfnanF[['asile','wmsProduct','codeUnit']].groupby(['asile'])
+    dfagg = dfnanF[['asile','wmsProduct','codeUnit','ex']].groupby(['asile'])
 
-    # print(dfagg)
+    # print("-dfnanF"*0,dfnanF[['asile','wmsProduct','codeUnit','ex']])
     dfCount = dfagg.count()
+    # print("-dfCount:","+" * 50)
+    print(dfCount)
     # print("(("*30)
     # print(dfCount)
     json_array.append(dfCount.to_json(orient='split'))
@@ -721,15 +734,15 @@ def agregates(id_inspection,reqAsile,reqLevel):
     # print('Ploting by LEVEL...')
 
     ### COUNTING MATCHING BY ASILE
-    print("not matching + readed and unreaded")
-    dfagg = dfnanF[['asile', 'wmsPosition','codeUnit', 'match']].groupby(['asile'])
-    print(dfagg.match.value_counts())
+    # print("not matching + readed and unreaded")
+    dfagg = dfnanF[['asile', 'wmsPosition','codeUnit', 'ex']].groupby(['asile'])
+    # print(dfagg.ex.value_counts())
     # print(dfnanF)
     dfreadedAgg = dfnanF[dfnanF.codeUnit.notnull()]
     # print(dfreadedAgg)
-    dfagg = dfreadedAgg[['asile', 'wmsPosition', 'codeUnit','match']].groupby(['asile'])
-    print("not matching"+"^^"*30)
-    print(dfagg.match.value_counts())
+    dfagg = dfreadedAgg[['asile', 'wmsPosition', 'codeUnit','ex']].groupby(['asile'])
+    # print("not matching"+"^^"*30)
+    # print(dfagg.ex.value_counts())
     #####
 
     if reqAsile != 'All':
@@ -739,7 +752,7 @@ def agregates(id_inspection,reqAsile,reqLevel):
     else:
         dfnanF = dfnan
 
-    dfagg = dfnanF[['level','wmsProduct','codeUnit']].groupby(['level'])
+    dfagg = dfnanF[['level','wmsProduct','codeUnit','ex']].groupby(['level'])
 
 
     dfCount = dfagg.count()
@@ -750,7 +763,7 @@ def agregates(id_inspection,reqAsile,reqLevel):
     ## TRYING TO PLOT ALL ASILES BY EACH LEVEL
     # print('Ploting ASILES BY LEVEL...')
 
-    dfagg = dfnanF[['asile','level','wmsProduct','codeUnit']].groupby(['level','asile'])
+    dfagg = dfnanF[['asile','level','wmsProduct','codeUnit','ex']].groupby(['level','asile'])
 
     dfCount = dfagg.count()
     json_array.append(dfCount.to_json(orient='split'))
@@ -763,7 +776,7 @@ def agregates(id_inspection,reqAsile,reqLevel):
     for level in dfnan['level'].unique():
         # print(level)
         dfagg = dfnanF[dfnan['level']==level]
-        dfagg = dfagg[['asile', 'wmsProduct', 'codeUnit']].groupby([ 'asile'])
+        dfagg = dfagg[['asile', 'wmsProduct', 'codeUnit','ex']].groupby([ 'asile'])
         dfCount = dfagg.count()
         # dfCount.plot(kind='bar', title='NIVEL '+str(level)+' - Pasillos y Lecturas', ylabel='Observed PA',
         #              xlabel='Asile', figsize=(14, 6))

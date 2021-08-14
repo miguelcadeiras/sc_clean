@@ -467,7 +467,7 @@ def readedAnalysis(request):
         # print("index,row",index,row,sd[0])
         # print(sd)
 
-        table.append([row,sd[0][index],sd[1][index],int(sd[0][index])-int(sd[1][index])])
+        table.append([row,sd[0][index],sd[1][index],sd[2][index],int(sd[0][index])-int(sd[1][index])])
 
     # print("table",table)
     context = {
