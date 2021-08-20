@@ -314,14 +314,14 @@ def allPD(request):
     # print("011")
     inspectionData = querys.getInspectionData(request.GET['id_inspection'])[0][0]
     dataLenght = len(data)-1
-    print("data: ",data)
-    print("len: ",len(data))
-    print(data[dataLenght][1])
+    # print("data: ",data)
+    # print("len: ",len(data))
+    # print(data[dataLenght][1])
     lastReadQuery = "select substring(codePos,5,6) from inventorymaptbl where id_inspection = "+str(id_inspection)+" and codePos not like '' order by id_Vector desc limit 1;"
 
     lastRead = querys.mysqlQuery(lastReadQuery)[0][0][0]
     lastRead = "Aisle:"+lastRead[0:3]+ " Pos:"+lastRead[3:6]
-    print(lastRead)
+    # print(lastRead)
 
     context = {'data':data,
                'description':description,
