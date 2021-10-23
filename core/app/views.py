@@ -212,8 +212,10 @@ def allPD(request):
     else:
         'True to debug. and export file on DecodeMach'
         if 'fullDATA' in request.GET:
+
             df = pdQuery.decodeMach(id_inspection,False)
         else:
+
             df = pdQuery.decodeMach(id_inspection,False)
 
         #################################################################

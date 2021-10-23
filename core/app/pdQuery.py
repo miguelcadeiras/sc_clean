@@ -576,7 +576,7 @@ def decodeMach(id_inspection,export_to_excel=False):
     dfwms = dfwms.drop(columns = 'codePos')
     # dfwms.to_excel("dfwms.xlsx", sheet_name='Merge Data')
     ddp = ddp.drop(columns = ['codePos','Pos','nivel_x'])
-    # ddp.to_excel("DDP.xlsx", sheet_name='Merge Data')
+    # ddp.to_excel("DDP1.xlsx", sheet_name='Merge Data')
 
     resMergeWms = pd.merge(ddp, dfwms, left_on="codeUnit", right_on="wmsProduct", how="outer")
     # print("filter")
@@ -619,6 +619,8 @@ def decodeMach(id_inspection,export_to_excel=False):
     # print("009")
     if export_to_excel:
         resMergeWms.to_csv("exportedData.csv")
+
+
 
     return resMergeWms
 
