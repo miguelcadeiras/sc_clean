@@ -9,6 +9,9 @@ from django.conf import settings
 import socket
 import matplotlib.pyplot as plt
 from . import querys
+import warnings
+
+warnings.filterwarnings('ignore')
 
 # # acceso al servidor remoto
 # mysql_schema = 'inventory'
@@ -49,6 +52,7 @@ def engine():
 # print(df)
 
 def runningPositionsRaw(id_inspection):
+    # cómo pasamos el virtual Rack.. aca.. con las queries estas.. para q funcione. 
     """
     method returns a pandas df
     :param id_inspection:
@@ -86,7 +90,7 @@ def runningPositionsRaw(id_inspection):
                       how="outer"
                       )
     # result.to_excel("runningPositions.xlsx", sheet_name='Merge Data')
-
+    # print(result.info())
     return result
 
 
@@ -120,12 +124,11 @@ def correctionFactor(levelFactor,id_inspection):
     """
     # uso un dictionary.. nivel: factor de corrección
     correctionFactor = levelFactor
-    # print(correctionFactor[5])
     df = runningPositionsRaw(id_inspection)
+    # df.to_excel("runningPositionsRaw.xlsx", sheet_name='right')
 
     # solo nos quedamos con los 6 digitos
-    df['purePos'] = df['Pos'].str[4:]
-    # print(df)
+    df['purePos'] = df['Pos'].str[4:]    # print(df)
     values = []
     modified = 0
     cfM = 0
@@ -169,7 +172,7 @@ def correctionFactor(levelFactor,id_inspection):
     # print("modified Positions", modified, cfM, df["nivel_y"].count())
     # df2 = dfTest.assign(test=values)
     df2 = df.assign(algoPos=values)
-    # print(df2)
+
     ## hasta aca corregimos la posición.. ahora hay que hacer el merge con el wms.
     sqlEngine = engine()
     dbConnection = sqlEngine.connect()
@@ -180,9 +183,196 @@ def correctionFactor(levelFactor,id_inspection):
     dbConnection.close()
 
     resMergeWms = pd.merge(df2, dfwms, left_on="codeUnit", right_on="wmsProduct", how="outer")
+
     # print(resMergeWms.head())
     # resMergeWms.to_excel("full_join_algo_r2.xlsx", sheet_name='Merge Data')
 
+    return df2
+
+def correctionFactorVR(levelFactor,id_inspection):
+    # print("correctionFactorVR()","*"*20)
+    """
+
+    :param dfRunningPositions:
+    :param levelFactor:{5: 0.3, 4: 0.2, 3: 0, 2: 0}
+    :param id_inspection:
+    :return:
+    """
+    # uso un dictionary.. nivel: factor de corrección
+    correctionFactor = levelFactor
+    # df = runningPositionsRaw(id_inspection)
+    # print("correctionFactorVR()","1"*20)
+
+    df = runningPosVR(id_inspection)
+
+    # print("correctionFactorVR()","2"*20)
+
+    # df.to_excel("runningPositionsRaw.xlsx", sheet_name='right')
+
+    # solo nos quedamos con los 6 digitos
+    df['purePos'] = df['Pos'].str[4:]    # print(df)
+    values = []
+    modified = 0
+    cfM = 0
+    # print(values)
+    # print("rerwrw",df["nivel_y"][2])
+    # print("correctionFactorVR()","3"*20)
+
+    for count, r in enumerate(df["purePos"]):
+        purePos = float(r)
+
+        if count == 0:
+            # In [2]: '%03.f'%5
+            # Out[2]: '005'
+
+            values.append('%06.f' % purePos)
+        else:
+            x = df["x"][count]
+            # print(df["nivel_x"][count],x)
+            if pd.isna(df["nivel_y"][count]):
+                cf = 0
+            else:
+                # print(correctionFactor)
+                # print(float(df["nivel_y"][count]))
+                cf = correctionFactor[float(df["nivel_y"][count])]
+
+
+            # print("x",x,type(x),"cf",cf,type(cf),int(df["nivel_y"][count]))
+
+            if x < cf or (x > 1.5 and x < 1.5 + cf):
+
+                if (purePos % 2) == 0:
+
+                    #                 print(purePos,purePos-2)
+                    modified += 1
+                    values.append('%06.f' % (purePos - 2))
+                else:
+                    #                 print(purePos,purePos+2)
+                    modified += 1
+                    values.append('%06.f' % (purePos + 2))
+            else:
+                values.append('%06.f' % (purePos))
+
+    # print("correctionFactorVR()","4"*20)
+
+    # print("modified Positions", modified, cfM, df["nivel_y"].count())
+    # df2 = dfTest.assign(test=values)
+    df2 = df.assign(algoPos=values)
+
+    return df2
+
+def virtualRack(id_inspection):
+    # print("virtualRack ()","*"*20)
+    dfQuery = "select *  from inventorymaptbl where id_inspection = " + str(id_inspection) + "; "
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+    df = pd.read_sql(dfQuery, dbConnection)
+    dbConnection.close()
+
+    midRack = False
+    subdivisions = 2
+    # defaultRlenght=2.75
+    # rlength=2.75
+    virtualRack = 50000
+
+    # print(df.describe())
+    df["ZERO"] = (df["customCode3"] == "ZERO")
+
+    # calculo la mediana de las x de los ZEROS para el default. Excluimos los outliers
+    defaultRlenght = df[(df["ZERO"]) & (df["x"] > 0.7) & (df["x"] < 3.8)].x.median()
+    rlength = defaultRlenght
+
+    df['rackLength'] = defaultRlenght
+    df['vRack'] = 0
+
+    count = len(df['x'])
+    # print("COUNT:",count)
+    for i, row in enumerate(df['x']):
+        j = count - i - 1
+        x = df['x'][j]
+
+        if df['ZERO'][j]:
+            midRack = True
+            virtualRack += 1
+            rlength = x
+
+        if x < rlength / subdivisions and midRack:
+            #         print("in mid",x,virtualRack)
+            virtualRack += 1
+            midRack = False
+
+        df['rackLength'][j] = rlength
+        #     df.loc[j,'rackLength']=rlength
+
+        # si no tenemos ZEROS, NO PODEMOS HACER MÁS Q CONFIAR EN EL ENCODER.. DE MOMENTO
+        if rlength > 1.5 * defaultRlenght:
+            #         df.loc[j,'vRack']=df['rack'][j]
+            df['vRack'][j] = df['rack'][j]
+        else:
+            df['vRack'][j] = virtualRack
+    #          df.loc[j,'vRack']=virtualRack
+
+    # print("virtualRack () -- END --","*"*20)
+
+    return df
+
+def runningPosVR(id_inspection):
+    # print("runningPosVR()","*"*20)
+    # tenemos q imprimir lo siguiente en pantalla
+    # df = df[['rack', 'AGVpos', 'codeUnit', 'nivel_y', 'Ppic']]
+    df =virtualRack(id_inspection)
+
+    # OBTENGO SÓLO POSICIONES RECORRIDAS CON SU VIRTUAL RACK
+    dfPos = df[["codePos", "vRack", "nivel"]]
+    dfPos["pos"] = df["codePos"].str[0:10]
+    dfPos = dfPos[(dfPos["codePos"].notnull()) & (dfPos["codePos"].str.len() > 0)]
+    dfPos1 = dfPos[["pos", "vRack"]].drop_duplicates()
+    # si pasamos 2 veces por la misma posición deberían haber 2 virtual Racks por posición
+    # dfPos1.sort_values('pos')
+
+    # OBTENGO LAS UNIDADES DETECTADAS CON SU VIRTUAL RACK
+    dfUnits = df[["vRack", "x", "codeUnit", "visionBar", "nivel", "picPath"]]
+    dfUnits = dfUnits[(dfUnits["codeUnit"].notnull()) & (dfUnits["codeUnit"].str.len() > 0)]
+    dfUnits = dfUnits.drop_duplicates(subset="codeUnit", keep="first")
+    # df.drop_duplicates(subset='A', keep="last")
+    # dfUnits
+
+    df_posUnits = pd.merge(dfPos1,
+                    dfUnits,
+                    left_on=["vRack"],
+                    right_on=["vRack"],
+                    how = "right"
+                           )
+    # print("runningPosVR() -- end --","*"*20)
+
+    return df_posUnits
+
+
+def plusminus10Pos(id_inspection,pos):
+    df = virtualRack(id_inspection)
+    # print("plusminus10Pos"+"---"*10)
+
+    df['codePos_Sub'] = df['codePos'].apply(lambda x: x[0:10] if x is not None else x)
+    # print("here")
+    # print(df)
+    index = df[df['codePos'].str[0:10] == pos][['rack', 'vRack', 'x', 'codePos']].index[0]
+    # print(index)
+    df[df['codePos'].str[0:10] == pos][['rack', 'vRack', 'x', 'codePos', 'codePos_Sub']]
+    bottomindex = 0 if index - 8 < 1 else index - 8
+    df2 = df.iloc[bottomindex:index + 15, [0, 1, 2, 5, 6, 7, 10, 15, 22, 23]]
+    # print("plusminus10Pos"*5,df2)
+    return df2
+
+def plusminus10Unit(id_inspection,unit):
+    df = virtualRack(id_inspection)
+
+    index = df[df['codeUnit'] == unit][['rack', 'vRack', 'x', 'codeUnit']].index[0]
+    # print(index)
+    # df[df['codePos'].str[0:10] == pos][['rack','vRack','x','codePos','codePos_Sub']]
+    bottomindex = 0 if index - 8 < 1 else index - 8
+    df.iloc[bottomindex:index + 10, [0, 1, 2, 5, 6, 7, 10, 15, 22, 23]]
+    df2 = df.iloc[bottomindex:index + 20, [0, 1, 2, 5, 6, 7, 10, 15, 22, 23]]
+    # print(df2)
     return df2
 
 
@@ -355,16 +545,19 @@ def fullDeDupR1(id_inspection):
     :param useDedup: use or Not the algorithm
     :return: dataFrame
     """
-
+    # print("aasdfasdf -------------------------------------")
     levelFactor = querys.getLevelFactor(id_inspection)
     # print("LevelFactor: ->",levelFactor,type(levelFactor))
 
     #Chequeamos en la base de datos si usamos o no el Deduplicador y cuardamos en useDeDup
     useDeDup = querys.getUseDeDup(id_inspection)
-    print("useDeDupDebug","**"*30)
+
+    # print("useDeDupDebug","**"*30)
     print("useDeDup",useDeDup)
+    # useDeDup=True
     df2 = correctionFactor(levelFactor, id_inspection)
-    # print(df2.columns)
+    print(df2.columns)
+
     # obtengo los niveles de los datos corregidos
     dfNiveles = df2[df2["nivel_y"].notnull()]["nivel_y"].sort_values().unique().astype(int)
     # print(">>------")
@@ -420,10 +613,113 @@ def fullDeDupR1(id_inspection):
             print("<<<>>>>>Deduplication Completed Successfully<<<<>>>>>>")
         else:
             print("<<<<<<<<<Deduplication Skipped>>>>>>>>>>>>>>>>>>>>>>>>")
+    # print("df_N ---"*10)
+    # print()
+
+    if df_N!=[]:
+        dfC = pd.concat(df_N)
+    else:
+        dfC = df2
+    # print('back to df2')
+    # dfC.describe()
+    # dfC["AGVFullPos"] = 'UBG1' + dfC['algoPos'] + dfC['nivel_y']
+
+    dfC["AGVpos"] = dfC['codePos'].str[:4] + dfC['algoPos'] + '0' + dfC["nivel_y"].fillna(0).astype(np.int8).astype(str)
+    # print(dfC.columns)
+    # print(dfC['AGVpos'])
 
 
-    dfC = pd.concat(df_N)
-    # dfC = df2
+    return dfC
+
+def fullDeDupVR(id_inspection):
+    """
+    :param id_inspection:
+    :param levelFactor: dictionary for correction factor{level:cm,...,level_n:cm}
+    :param useDedup: use or Not the algorithm
+    :return: dataFrame
+    """
+    # print("fullDeDupVR", "*" * 20)
+
+    # print("aasdfasdf -------------------------------------")
+    levelFactor = querys.getLevelFactor(id_inspection)
+    # print("LevelFactor: ->",levelFactor,type(levelFactor))
+
+    #Chequeamos en la base de datos si usamos o no el Deduplicador y cuardamos en useDeDup
+    useDeDup = querys.getUseDeDup(id_inspection)
+
+    print("useDeDupDebug","**"*30)
+    print("useDeDup",useDeDup)
+    # useDeDup = False
+    df2 = correctionFactorVR(levelFactor, id_inspection)
+    # print("correctionFactorVR..COMPLETED", "*" * 20)
+    # print(df2.columns)
+    df2["codePos"]= df2["pos"]+df2["_nivel"].astype(str)
+    df2.rename(columns={"picPath_x":"Ppic"}, inplace=True)
+    # print("rename","r"*15)
+    # print(df2["Ppic"])
+    # print(df2.columns)
+    # obtengo los niveles de los datos corregidos
+    dfNiveles = df2[df2["nivel_y"].notnull()]["nivel_y"].sort_values().unique().astype(int)
+    # print(">>------")
+    # print(dfNiveles)
+    # separamos un df para cada nivel
+    df_N = []
+    for level in dfNiveles:
+        df_N.append(df2[df2["nivel_y"] == level])
+
+    # print(">>>>>>>>>>>>")
+    # print(df_N)
+    # print("<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>")
+
+
+    # df_N5 = df2[df2["nivel_y"] == 5]
+    # df_N4 = df2[df2["nivel_y"] == 4]
+    # df_N3 = df2[df2["nivel_y"] == 3]
+    # df_N2 = df2[df2["nivel_y"] == 2]
+
+    for df in df_N:
+        df_N2 = df[df["codePos"].str.len() <= 12]
+
+        df2_duplicated = df_N2[df_N2.duplicated(['algoPos'])].sort_values(by=['algoPos'])
+        # print (df2_duplicated["algoPos"])
+        df2_duplicated = df2_duplicated[df2_duplicated.purePos.notnull()]
+        # mid = 1.5
+        # th = 0.2
+        # df2Copy = df2.copy()
+
+        print("3.------------------")
+        if useDeDup:
+            print("usingDedup")
+            for rack in df2_duplicated["rack"]:
+                dfDup = df_N2[df_N2['rack'] == rack]
+                # print(dfDup[["algoPos","purePos","rack",'x','codeUnit']])
+                if dfDup.shape[0] == 2:
+                    # print(rack,dfDup['codePos'].str.len())
+                    oldPos = dfDup['algoPos'].values[0]
+                    # print(" >>s_______________<<< ")
+                    newPos, pa = dedupMiddleR1(dfDup)
+                    # print("dev:",newPos,oldPos,pa)
+                    print(" >>s_______________<<< ")
+                    # print(df2Copy[df2Copy["codeUnit"].str.contains(pa,na=False).values[0]])
+                    if oldPos != newPos:
+                        try:
+                            index = df.index[df["codeUnit"].str.contains(pa,na=False)].values[0]
+                            # print(index)
+                            df.at[index, 'algoPos'] = '%06.f' % (newPos)
+                            # print(newPos, pa, oldPos, rack, dfDup['codeUnit'].values[0], dfDup['x'].values[0])
+                        except:
+                            pass
+
+            print("<<<>>>>>Deduplication Completed Successfully<<<<>>>>>>")
+        else:
+            print("<<<<<<<<<Deduplication Skipped>>>>>>>>>>>>>>>>>>>>>>>>")
+    # print("df_N ---"*10)
+    # print()
+
+    if df_N!=[]:
+        dfC = pd.concat(df_N)
+    else:
+        dfC = df2
     # print('back to df2')
     # dfC.describe()
     # dfC["AGVFullPos"] = 'UBG1' + dfC['algoPos'] + dfC['nivel_y']
@@ -512,7 +808,7 @@ def testFullDeDup(id_inspection, mid, th, levelFactor, rack):
 
 def decodeMach(id_inspection,export_to_excel=False):
     # dfBeforeDeDup = correctionFactor(levelFactor, id_inspection)
-
+    print("decodeMach()----")
     ddp = fullDeDupR1(id_inspection)
     # ddp = ddp.drop(columns='codePos')
     # print(".............DDP DATAFRAME")
@@ -624,6 +920,78 @@ def decodeMach(id_inspection,export_to_excel=False):
 
     return resMergeWms
 
+def decodeMachPAVR(id_inspection):
+    print("decodeMachVR() ---", "*"*15)
+    df = virtualRack(id_inspection)
+
+    # GETTING JUST POSITION and vRack
+    dfPos = df[["codePos", "vRack", "nivel"]]
+    # nos quedamos con los digitos de Posicion
+    dfPos["pos"] = df["codePos"].str[0:10]
+    # solo nos quedamos con las posiciones no nulas y vacías q tienen virtualRack
+    dfPos = dfPos[(dfPos["codePos"].notnull()) & (dfPos["codePos"].str.len() > 0)]
+    dfPos1 = dfPos[["pos", "vRack"]].drop_duplicates()
+    dfPos1.sort_values('pos')
+
+    # NOS QUEDAMOS CON EL TRUE-FALSE DE LOS PALLETS
+    dfPallet = df[["vRack", "customCode3", "nivel", "picPath"]]
+    dfPallet = dfPallet[(dfPallet["customCode3"].str.contains('PALLET', regex=False))]
+    dfPallet['Pallet'] = (dfPallet["customCode3"].str.contains('TRUE', regex=False))
+    del dfPallet["customCode3"]
+    dfPallet.drop(dfPallet[dfPallet['vRack'] == 0].index, inplace=True)
+
+    ## UNITS por vRack
+    dfUnits = df[["vRack", "x", "codeUnit", "visionBar", "nivel", "picPath"]]
+    dfUnits = dfUnits[(dfUnits["codeUnit"].notnull()) & (dfUnits["codeUnit"].str.len() > 0)]
+    dfUnits = dfUnits.drop_duplicates(subset="codeUnit", keep="first")
+
+    ###### COMENZAMOS CON LOS MERGE
+    #UNIONES entre Pallets,vrack y Posiciones y Vrack
+    df_posPallet = pd.merge(dfPos1, dfPallet, on=["vRack"], how="right")
+
+    # UNION  CON ETIQUETAS DE CODE UNIT  (OUTER MERGE)
+
+    dfResult = pd.merge(df_posPallet[["vRack", "nivel", "Pallet", "pos", "picPath"]],
+                        dfUnits[["vRack", "x", "codeUnit", "visionBar", "nivel"]],
+                        on=["vRack", "nivel"],
+                        how="outer"
+                        )
+
+    #### CONECTAMOS AL WMS-IMPORTED
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+    dfwms = pd.read_sql(
+        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsdesc2 from wmspositionmaptbl where id_inspection =" + str(
+            id_inspection), dbConnection)
+    dbConnection.close()
+    dfwms = dfwms.replace(r'^\s*$', np.nan, regex=True)
+    dfwms["wPos"] = dfwms["wmsPosition"].str[4:10]
+    dfwms["wmsPos"] = dfwms['wmsPosition'].str[0:10]
+
+    ## HAY Q EVITAR LOS NAN.. entonces comparamos por separado,: donde hay prod, y donde No
+    # DONDE HAY PRODUCTO
+    df_testProduct = dfResult.dropna(subset=['codeUnit']) \
+        .merge(dfwms.dropna(subset=['wmsProduct']),
+               left_on='codeUnit',
+               right_on='wmsProduct',
+               how='outer')
+    df_testProduct['aPos'] = df_testProduct['pos'].apply(lambda x: x[4:10] if x is not np.NaN else np.NaN)
+    df_testProduct['match'] = df_testProduct.apply(lambda x: True if x['aPos'] == x['wPos'] else False, axis=1)
+
+    # DONDE NO HAY PRODUCTO EN EL WMS
+
+    df_noProduct = dfPos1.merge(dfwms[(dfwms['wmsProduct'].isna())], left_on='pos', right_on='wmsPos', how='right')
+    df_noProduct['match'] = df_noProduct.apply(lambda x: True if x['pos'] == x['wmsPos'] else np.nan, axis=1)
+
+    # UNIMOS LOS 2
+    dfTotalMatch = df_testProduct.append(df_noProduct)
+    print("decodeMachVR() ---END ---", "*"*15)
+
+    return dfTotalMatch
+
+
+def decodeMachVR(id_inspection, export_to_excel=False):
+    return
 
 def pasilloNivel(id_inspection,levelFactor,pasillo,nivel):
     df = decodeMach(id_inspection, False)

@@ -194,9 +194,14 @@ def all(request):
 
 @login_required(login_url="/login/")
 def allPD(request):
+    # dvr =pdQuery.virtualRack(98)
+    # print(dvr)
+    # dfpm10=pdQuery.plusminus10Pos(98,"UBG1002002")
+
+
     picpath = []
     levels = []
-
+    lastRead =0
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
     # if id_inspection == 27:
@@ -206,7 +211,10 @@ def allPD(request):
     # # levels = querys.getLevels(id_inspection)
     if request.GET['matching'] == '0':
         # print('in Get - matching =0')
+        # df = pdQuery.fullDeDupR1(id_inspection)
+        print("allPD.view","*"*20)
         df = pdQuery.fullDeDupR1(id_inspection)
+        print("allPD.view1", "*" * 20)
         df = df[['rack','AGVpos','codeUnit','nivel_y','Ppic']]
         description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
     else:
@@ -220,15 +228,17 @@ def allPD(request):
 
         #################################################################
         #EXPORT FULL INFO TO DEBUG
-        # df.to_excel("resMergeWms.xlsx", sheet_name='ddp_dfwms_onCodeUnit-wmsProduct')
+            # df.to_excel("resMergeWms.xlsx", sheet_name='ddp_dfwms_onCodeUnit-wmsProduct')
         ###################################################################
+
         df = df[['rack','wmsProduct','codeUnit','nivel_y','AGVpos','wmsPosition','wmsDesc','wmsDesc1','wmsDesc2','match','Ppic']]
         description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsDesc2','c','pic']
 
 
     data = df.values.tolist()
     # description = list(df.columns.values)
-
+    # print("data:"*10)
+    # print(df.empty)
 
     query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection=' + str(id_inspection)
     warehouseTotalPositions = querys.mysqlQuery(query)[0][0][0]
@@ -301,11 +311,11 @@ def allPD(request):
             data = df.values.tolist()
 
         if 'exportData' in request.POST:
-            print("009")
+            # print("009")
 
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename=exportedData_'+str(id_inspection)+'.csv'
-            print("010")
+            # print("010")
 
             df.to_csv(path_or_buf=response, sep=',', float_format='%.2f', index=False, decimal=".")
 
@@ -319,10 +329,163 @@ def allPD(request):
     # print("data: ",data)
     # print("len: ",len(data))
     # print(data[dataLenght][1])
-    lastReadQuery = "select substring(codePos,5,6) from inventorymaptbl where id_inspection = "+str(id_inspection)+" and codePos not like '' order by id_Vector desc limit 1;"
+    if not df.empty:
+        lastReadQuery = "select substring(codePos,5,6) from inventorymaptbl where id_inspection = "+str(id_inspection)+" and codePos not like '' order by id_Vector desc limit 1;"
+        lastRead = querys.mysqlQuery(lastReadQuery)[0][0][0]
+        lastRead = "Aisle:"+lastRead[0:3]+ " Pos:"+lastRead[3:6]
+    # print(lastRead)
 
-    lastRead = querys.mysqlQuery(lastReadQuery)[0][0][0]
-    lastRead = "Aisle:"+lastRead[0:3]+ " Pos:"+lastRead[3:6]
+    context = {'data':data,
+               'description':description,
+               'clientName': request.user.profile.client,
+               'id_warehouse':id_warehouse,
+               'warehouseName': querys.getWarehouseName(request.GET['id_inspection']),
+               'warehouseTotalPositions': warehouseTotalPositions,
+               'warehouseTotalCount': warehouseUnitCount,
+               'warehouseRatio': "{:.1f}".format(warehouseRatio),
+               'readedPositions': readedPositions,
+               'readedCount': readedCount,
+               'readedRatio': "{:.1f}".format(readedRatio),
+               'readMissMach':"{:.1f}".format((1-(readedCount/warehouseUnitCount))*100) if warehouseUnitCount>0 else "0",
+               'inspection': inspectionData ,
+               'picpath': picpath,
+               'levels': levels,
+               'lastRead':lastRead
+               }
+
+    return render(request, 'allPD.html', context)
+
+@login_required(login_url="/login/")
+def allPDvr(request):
+    # dvr =pdQuery.virtualRack(98)
+    # print(dvr)
+    # dfpm10=pdQuery.plusminus10Pos(98,"UBG1002002")
+
+
+    picpath = []
+    levels = []
+    lastRead =0
+    id_inspection = request.GET['id_inspection']
+    id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = "+str(id_inspection))[0][0][0]
+    if request.GET['matching'] == '0':
+        # print('in Get - matching =0')
+        # df = pdQuery.fullDeDupR1(id_inspection)
+        # print("allPD.view","*"*20)
+        df = pdQuery.runningPosVR(id_inspection)
+        print("allPD.view1", "*" * 20)
+        df = df[['vRack','pos','codeUnit','nivel','picPath']]
+        description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
+        print("runningPosVR-completed: ",df)
+    else:
+        df = pdQuery.decodeMachPAVR(id_inspection)
+        df = df.fillna('')
+        #################################################################
+        #EXPORT FULL INFO TO DEBUG
+            # df.to_excel("resMergeWms.xlsx", sheet_name='ddp_dfwms_onCodeUnit-wmsProduct')
+        ###################################################################
+        print(df)
+        df = df[['vRack','wmsProduct','codeUnit','nivel','pos','wmsPosition','wmsDesc','wmsDesc1','wmsdesc2','match','picPath']]
+        description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsDesc2','c','pic']
+
+
+    data = df.values.tolist()
+    # description = list(df.columns.values)
+    # print("data:"*10)
+    # print(df.empty)
+
+    query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection=' + str(id_inspection)
+    warehouseTotalPositions = querys.mysqlQuery(query)[0][0][0]
+    # print( 'warehouseTotalPositions',warehouseTotalPositions)
+    query = "select count(wmsProduct) from wmspositionmaptbl where wmsproduct not like '' and id_inspection=" + str(
+        id_inspection)
+    warehouseUnitCount = querys.mysqlQuery(query)[0][0][0]
+    # print('warehouseTotalCount',warehouseUnitCount)
+    # en esta query hay que tener encuenta que en cencosud hay etiquetas que son  XX, etiquetas del primer nivel tambien, terminan en 01 y tienen 12 caracteres.
+    query = "select count(distinct(codePos)) from inventorymaptbl where codePos not like '' and codePos not like '%XX%' and substring(codePos,11,2) not like '01'  and id_inspection=" + str(
+        id_inspection)
+    # query = "SELECT distinct SUBSTRING(codePos,1,12) from inventorymaptbl where id_inspection = "+id_inspection+" AND codePos not like '%XX%';"
+    readedPositions = querys.mysqlQuery(query)[0][0][0]
+    # print('readedPositions',readedPositions)
+    query = "select count(distinct(codeUnit)) from inventorymaptbl where codeUnit not like ''  and id_inspection=" + str(id_inspection)
+    readedCount = querys.mysqlQuery(query)[0][0][0]
+    # print('readedCount',readedCount)
+    # print(data)
+    readedRatio = 0
+
+
+    if int(readedCount) > 0:
+        readedRatio = round(readedCount / readedPositions, 2) * 100
+        # print('readedRatio',readedRatio)
+
+    warehouseRatio = 0
+    if warehouseTotalPositions > 0:
+        warehouseRatio = round(warehouseUnitCount / warehouseTotalPositions, 2) * 100
+        # print('warehouseRatio',warehouseRatio)
+
+    if request.method == "POST":
+        # print("in Post method")
+        if 'applyFilter' in request.POST:
+            level = request.POST['level']
+            asile = request.POST['asile'].zfill(3)
+            position = request.POST['position'].zfill(3)
+            matching = request.GET['matching']
+
+            for key in request.POST:
+                print(key,request.POST[key])
+
+            if level != "All":
+                df = df[(df['nivel_y'] == int(level))]
+                # data = df.values.tolist()
+
+            if asile != "000":
+                print("in asile:",asile)
+                if matching == "0":
+                    print("in asile 1:", asile)
+                    df = df[df["AGVpos"].str[4:7] == asile]
+                    # df = df[df["AGVpos"] ]
+                else:
+                    print("in asile 2:", asile)
+                    df = df[df["wmsPosition"].str[4:7] ==asile]
+
+                data = df.values.tolist()
+
+            if position != '000':
+                print("in position:",position)
+
+                if matching == "0":
+                    print("in position1:", position)
+                    print(df["AGVpos"].str[8:10])
+                    df = df[df["AGVpos"].str[7:10] == position]
+                else:
+                    print("in position2:", position)
+
+                    df = df[df["wmsPosition"].str[8:10] == position]
+
+            data = df.values.tolist()
+
+        if 'exportData' in request.POST:
+            # print("009")
+
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename=exportedData_'+str(id_inspection)+'.csv'
+            # print("010")
+
+            df.to_csv(path_or_buf=response, sep=',', float_format='%.2f', index=False, decimal=".")
+
+            messages.success(request, 'Data Exported ')
+
+            return response
+
+    # print("011")
+    inspectionData = querys.getInspectionData(request.GET['id_inspection'])[0][0]
+    dataLenght = len(data)-1
+    # print("data: ",data)
+    # print("len: ",len(data))
+    # print(data[dataLenght][1])
+    if not df.empty:
+        lastReadQuery = "select substring(codePos,5,6) from inventorymaptbl where id_inspection = "+str(id_inspection)+" and codePos not like '' order by id_Vector desc limit 1;"
+        lastRead = querys.mysqlQuery(lastReadQuery)[0][0][0]
+        lastRead = "Aisle:"+lastRead[0:3]+ " Pos:"+lastRead[3:6]
     # print(lastRead)
 
     context = {'data':data,
