@@ -22,7 +22,9 @@ urlpatterns = [
     path('test',views.testPage, name='testpage'),
     path('importWMS',views.importWMS,name='importWMS'),
     path('readedAnalysis', views.readedAnalysis, name='readedAnalysis'),
+    path('readedAnalysisVR', views.readedAnalysisVR, name='readedAnalysisVR'),
 
+    path('plusMinus', views.plusMinus, name='plusMinus'),
 
     path("password-reset",
          auth_views.PasswordResetView.as_view(template_name="registration/password_reset.html"),

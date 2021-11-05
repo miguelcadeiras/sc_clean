@@ -383,9 +383,21 @@ def allPDvr(request):
         #EXPORT FULL INFO TO DEBUG
             # df.to_excel("resMergeWms.xlsx", sheet_name='ddp_dfwms_onCodeUnit-wmsProduct')
         ###################################################################
-        print(df)
-        df = df[['vRack','wmsProduct','codeUnit','nivel','pos','wmsPosition','wmsDesc','wmsDesc1','wmsdesc2','match','picPath']]
-        description = ['rack','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsDesc2','c','pic']
+
+
+        validationQuery = "select * from validationtbl where id_inspection = " + str(
+            id_inspection) + " order by id_validation;"
+        dfv= pdQuery.pdDF(validationQuery)
+        dfv = dfv.drop_duplicates(subset='product', keep='last')
+        dfv
+        df['verified'] = df.apply(
+            lambda x: dfv['validation'][dfv['product'] == x['codeUnit']].tolist()[0] if x['codeUnit'] in dfv[
+                'product'].tolist() else False, axis=1)
+        print(df[df.wmsProduct.isin(dfv['product'].tolist())])
+
+        # print(df)
+        df = df[['verified','wmsProduct','codeUnit','nivel','pos','wmsPosition','wmsDesc','wmsDesc1','wmsdesc2','match','picPath']]
+        description = ['vf','wmsProduct','codeUnit','N','AGVpos','wmsPos','wmsDesc','wmsDesc1','wmsDesc2','c','pic']
 
 
     data = df.values.tolist()
@@ -487,7 +499,6 @@ def allPDvr(request):
         lastRead = querys.mysqlQuery(lastReadQuery)[0][0][0]
         lastRead = "Aisle:"+lastRead[0:3]+ " Pos:"+lastRead[3:6]
     # print(lastRead)
-
     context = {'data':data,
                'description':description,
                'clientName': request.user.profile.client,
@@ -507,7 +518,6 @@ def allPDvr(request):
                }
 
     return render(request, 'allPD.html', context)
-
 
 @login_required(login_url="/login/")
 def levelPics(request):
@@ -585,7 +595,7 @@ def levelPics(request):
 
     return render(request, 'levelPics.html', context)
 
-# @login_requierd(login_url="/login/")
+@login_required(login_url="/login/")
 def readedAnalysis(request):
     """
     The idea in this page is to show reliable info so when running an inspection we can understand
@@ -666,7 +676,91 @@ def readedAnalysis(request):
 
     return render(request, 'readedAnalysis.html', context)
 
+@login_required(login_url="/login/")
+def readedAnalysisVR(request):
+    """
+    The idea in this page is to show reliable info so when running an inspection we can understand
+    what is going on on real time
+    :param request:
+    :return:
 
+    """
+    # print("readedAnalysisVR","1"*10,"*"*20)
+    id_inspection = request.GET['id_inspection']
+    id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
+    wms_data = querys.mysqlQuery("select count(distinct wmsposition) from wmspositionmaptbl where id_inspection = "+str(id_inspection))[0][0][0]
+    jsonData = []
+    reqAsile = request.GET['asile']
+    reqLevel = request.GET['level']
+    # print("readedAnalysisVR","2"*10,"*"*20)
+
+    if wms_data > 0:
+        jsonData = pdQuery.agregatesVR(id_inspection,reqAsile,reqLevel)
+        # print(jsonData)
+        barDict = json.loads(jsonData[0])
+    else:
+        jsonData = pdQuery.readAggregate(id_inspection)
+        barDict = json.loads(jsonData[0])
+
+    # print(jsonData,type(jsonData))
+    # print("barDict: ",barDict)
+    # ORGANIZO LAS SERIES PARA DATASETS DE CHART.JS NO VAN EN PARES SINO EN SETS DIFERENTES
+    sd = []
+    totalDatasets = len(barDict["data"][0])
+    # print("totalDatasets:",totalDatasets)
+    # print("readedAnalysisVR", "3" * 10, "*" * 20)
+
+    for i in range(0,totalDatasets):
+        sd.append([])
+    for item in barDict["data"]:
+
+        for index,value in enumerate(item):
+            # print(value,index)
+            sd[index].append(value)
+    #####################################################
+    ## para el chart agregado por nivel
+    ##############################################
+    barLevelDict = json.loads(jsonData[1])
+    # print("barLevelDict: ",barLevelDict)
+    # ORGANIZO LAS SERIES PARA DATASETS DE CHART.JS NO VAN EN PARES SINO EN SETS DIFERENTES
+    sdLevel = []
+    totalDatasets = len(barLevelDict["data"][0])
+    # print("totalDatasets:",totalDatasets)
+    for i in range(0, totalDatasets):
+        sdLevel.append([])
+    for item in barLevelDict["data"]:
+
+        for index, value in enumerate(item):
+            # print(value,index)
+            sdLevel[index].append(value)
+    #####################################################
+    # print(sd)
+    table = []
+    # print(barDict["index"])
+    for index,row in enumerate(barDict["index"]):
+        # print("index,row",index,row,sd[0])
+        # print(sd)
+
+        table.append([row,sd[0][index],sd[1][index],sd[2][index],int(sd[0][index])-int(sd[1][index])])
+
+    # print("table",table)
+    context = {
+            'barSeries':barDict["columns"],
+            'barX':barDict["index"],
+            'barDataSets': sd,
+            'table':table,
+            'barLevelSeries':barLevelDict["columns"],
+            'barLevelX': barLevelDict["index"],
+            'barLevelDataSets': sdLevel,
+            'wmsDataBool': True if wms_data>0 else False,
+            'levels': barLevelDict["index"],
+            'asiles': barDict["index"],
+            'inspection': querys.getInspectionData(request.GET['id_inspection']),
+
+    }
+    # print("readedAnalysisVR","end"*10,"*"*20)
+
+    return render(request, 'readedAnalysis.html', context)
 
 @login_required(login_url="/login/")
 def carrousel(request):
@@ -867,8 +961,92 @@ def importWMS(request):
                "description": description[0],
                "wmsPositions":wmsPositions,
                "id_warehouse":id_warehouse,
+               'inspection': querys.getInspectionData(request.GET['id_inspection']),
+
                }
     return render(request, 'importWMS.html', context)
+
+@login_required(login_url="/login/")
+def plusMinus(request):
+    id_inspection = request.GET['id_inspection']
+    id_unit = request.GET['id_unit']
+    agvPos = request.GET['agvPos']
+    data = []
+    wmsData = []
+    pos=""
+    unit=""
+    # print(id_inspection)
+
+    validationQuery = "select * from validationtbl where product like '"+id_unit+"' and id_inspection = "+str(id_inspection)+" order by id_validation desc limit 1;"
+    dfv=pdQuery.pdDF(validationQuery)
+    if len(dfv)>0:
+        messages.success(request,"Data Validated: " +str(dfv['validation'][0])+ " : "+ str(dfv['position'][0])+" , " + str(dfv['product'][0])+" : validated by "+ str(dfv['user'][0])+"    || Comments: "+str(dfv['comment'][0]))
+        print("Comment: ",str(dfv['comment'][0]))
+    if len(id_unit)>3:
+        dfu = pdQuery.getRawDataByUnit(id_inspection, id_unit)
+        data = dfu.values.tolist()
+        unit = id_unit
+
+        dfw = pdQuery.getWmsPosByUnit(id_inspection,id_unit)
+
+    if request.method == "POST":
+        print(request.POST.keys())
+
+        if "comment" in request.POST.keys():
+            if "acceptwms"in request.POST.keys():
+                query = "insert into validationtbl (id_inspection,position,product,comment,user,validation) values ("+str(id_inspection)+",'"+str(dfw["wmsPosition"][0])+"','"+str(id_unit)+"','"+request.POST["comment"]+"','"+request.user.username+"','wms')"
+                print(str(dfw["wmsPosition"][0])," : : dfw['wmsPosition']")
+                querys.execute(query)
+            if "discrep"in request.POST.keys():
+                query = "insert into validationtbl (id_inspection,position,product,comment,user,validation) values ("+str(id_inspection)+",'"+str(agvPos)+"','"+str(id_unit)+"','"+request.POST["comment"]+"','"+request.user.username+"','agv')"
+                # query = "insert into validationtbl (id_inspection,position,product,comment,user,validation) values (1,'UBF1900890','PA33123','TEST VALUE','TESTUSER','wms')"
+                querys.execute(query)
+
+            messages.success(request,"PA - Validated. Thank you")
+            print('plusMinus?id_inspection='+str(id_inspection)+'&id_unit='+unit+'&agvPos='+str(agvPos))
+            return redirect('/plusMinus?id_inspection='+str(id_inspection)+'&id_unit='+unit+'&agvPos='+str(agvPos))
+
+
+        if "position" in request.POST.keys():
+            pos = request.POST["position"]
+            unit = request.POST["unit"]
+
+            for key in request.POST.keys():
+                print(key,request.POST[key])
+
+
+            if len(request.POST['position'])>= 10:
+                df = pdQuery.virtualRack(id_inspection)
+                print("Searching by pos:",pos)
+
+                df['codePos_Sub'] = df['codePos'].apply(lambda x: x[0:10] if x is not None else x)
+
+                index = df[df['codePos'].str[0:10] == pos][['rack', 'vRack', 'x', 'codePos']].index[0]
+                print(index)
+                df[df['codePos'].str[0:10] == pos][['rack', 'vRack', 'x', 'codePos', 'codePos_Sub']]
+                bottomindex = 0 if index - 8 < 1 else index - 8
+                dfu =df.iloc[bottomindex:index + 20, [0, 1, 2, 5, 6, 7, 10, 15, 21, 22]]
+                data = dfu.values.tolist()
+
+            else:
+
+                if len(request.POST['unit'])>= 7:
+                    dfu = pdQuery.getRawDataByUnit(id_inspection,unit)
+                    data = dfu.values.tolist()
+
+                    dfw = pdQuery.getWmsPosByUnit(id_inspection, id_unit)
+
+
+    context = {"data": data,
+               "description":['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel'],
+               "lastSearchUnit":  unit,
+               "lastSearchPos":pos,
+               'inspection': querys.getInspectionData(request.GET['id_inspection']),
+               'wmsData': dfw,
+               'validation':dfv['validation']
+
+               }
+    return render(request, 'plusMinus.html', context)
 
 # @login_required(login_url="/login/")
 # def pages(request):

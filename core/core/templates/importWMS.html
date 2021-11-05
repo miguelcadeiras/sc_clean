@@ -10,6 +10,13 @@
 
 {% block content %}
  <div id="loading" class="overlay">Please Wait. Loading Data...<i class="fas fa-2x fa-sync-alt fa-spin"></i></div>
+
+ <span>
+<!--            {{warehouseName.0.0.1}},{{warehouseName.0.0.2}},<br>{{warehouseName.0.0.3}}<br>-->
+             Inspection date:{{inspection.0.0.1}} || Description :<a href="/all?id_inspection={{request.GET.id_inspection}}&qty=500&offset=0&matching=1&pic=0"> {{inspection.0.0.0}}</a> </span>
+
+<!--            Inspection date:{{inspection.1}} || Description : {{inspection.0}} -->
+        </span>
 <div class="row">
 
     <div class ="col-6">

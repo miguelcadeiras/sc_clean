@@ -15,6 +15,8 @@
 
 
 {% block indicators %}
+<!-- <div id="loading" class="overlay">Please Wait. Loading Data...<i class="fas fa-2x fa-sync-alt fa-spin"></i></div>-->
+
 <div class="row">
     <div class="col-lg-4" >
         <span>
@@ -36,7 +38,7 @@
 
 <div class="row">
     <!-- Left col -->
-    <section class="col-lg-10   connectedSortable">
+    <section class="col-lg-10  ">
         <!-- Custom tabs (TABLE)-->
         <div class="card">
             <div class="card-header">
@@ -74,7 +76,7 @@
                         <tbody>
                         {% for row in data %}
                         {% if forloop.counter < 3000 %}
-                        <tr role="row" class="odd {% if request.GET.matching == '1' and row.9 == False  %}bg-danger{% endif %}">
+                        <tr role="row" class="odd {% if request.GET.matching == '1' and row.0 != False  %}bg-warning {% elif request.GET.matching == '1' and row.9 == False  %}bg-danger{% endif %}">
                             {% for item in row %}
 
                             {% if forloop.last  %}
@@ -97,11 +99,16 @@
                             {% else %}
                             <td>
                                 {% if forloop.first  %}
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="" id="{{row.5}}">
-                                </div>
+                                    {% if item != False %}{{item}} {% endif %}
                                 {% else %}
-                                    {{item}}
+                                    {% if forloop.counter == 3 and row.9 == False %}
+                                    <a href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.4}}" target="_blank" >{{item}}</a>
+                                    {% else %}
+                                        {{item}}
+                                    {% endif %}
+
+
+
                                 {% endif %}
                             </td>
 

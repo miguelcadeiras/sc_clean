@@ -921,7 +921,7 @@ def decodeMach(id_inspection,export_to_excel=False):
     return resMergeWms
 
 def decodeMachPAVR(id_inspection):
-    print("decodeMachVR() ---", "*"*15)
+    # print("decodeMachVR() ---", "*"*15)
     df = virtualRack(id_inspection)
 
     # GETTING JUST POSITION and vRack
@@ -985,7 +985,7 @@ def decodeMachPAVR(id_inspection):
 
     # UNIMOS LOS 2
     dfTotalMatch = df_testProduct.append(df_noProduct)
-    print("decodeMachVR() ---END ---", "*"*15)
+    # print("decodeMachVR() ---END ---", "*"*15)
 
     return dfTotalMatch
 
@@ -1155,6 +1155,127 @@ def agregates(id_inspection,reqAsile,reqLevel):
 
     return json_array
 
+def agregatesVR(id_inspection,reqAsile,reqLevel):
+    """
+    The idea in this page is to show reliable info so when running an inspection we can understand
+    what is going on on real time
+    :param request:
+    :return: json_array
+
+    """
+    # print("reqAsile",reqAsile)
+    # print("reqLevel",reqLevel)
+    json_array = []
+
+    levelFactor = querys.getLevelFactor(id_inspection)
+
+
+    df = decodeMachPAVR(id_inspection)
+    # print("carrousel df,")
+    # print(df.columns)
+    df = df[
+        ['vRack', 'wmsProduct', 'codeUnit', 'nivel', 'pos', 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2',
+         'match', 'picPath']]
+
+    df['asile'] = df['wmsPosition'].str[4:7]
+    df['position'] = df['wmsPosition'].str[8:11]
+    df['level'] = df['wmsPosition'].str[10:12]
+    # print("agregatesVR","1"*20)
+
+    # dfx = df[df["wmsPosition"].notnull()]
+    # print('dfx: ', dfx)
+    # dfa = dfx["wmsPosition"].str[4:7].unique()
+    # print("dfa", dfa)
+
+
+    # print(df[['wmsPosition','asile','level']])
+    dfnan = df.replace(r'', np.NaN)
+    # print(dfnan.info())
+    dfnan["ex"] = np.NaN
+    dfnan["ex"]  = dfnan["match"]*1
+    dfnan= dfnan.replace(1,np.NaN)
+    # print(dfnan["ex"].count)
+
+    # print('dfnan ##' *5)
+    # print()
+
+
+    # print(dfnan[['asile','level','wmsProduct','codeUnit','ex']])
+
+    # PLOTING ..  BY LEVEL AND BY ASILE
+    # print('Ploting by Asile...')
+    if reqLevel != 'All':
+        # print("asile not All:",reqAsile)
+        dfnanF = dfnan[dfnan['level'] == reqLevel]
+        # print(dfnanF)
+    else:
+        dfnanF = dfnan
+    dfagg = dfnanF[['asile','wmsProduct','codeUnit','ex']].groupby(['asile'])
+
+    # print("-dfnanF"*0,dfnanF[['asile','wmsProduct','codeUnit','ex']])
+    dfCount = dfagg.count()
+    # print("-dfCount:","+" * 50)
+    # print(dfCount)
+    # print("(("*30)
+    # print(dfCount)
+    json_array.append(dfCount.to_json(orient='split'))
+    # dfCount.plot(kind='bar',title='Pasillos y Lecturas', ylabel='Observed PA',
+    #              xlabel='Asile',figsize=(14,6))
+    # print('Ploting by LEVEL...')
+
+    ### COUNTING MATCHING BY ASILE
+    # print("not matching + readed and unreaded")
+    dfagg = dfnanF[['asile', 'wmsPosition','codeUnit', 'ex']].groupby(['asile'])
+    # print(dfagg.ex.value_counts())
+    # print(dfnanF)
+    dfreadedAgg = dfnanF[dfnanF.codeUnit.notnull()]
+    # print(dfreadedAgg)
+    dfagg = dfreadedAgg[['asile', 'wmsPosition', 'codeUnit','ex']].groupby(['asile'])
+    # print("not matching"+"^^"*30)
+    # print(dfagg.ex.value_counts())
+    #####
+
+    if reqAsile != 'All':
+        # print("level not All",reqLevel)
+        dfnanF = dfnan[dfnan['asile'] == reqAsile]
+        # print(dfnanF)
+    else:
+        dfnanF = dfnan
+
+    dfagg = dfnanF[['level','wmsProduct','codeUnit','ex']].groupby(['level'])
+
+
+    dfCount = dfagg.count()
+    json_array.append(dfCount.to_json(orient='split'))
+    # dfCount.plot(kind='bar', title='Niveles y Lecturas', ylabel='Observed PA',
+    #              xlabel='level')
+
+    ## TRYING TO PLOT ALL ASILES BY EACH LEVEL
+    # print('Ploting ASILES BY LEVEL...')
+
+    dfagg = dfnanF[['asile','level','wmsProduct','codeUnit','ex']].groupby(['level','asile'])
+
+    dfCount = dfagg.count()
+    json_array.append(dfCount.to_json(orient='split'))
+
+    # print(dfnan['level'].unique())
+    # print('____before for:')
+
+
+    for level in dfnan['level'].unique():
+        # print(level)
+        dfagg = dfnanF[dfnan['level']==level]
+        dfagg = dfagg[['asile', 'wmsProduct', 'codeUnit','ex']].groupby([ 'asile'])
+        dfCount = dfagg.count()
+        # dfCount.plot(kind='bar', title='NIVEL '+str(level)+' - Pasillos y Lecturas', ylabel='Observed PA',
+        #              xlabel='Asile', figsize=(14, 6))
+        json_array.append(dfCount.to_json(orient='split'))
+
+    # print("agregatesVR ------END ------","*"*20)
+
+    return json_array
+
+
 def readAggregate(id_inspection):
     json_array = []
 
@@ -1186,7 +1307,62 @@ def readAggregate(id_inspection):
     # print (json_array)
     return json_array
 
+def getRawDataByUnit(id_inspection,unit):
 
+    query0 = "set @vector=0 ;"
+    query1 = "select id_Vector into @vector from inventorymaptbl where id_inspection=" + str(
+        id_inspection) + " and codeUnit like '" + unit + "' order by rack desc limit 1;"
+    query3 = "select * from inventorymaptbl where id_inspection= "+str(id_inspection)+" and id_Vector>@vector-10 and id_Vector<@vector+15 order by rack desc;"
+
+    # print(query1)
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+
+    dbConnection.execute(query1)
+    # dfv = pd.read_sql("select @vector", dbConnection)
+    # print("dfv:",dfv)
+    dfp = pd.read_sql(query3, dbConnection)
+
+    dbConnection.close()
+
+    return dfp[['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel']]
+
+def getWmsPosByUnit(id_inspection,unit):
+    query1 = "select * from wmspositionmaptbl where id_inspection= " + str(
+        id_inspection) + " and wmsProduct like '"+unit+"';"
+
+    # print(query1)
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+    # dbConnection.execute(query1)
+    # dfv = pd.read_sql("select @vector", dbConnection)
+    # print("dfv:",dfv)
+    dfp = pd.read_sql(query1, dbConnection)
+    # print("dfp"*20,dfp)
+    dbConnection.close()
+    return dfp
+
+def getWmsPosByUnit(id_inspection,unit):
+    query1 = "select * from wmspositionmaptbl where id_inspection= " + str(
+        id_inspection) + " and wmsProduct like '"+unit+"';"
+
+    # print(query1)
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+    # dbConnection.execute(query1)
+    # dfv = pd.read_sql("select @vector", dbConnection)
+    # print("dfv:",dfv)
+    dfp = pd.read_sql(query1, dbConnection)
+    # print("dfp"*20,dfp)
+    dbConnection.close()
+    return dfp
+
+def pdDF(query):
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+    dfp = pd.read_sql(query, dbConnection)
+    dbConnection.close()
+    return dfp
 
 
 
