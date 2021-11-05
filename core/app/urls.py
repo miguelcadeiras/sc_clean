@@ -12,7 +12,7 @@ urlpatterns = [
    # The home page
     path('', views.index, name='home'),
     path('inspections',views.inspections,name='inspections'),
-    path('all',views.allPD,name='all'),
+    path('all',views.allVR_noPD,name='all'),
     # path('allPD',views.allPD,name='allPD'),
     path('allPDvr', views.allPDvr, name='allPDvr'),
     path('allVR_noPD', views.allVR_noPD, name='allVR_noPD'),
@@ -22,8 +22,9 @@ urlpatterns = [
     path('level', views.level, name='level'),
     path('test',views.testPage, name='testpage'),
     path('importWMS',views.importWMS,name='importWMS'),
-    path('readedAnalysis', views.readedAnalysis, name='readedAnalysis'),
-    path('readedAnalysisVR', views.readedAnalysisVR, name='readedAnalysisVR'),
+    # path('readedAnalysis', views.readedAnalysis, name='readedAnalysis'),
+    path('readedAnalysis', views.readedAnalysisVR_noPD, name='readedAnalysis'),
+    path('readedAnalysisVR', views.readedAnalysisVR_noPD, name='readedAnalysisVR'),
 
     path('plusMinus', views.plusMinus, name='plusMinus'),
 
