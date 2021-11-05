@@ -15,6 +15,7 @@ urlpatterns = [
     path('all',views.allPD,name='all'),
     # path('allPD',views.allPD,name='allPD'),
     path('allPDvr', views.allPDvr, name='allPDvr'),
+    path('allVR_noPD', views.allVR_noPD, name='allVR_noPD'),
 
     path('levelPics',views.levelPics,name='levelPics'),
     path('carrousel', views.carrousel, name='carrousel'),
