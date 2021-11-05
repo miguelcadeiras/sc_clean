@@ -585,6 +585,7 @@ def allVR_noPD(request):
         id_inspection)
     # query = "SELECT distinct SUBSTRING(codePos,1,12) from inventorymaptbl where id_inspection = "+id_inspection+" AND codePos not like '%XX%';"
     readedPositions = querys.mysqlQuery(query)[0][0][0]
+    print(readedPositions)
     print("4","*"*30)
     # print('readedPositions',readedPositions)
     query = "select count(distinct(codeUnit)) from inventorymaptbl where codeUnit not like ''  and id_inspection=" + str(id_inspection)
@@ -596,7 +597,8 @@ def allVR_noPD(request):
 
 
     if int(readedCount) > 0:
-        readedRatio = round(readedCount / readedPositions, 2) * 100
+        if readedPositions>0:
+            readedRatio = round(readedCount / readedPositions, 2) * 100
         # print('readedRatio',readedRatio)
 
     print("6","*"*30)
