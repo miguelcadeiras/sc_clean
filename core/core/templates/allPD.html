@@ -41,10 +41,10 @@
     <section class="col-lg-10  ">
         <!-- Custom tabs (TABLE)-->
         <div class="card">
-            <div class="card-header">
+            <div class="card-header {% if request.GET.matching == '2' %}bg-danger{% endif %}">
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="row">
+                        <div class="row ">
                             <div class="col-md-3"><h3 class="card-title text-bold">Position | Unit match</h3></div>
                             <div class="col-lg-6">
                                 {% include '_includes/searchBox.html' %}
@@ -53,6 +53,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
                 <!-- /.card-header -->
                 <div class="card-body">
                     <table id="table1" name="example1" class="table table-bordered table-striped dataTable " role="grid" aria-describedby="table1_info" style="width:100%">
@@ -102,7 +103,7 @@
                                     {% if item != False %}{{item}} {% endif %}
                                 {% else %}
                                     {% if forloop.counter == 3 and row.9 == False %}
-                                    <a href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.4}}" target="_blank" >{{item}}</a>
+                                    <a href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.4}}&list={{falsePAlist}}" target="_blank" >{{item}}</a>
                                     {% else %}
                                         {{item}}
                                     {% endif %}
@@ -151,7 +152,7 @@
 
     <!-- /.Left col -->
     <!-- right col (We are only adding the ID to make the widgets sortable)-->
-
+{{falsePAlist}}
     <!-- right col -->
 </div>
 

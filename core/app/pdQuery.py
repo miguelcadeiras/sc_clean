@@ -990,7 +990,6 @@ def decodeMachPAVR(id_inspection):
     return dfTotalMatch
 
 def decodeMachVR_noPD(id_inspection):
-    # print("decodeMachVR() ---", "*"*15)
     df = virtualRack(id_inspection)
 
     # GETTING JUST POSITION and vRack
@@ -1085,7 +1084,11 @@ def decodeMachVR_noPD(id_inspection):
 
     dfResult_nPA = df_productsResult.append(df_noProductTest)
     dfResult_nPA['aPos'] = dfResult_nPA['pos'].str[4:10]
+    dfResult_nPA['match']=False
+    dfResult_nPA['desc'] =""
+
     dfResult_nPA['match'] = dfResult_nPA.apply(lambda x: True if x['pos'] == x['wmsPos'] else False, axis=1)
+
     dfResult_nPA['desc'] = dfResult_nPA.apply(lambda x: reason(x), axis=1)
 
     col_names = ['pos',
@@ -1093,7 +1096,6 @@ def decodeMachVR_noPD(id_inspection):
                  'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'wPos', 'aPos', 'match', 'desc', 'picPath']
     dfResult_nPA = dfResult_nPA.reindex(columns=col_names)
 
-    # print("decodeMachVR() ---END ---", "*"*15)
 
     return dfResult_nPA
 

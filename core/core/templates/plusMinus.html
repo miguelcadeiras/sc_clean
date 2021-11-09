@@ -17,12 +17,23 @@
 {% block indicators %}
 <div class="row">
     <div class="col-lg-4" >
+        <div class ="row">
         <span>
 <!--            {{warehouseName.0.0.1}},{{warehouseName.0.0.2}},<br>{{warehouseName.0.0.3}}<br>-->
-             Inspection date:{{inspection.0.0.1}} || Description :<a href="/all?id_inspection={{request.GET.id_inspection}}&qty=500&offset=0&matching=1&pic=0"> {{inspection.0.0.0}}</a> </span>
-
-        <!--            Inspection date:{{inspection.1}} || Description : {{inspection.0}} -->
+             Inspection date:{{inspection.0.0.1}} || Description :<a href="/all?id_inspection={{request.GET.id_inspection}}&qty=500&offset=0&matching=1&pic=0"> {{inspection.0.0.0}}</a>
         </span>
+
+        </div>
+        <div class="row">
+            <div class="col-6 ">
+                <a href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{backUnit}}&agvPos={{row.4}}&list={{falsePAList}}"  ><i class="fas fa-arrow-right">BACK</i></a>
+            </div>
+            <div class="col-6 ">
+                <a href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{nextUnit}}&agvPos={{row.4}}&list={{falsePAList}}"  ><i class="fas fa-arrow-right">NEXT</i></a>
+            </div>
+
+        </div>
+
 
     </div>
     <div class ="col-4">
@@ -191,4 +202,6 @@
 
 } );
 </script>
+
+        {{falsePAList}}
         {% endblock %}

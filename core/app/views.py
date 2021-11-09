@@ -1,5 +1,4 @@
 import json
-
 from django.shortcuts import render
 import numpy as np
 import pandas as pd
@@ -542,6 +541,7 @@ def allVR_noPD(request):
         description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
         # print("runningPosVR-completed: ",df)
     else:
+
         df = pdQuery.decodeMachVR_noPD(id_inspection)
         df = df.fillna('')
         #################################################################
@@ -554,17 +554,21 @@ def allVR_noPD(request):
             id_inspection) + " order by id_validation;"
         dfv= pdQuery.pdDF(validationQuery)
         dfv = dfv.drop_duplicates(subset='product', keep='last')
-        dfv
+
+        df['verified'] =""
         df['verified'] = df.apply(
             lambda x: dfv['validation'][dfv['product'] == x['codeUnit']].tolist()[0] if x['codeUnit'] in dfv[
                 'product'].tolist() else False, axis=1)
         # print(df[df.wmsProduct.isin(dfv['product'].tolist())])
 
-        print(df.columns)
+        #print(df.columns)
         df = df[['verified','wmsProduct','codeUnit','nivel','pos','wmsPosition','wmsDesc','wmsDesc1','wmsdesc2','match','desc','picPath']]
         description = ['vf','wmsProduct','codeUnit','N','AGVpos','wmsPos','D1','Description','D2','c','desc','p']
 
-    print("1","*"*30)
+        if request.GET['matching']=='2':
+            print('here')
+            df = df[df['match']==False]
+
     data = df.values.tolist()
     # description = list(df.columns.values)
     # print("data:"*10)
@@ -573,24 +577,21 @@ def allVR_noPD(request):
     query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection=' + str(id_inspection)
     warehouseTotalPositions = querys.mysqlQuery(query)[0][0][0]
 
-    print("2","*"*30)
     # print( 'warehouseTotalPositions',warehouseTotalPositions)
     query = "select count(wmsProduct) from wmspositionmaptbl where wmsproduct not like '' and id_inspection=" + str(
         id_inspection)
     warehouseUnitCount = querys.mysqlQuery(query)[0][0][0]
-    print("3","*"*30)
+
     # print('warehouseTotalCount',warehouseUnitCount)
     # en esta query hay que tener encuenta que en cencosud hay etiquetas que son  XX, etiquetas del primer nivel tambien, terminan en 01 y tienen 12 caracteres.
     query = "select count(distinct(codePos)) from inventorymaptbl where codePos not like '' and codePos not like '%XX%' and substring(codePos,11,2) not like '01'  and id_inspection=" + str(
         id_inspection)
     # query = "SELECT distinct SUBSTRING(codePos,1,12) from inventorymaptbl where id_inspection = "+id_inspection+" AND codePos not like '%XX%';"
     readedPositions = querys.mysqlQuery(query)[0][0][0]
-    print(readedPositions)
-    print("4","*"*30)
     # print('readedPositions',readedPositions)
     query = "select count(distinct(codeUnit)) from inventorymaptbl where codeUnit not like ''  and id_inspection=" + str(id_inspection)
     readedCount = querys.mysqlQuery(query)[0][0][0]
-    print("5","*"*30)
+
     # print('readedCount',readedCount)
     # print(data)
     readedRatio = 0
@@ -601,7 +602,7 @@ def allVR_noPD(request):
             readedRatio = round(readedCount / readedPositions, 2) * 100
         # print('readedRatio',readedRatio)
 
-    print("6","*"*30)
+
     warehouseRatio = 0
     if warehouseTotalPositions > 0:
         warehouseRatio = round(warehouseUnitCount / warehouseTotalPositions, 2) * 100
@@ -661,7 +662,7 @@ def allVR_noPD(request):
 
             return response
 
-    print("7","*"*30)
+
     # print("011")
     inspectionData = querys.getInspectionData(request.GET['id_inspection'])[0][0]
     dataLenght = len(data)-1
@@ -673,7 +674,7 @@ def allVR_noPD(request):
         lastRead = querys.mysqlQuery(lastReadQuery)[0][0][0]
         lastRead = "Aisle:"+lastRead[0:3]+ " Pos:"+lastRead[3:6]
     # print(lastRead)
-    print("8","*"*30)
+
     context = {'data':data,
                'description':description,
                'clientName': request.user.profile.client,
@@ -689,7 +690,9 @@ def allVR_noPD(request):
                'inspection': inspectionData ,
                'picpath': picpath,
                'levels': levels,
-               'lastRead':lastRead
+               'lastRead':lastRead,
+               'falsePAlist':df['codeUnit'][df['match']==False].tolist()
+
                }
 
     return render(request, 'allPD.html', context)
@@ -1231,12 +1234,21 @@ def importWMS(request):
 def plusMinus(request):
     id_inspection = request.GET['id_inspection']
     id_unit = request.GET['id_unit']
+    falseList=request.GET['list']
     agvPos = request.GET['agvPos']
     data = []
     wmsData = []
     pos=""
     unit=""
     # print(id_inspection)
+    #falseList=json.load(falseList)
+    falseList=falseList[1:-1].replace(" ","")
+    falseList=falseList.replace("'","")
+
+    falseList=falseList.split(",")
+
+    falseIndex =falseList.index(id_unit)
+    # print(falseIndex,falseList)
 
     validationQuery = "select * from validationtbl where product like '"+id_unit+"' and id_inspection = "+str(id_inspection)+" order by id_validation desc limit 1;"
     dfv=pdQuery.pdDF(validationQuery)
@@ -1264,8 +1276,8 @@ def plusMinus(request):
                 querys.execute(query)
 
             messages.success(request,"PA - Validated. Thank you")
-            print('plusMinus?id_inspection='+str(id_inspection)+'&id_unit='+unit+'&agvPos='+str(agvPos))
-            return redirect('/plusMinus?id_inspection='+str(id_inspection)+'&id_unit='+unit+'&agvPos='+str(agvPos))
+            # print('plusMinus?id_inspection='+str(id_inspection)+'&id_unit='+unit+'&agvPos='+str(agvPos))
+            return redirect('/plusMinus?id_inspection='+str(id_inspection)+'&id_unit='+unit+'&agvPos='+str(agvPos)+'&list='+str(falseList))
 
 
         if "position" in request.POST.keys():
@@ -1304,10 +1316,23 @@ def plusMinus(request):
                "lastSearchPos":pos,
                'inspection': querys.getInspectionData(request.GET['id_inspection']),
                'wmsData': dfw,
-               'validation':dfv['validation']
+               'validation':dfv['validation'],
+               'falsePAList': falseList,
+               'falseIndex': falseIndex,
+               'nextUnit': falseList[falseIndex+1] if falseIndex<len(falseList)-1 else unit,
+               'backUnit': falseList[falseIndex-1] if falseIndex>0 else unit,
 
                }
     return render(request, 'plusMinus.html', context)
+
+@login_required(login_url="/login/")
+def status(request):
+
+    context = {}
+    if request.user.groups=='driver':
+        return render(request,"status.html",context)
+
+    return render(request,"status.html",context)
 
 # @login_required(login_url="/login/")
 # def pages(request):
