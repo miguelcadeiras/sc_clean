@@ -46,12 +46,12 @@
 
 {% block content %}
 
-
+<div class="container-fluid">
 <div class="row">
     <!-- Left col -->
     <!--    <section class="col-lg-10   connectedSortable">-->
     <!-- Custom tabs (TABLE)-->
-    <div class = "col-8">
+    <div class = "col-md-6 col-sm-11">
         <div class="card">
             <div class="card-header">
                 <div class="row">
@@ -138,7 +138,7 @@
             <!-- right col -->
         </div>
     </div>
-    <div class = "col-4">
+    <div class = "col-md-4 col-sm-11">
         <div class="card">
             <div class="card-header {% if validation.0 == 'wms' %}bg-success{% elif validation.0 == 'agv' %}bg-danger{% else %}bg-info{% endif %}">
                 <h2>WMS Information</h2>
@@ -203,5 +203,7 @@
 } );
 </script>
 
-        {{falsePAList}}
+
         {% endblock %}
+
+        </div>

@@ -2,7 +2,7 @@ import json
 from django.shortcuts import render
 import numpy as np
 import pandas as pd
-
+from django.contrib.auth.models import User, Group
 # Create your views here.
 from django.conf import settings
 from django.shortcuts import render
@@ -604,6 +604,7 @@ def allVR_noPD(request):
 
 
     warehouseRatio = 0
+    # print(warehouseTotalPositions)
     if warehouseTotalPositions > 0:
         warehouseRatio = round(warehouseUnitCount / warehouseTotalPositions, 2) * 100
         # print('warehouseRatio',warehouseRatio)
@@ -675,6 +676,7 @@ def allVR_noPD(request):
         lastRead = "Aisle:"+lastRead[0:3]+ " Pos:"+lastRead[3:6]
     # print(lastRead)
 
+
     context = {'data':data,
                'description':description,
                'clientName': request.user.profile.client,
@@ -691,7 +693,7 @@ def allVR_noPD(request):
                'picpath': picpath,
                'levels': levels,
                'lastRead':lastRead,
-               'falsePAlist':df['codeUnit'][df['match']==False].tolist()
+               'falsePAlist':df['codeUnit'][df['match']==False].tolist() if int(request.GET['matching'])>0 else ""
 
                }
 
@@ -1327,12 +1329,75 @@ def plusMinus(request):
 
 @login_required(login_url="/login/")
 def status(request):
+    user = User.objects.get(username=request.user.username)  # get Some User.
 
-    context = {}
-    if request.user.groups=='driver':
+    # print(user.groups.filter(name='driver').exists())
+    if user.groups.filter(name='driver').exists():
+        messages.success(request, "You are an authorized User of this device")
+        id_device = request.GET['device']
+        dfStatus,voltages = pdQuery.getStatus(id_device)
+        # print(voltages)
+        if len(dfStatus)>0:
+            statusString = getStatusString(dfStatus['status'][0])
+        else:
+            statusString = "n/a"
+        lastRead = pdQuery.getLastPosition(id_device)
+        context = {"status":dfStatus,
+                   "statusSubstring":statusString,
+                   "voltages":voltages,
+                   "lastRead":lastRead
+
+                   }
         return render(request,"status.html",context)
+    else:
+        messages.success(request, "You are NOT authorized to this device")
+        return redirect("/login/")
 
-    return render(request,"status.html",context)
+
+@login_required(login_url="/login/")
+def devices(request):
+    user = User.objects.get(username=request.user.username)  # get Some User
+    print(user.username, user.groups.filter(name='driver').exists())
+    if user.groups.filter(name='driver').exists():
+        print("here")
+        messages.success(request, "You are an authorized User of this device")
+        dfDevices = pdQuery.getDevices()
+        data = dfDevices.values.tolist()[0]
+        description = dfDevices.columns.tolist()
+        print("description:",description)
+
+        context = {'data': data,
+                   'description': description,
+
+                   }
+
+        return render(request, "devices.html", context)
+    else:
+        messages.success(request, "You are NOT authorized to this device")
+        return redirect("/login/")
+
+
+
+def getStatusString(lastAcation):
+    print("lastAcation: ",lastAcation)
+    if lastAcation=="x":
+        return "voltage"
+    elif lastAcation=="p":
+        return "Following Line"
+    elif lastAcation=="s":
+        return "Backwards"
+    elif lastAcation=="w":
+        return "forward"
+    elif lastAcation=="a":
+        return "Turning Left"
+    elif lastAcation=="d":
+        return "Turning Right"
+    elif lastAcation == "0":
+        return "Stopped"
+    else:
+        return "No Status"
+
+
 
 # @login_required(login_url="/login/")
 # def pages(request):

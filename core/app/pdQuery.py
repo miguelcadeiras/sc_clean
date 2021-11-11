@@ -1594,6 +1594,49 @@ def pdDF(query):
     dbConnection.close()
     return dfp
 
+###############################
+
+def getStatus(device):
+    dfQuery = "select *  from status where device like '" + str(device) + "' and status not like 'x' order by id_status desc; "
+    dfVoltageQuery = "select *  from status where device like '" + str(device) + "' and status like 'x'; "
+    # print('dfQuery',dfQuery)
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+    dfStatus = pd.read_sql(dfQuery, dbConnection)
+    # status = dfStatus['status'][0]
+    df = pd.read_sql(dfVoltageQuery, dbConnection)
+    voltage = df['voltages'][0]
+    # print(voltage)
+    dbConnection.close()
+
+
+    return dfStatus,voltage
+
+def getDevices():
+    query = "select distinct device  from status ; "
+
+    # print('dfQuery',dfQuery)
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+    dfStatus = pd.read_sql(query, dbConnection)
+
+    dbConnection.close()
+
+
+    return dfStatus
+
+
+def getLastPosition(device):
+    lastReadQuery = "select substring(codePos,5,6) from inventorymaptbl where device like '"+str(device)+"' and codePos not like '' order by id_Vector desc limit 1;"
+    print(lastReadQuery)
+    lastRead = querys.mysqlQuery(lastReadQuery)[0][0][0]
+    print(lastRead)
+    if len(lastRead)==6:
+        lastRead = "Aisle:" + lastRead[0:3] + " Pos:" + lastRead[3:6]
+    else:
+        lastRead = ''
+    return lastRead
+
 
 
 
