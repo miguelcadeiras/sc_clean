@@ -1362,7 +1362,7 @@ def devices(request):
         # print("here")
         messages.success(request, "You are an authorized User of this device")
         dfDevices = pdQuery.getDevices()
-        data = dfDevices.values.tolist()[0]
+        data = dfDevices.values.tolist()
         description = dfDevices.columns.tolist()
         print("data: ",data)
         print("description:",description)
