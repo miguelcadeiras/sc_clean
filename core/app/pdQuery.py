@@ -1608,7 +1608,7 @@ def getStatus(device):
     voltage = df['voltages'][0]
     # print(voltage)
     dbConnection.close()
-
+    print("dfStatus:",dfStatus)
 
     return dfStatus,voltage
 
