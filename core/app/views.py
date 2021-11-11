@@ -1364,8 +1364,8 @@ def devices(request):
         dfDevices = pdQuery.getDevices()
         data = dfDevices.values.tolist()
         description = dfDevices.columns.tolist()
-        print("data: ",data)
-        print("description:",description)
+        # print("data: ",data)
+        # print("description:",description)
 
         context = {'data': data,
                    'description': description,

@@ -1629,9 +1629,12 @@ def getDevices():
 def getLastPosition(device):
     lastReadQuery = "select substring(codePos,5,6) from inventorymaptbl where device like '"+str(device)+"' and codePos not like '' order by id_Vector desc limit 1;"
     # print(lastReadQuery)
-    lastRead = querys.mysqlQuery(lastReadQuery)[0][0][0]
-    # print(lastRead)
+    lastRead = querys.mysqlQuery(lastReadQuery)
+    print("len LastRead: ",len(lastRead))
+    if len(lastRead)==0:
+        lastRead = lastRead[0][0][0]
     if len(lastRead)==6:
+
         lastRead = "Aisle:" + lastRead[0:3] + " Pos:" + lastRead[3:6]
     else:
         lastRead = ''
