@@ -1359,11 +1359,12 @@ def devices(request):
     user = User.objects.get(username=request.user.username)  # get Some User
     print(user.username, user.groups.filter(name='driver').exists())
     if user.groups.filter(name='driver').exists():
-        print("here")
+        # print("here")
         messages.success(request, "You are an authorized User of this device")
         dfDevices = pdQuery.getDevices()
         data = dfDevices.values.tolist()[0]
         description = dfDevices.columns.tolist()
+        print("data: ",data)
         print("description:",description)
 
         context = {'data': data,
