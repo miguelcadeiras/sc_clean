@@ -1395,6 +1395,8 @@ def getStatusString(lastAcation):
         return "Turning Right"
     elif lastAcation == "0":
         return "Stopped"
+    elif lastAcation == "Power On":
+        return "Powering On"
     else:
         return "No Status"
 

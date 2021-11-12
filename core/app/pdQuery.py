@@ -1599,7 +1599,7 @@ def pdDF(query):
 def getStatus(device):
     dfQuery = "select *  from status where device like '" + str(device) + "' and status not like 'x' order by id_status desc limit 1; "
     dfVoltageQuery = "select *  from status where device like '" + str(device) + "' and status like 'x'; "
-    print('dfQuery',dfQuery)
+    # print('dfQuery',dfQuery)
     sqlEngine = engine()
     dbConnection = sqlEngine.connect()
     dfStatus = pd.read_sql(dfQuery, dbConnection)
@@ -1608,7 +1608,7 @@ def getStatus(device):
     voltage = df['voltages'][0]
     # print(voltage)
     dbConnection.close()
-    print("dfStatus:",dfStatus)
+    # print("dfStatus:",dfStatus)
 
     return dfStatus,voltage
 
