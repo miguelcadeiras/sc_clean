@@ -213,7 +213,7 @@ def getInspections(id_warehouse):
     query = 'SELECT id_inspection,description,inspectionDate FROM inspectiontbl where id_warehouse=' + str(
         id_warehouse) + ' order by id_inspection desc;'
     result = mysqlQuery(query)
-    print(query)
+    # print(query)
     return result
 
 

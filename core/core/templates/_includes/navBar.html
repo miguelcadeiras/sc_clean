@@ -3,57 +3,72 @@
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-      </li>
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="/" class="nav-link">Warehouses</a>
-      </li>
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="/" class="nav-link">Warehouses</a>
+        </li>
 
 
-      {% if 'all' in request.path or 'importWMS' in request.path %}
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="inspections?id_warehouse={{id_warehouse}}" class="nav-link">Inspections</a>
-      </li>
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="importWMS?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}" class="nav-link">WMS Data</a>
-      </li>
-            <li class="nav-item d-none d-sm-inline-block">
-        <a href="levelPics?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}" class="nav-link">Map</a>
-      </li>
-            <li class="nav-item d-none d-sm-inline-block">
-        <a href="carrousel?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}&asile=0" class="nav-link">Images</a>
-      </li>
-       <li class="nav-item d-none d-sm-inline-block">
-        <a href="readedAnalysis?id_inspection={{request.GET.id_inspection}}&asile=All&level=All" class="nav-link">Aggregates</a>
-      </li>
-      {% endif %}
-      {% if 'matching' in request.GET %}
-      <li class="nav-item d-none d-sm-inline-block">
-        {% if request.GET.matching == '0' %}
-        <a href="all?id_inspection={{request.GET.id_inspection}}&qty={{request.GET.qty}}&offset={{request.GET.offset}}&matching=1&pic=0" class="nav-link active">Matching Data</a>
-        {% else %}
-        <a href="all?id_inspection={{request.GET.id_inspection}}&qty={{request.GET.qty}}&offset={{request.GET.offset}}&matching=0&pic=0" class="nav-link active">Readed Data</a>
+        {% if 'all' in request.path or 'importWMS' in request.path %}
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="inspections?id_warehouse={{id_warehouse}}" class="nav-link">Inspections</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="importWMS?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}" class="nav-link">WMS Data</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="levelPics?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}" class="nav-link">Map</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="carrousel?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}&asile=0" class="nav-link">Images</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="readedAnalysis?id_inspection={{request.GET.id_inspection}}&asile=All&level=All" class="nav-link">Aggregates</a>
+        </li>
         {% endif %}
-      </li>
-      {% endif %}
+        {% if 'matching' in request.GET %}
+        <li class="nav-item d-none d-sm-inline-block">
+            {% if request.GET.matching == '0' %}
+            <a href="all?id_inspection={{request.GET.id_inspection}}&qty={{request.GET.qty}}&offset={{request.GET.offset}}&matching=1&pic=0" class="nav-link active">Matching Data</a>
+            {% else %}
+            <a href="all?id_inspection={{request.GET.id_inspection}}&qty={{request.GET.qty}}&offset={{request.GET.offset}}&matching=0&pic=0" class="nav-link active">Readed Data</a>
+            {% endif %}
+        </li>
+        {% endif %}
 
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="logout" class="nav-link">Log OUT</a>
-      </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="logout" class="nav-link">Log OUT</a>
+        </li>
+
     </ul>
 
 
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
-      <!-- Messages Dropdown Menu -->
-      {% if 'id_inspection' in request.GET %}
-      <li class="nav-item">
-           <a class="nav-link" href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}">
-          <i class="fas fa-database"></i>
-        </a>
-      </li>
-      {% endif %}
+        <!-- Messages Dropdown Menu -->
+        {% if 'id_inspection' in request.GET %}
+         {% if request.GET.matching == '1' %}
+        <li>
+            <DIV class="col-1">
+                <button onclick="redirect()" name="errors" class="btn btn-danger">Errors</button>
+            </DIV>
+            </li>
+            {% endif %}
+        <li class="nav-item">
+            <a class="nav-link" href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_warehouse={{id_warehouse}}&id_unit=0&agvPos=0&list=[]">
+                <i class="fas fa-database"></i>
+            </a>
+        </li>
+
+
+        {% endif %}
     </ul>
-  </nav>
+</nav>
+<script>
+    function redirect(){
+     window.location.href = "all?id_inspection={{request.GET.id_inspection}}&qty={{request.GET.qty}}&offset={{request.GET.offset}}&matching=2&pic=0";
+    }
+</script>

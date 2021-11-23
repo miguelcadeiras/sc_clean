@@ -47,47 +47,50 @@
 {% block content %}
 
 <div class="container-fluid">
-<div class="row">
-    <!-- Left col -->
-    <!--    <section class="col-lg-10   connectedSortable">-->
-    <!-- Custom tabs (TABLE)-->
-    <div class = "col-md-6 col-sm-11">
-        <div class="card">
-            <div class="card-header">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="row">
-                            <div class="col-md-3"><h3 class="card-title text-bold">Search by: Position or Unit  </h3></div>
-                            <div class="col-lg-9">
-                                <form method="POST">
-                                    {% csrf_token %}
-                                    <div class="row">
-                                        <div class="col-5 ">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Position</span>
-                                                </div>
-                                                <input type="text" name="position" class="form-control" placeholder="UBG1XXXXXX">
-                                            </div>
-                                            <!--                <input type="text" class="form-control" placeholder=".col-xs-3">-->
-                                        </div>
-
-                                        <div class="col-6">
-                                            <div class="input-group  ">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Unit </span>
-                                                </div>
-                                                <input type="text" name="unit" class="form-control" placeholder="PAXXXXXXXXXXX">
-                                            </div>
-                                            <!--                <input type="text" class="form-control" placeholder=".col-xs-3">-->
-                                        </div>
-                                        <DIV class="col-1">
-                                            <button type="submit" name="applyFilter" class="btn btn-primary">Apply</button>
-                                        </DIV>
-                                    </div>
-                                </form>
+    <div class="row">
+        <!-- Left col -->
+        <!--    <section class="col-lg-10   connectedSortable">-->
+        <!-- Custom tabs (TABLE)-->
+        <div class = "col-md-8 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-3"><h3 class="card-title text-bold">Search by: Position or Unit  </h3></div>
                             </div>
+                            <div class="row container-fluid">
+                                <div class="col-lg-9">
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-5 ">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">Position</span>
+                                                    </div>
+                                                    <input type="text" name="position" class="form-control" placeholder="UBG1XXXXXX">
+                                                </div>
+                                                <!--                <input type="text" class="form-control" placeholder=".col-xs-3">-->
+                                            </div>
 
+                                            <div class="col-6">
+                                                <div class="input-group  ">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">Unit </span>
+                                                    </div>
+                                                    <input type="text" name="unit" class="form-control" placeholder="PAXXXXXXXXXXX">
+                                                </div>
+                                                <!--                <input type="text" class="form-control" placeholder=".col-xs-3">-->
+                                            </div>
+                                            <DIV class="col-1">
+                                                <button type="submit" name="applyFilter" class="btn btn-primary">Apply</button>
+                                            </DIV>
+                                        </div>
+                                    </form>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -137,57 +140,68 @@
 
             <!-- right col -->
         </div>
-    </div>
-    <div class = "col-md-4 col-sm-11">
-        <div class="card">
-            <div class="card-header {% if validation.0 == 'wms' %}bg-success{% elif validation.0 == 'agv' %}bg-danger{% else %}bg-info{% endif %}">
-                <h2>WMS Information</h2>
 
-            </div>
-            <div class="card-body">
+        <div class = "col-md-4 col-sm-11">
+<!--            <div class="row">-->
+            <div class="card">
+                <div class="card-header {% if validation.0 == 'wms' %}bg-success{% elif validation.0 == 'agv' %}bg-danger{% else %}bg-info{% endif %}">
+                    <h2>WMS Information</h2>
 
-                <h3>Position<br><span>{{wmsData.wmsPosition.0}}</span><br>
-                    Unit<br><span>{{wmsData.wmsProduct.0}}</span><br></h3>
-                <h5>DESCRIPTION: <br></h5>
+                </div>
+                <div class="card-body">
 
-                <span>{{wmsData.wmsDesc1.0}}</span><br><br>
-                <span>{{wmsData.wmsDesc.0}}</span><br><br>
-                <span>{{wmsData.wmsDesc2.0}}</span><br>
-            </div>
-            <div class="card-footer">
-                <form method="POST">
-                    {% csrf_token %}
+                    <h3>Position<br><span>{{wmsData.wmsPosition.0}}</span><br>
+                        Unit<br><span>{{wmsData.wmsProduct.0}}</span><br></h3>
+                    <h5>DESCRIPTION: <br></h5>
 
-                    <div class="row">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">Comment:</span>
+                    <span>{{wmsData.wmsDesc1.0}}</span><br><br>
+                    <span>{{wmsData.wmsDesc.0}}</span><br><br>
+                    <span>{{wmsData.wmsDesc2.0}}</span><br>
+                </div>
+                <div class="card-footer">
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Comment:</span>
+                                </div>
+                                <input type="text" name="comment" class="form-control" placeholder="{{comment}}">
                             </div>
-                            <input type="text" name="comment" class="form-control" placeholder="Comment...">
+
                         </div>
+                        <div><span> <br></span></div>
+                        <div class="row">
+                            <DIV class="col-5">
+                                <button type="submit" name="acceptwms" class="btn btn-success">Accept WMS</button>
+                            </DIV>
+                            <DIV class="col-5">
+                                <button type="submit" name="discrep" class="btn btn-warning">Confirm Discrepancy</button>
+                            </DIV>
+                        </div>
+                    </form>
 
-                    </div>
-                    <div><span> <br></span></div>
-                    <div class="row">
-                        <DIV class="col-5">
-                            <button type="submit" name="acceptwms" class="btn btn-success">Accept WMS</button>
-                        </DIV>
-                        <DIV class="col-5">
-                            <button type="submit" name="discrep" class="btn btn-warning">Confirm Discrepancy</button>
-                        </DIV>
-                    </div>
-                </form>
-
+                </div>
             </div>
+<!--            </div>-->
+<!--            <div class="row">-->
+                <div class="card">
+                    <div class="card-body">
+                        <img class="img-fluid img-thumbnail" src="{% static picPath %}" style="" alt="">
+                    </div>
+                </div>
+<!--            </div>-->
+
         </div>
 
 
 
 
-        {% endblock %}
+            {% endblock %}
 
-        {% block pageScripts %}
-        <script>
+            {% block pageScripts %}
+            <script>
   $(document).ready(function() {
 
 
@@ -204,6 +218,8 @@
 </script>
 
 
-        {% endblock %}
+            {% endblock %}
 
         </div>
+    </div>
+</div>

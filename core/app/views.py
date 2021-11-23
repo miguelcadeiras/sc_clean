@@ -23,11 +23,11 @@ from .models import *
 @login_required(login_url="/login/")
 def index(request):
     # HOME PAGE SHOULD: show warehouses, and select Inspections
-    print(request.user)
+    # print(request.user)
     clientUser = request.user.profile.client
 
     id_client, cols = querys.getClientID(clientUser)
-    print(id_client)
+    # print(id_client)
     data, description = querys.getWarehouses(id_client[0][0])
     # print("data", data)
     # print("description:,", description)
@@ -676,7 +676,6 @@ def allVR_noPD(request):
         lastRead = "Aisle:"+lastRead[0:3]+ " Pos:"+lastRead[3:6]
     # print(lastRead)
 
-
     context = {'data':data,
                'description':description,
                'clientName': request.user.profile.client,
@@ -693,7 +692,7 @@ def allVR_noPD(request):
                'picpath': picpath,
                'levels': levels,
                'lastRead':lastRead,
-               'falsePAlist':df['codeUnit'][df['match']==False].tolist() if int(request.GET['matching'])>0 else ""
+               'falsePAlist':df['codeUnit'][(df['match']==False) & (df['codeUnit'].str.len()>0)].tolist() if int(request.GET['matching'])>0 else ""
 
                }
 
@@ -1235,42 +1234,52 @@ def importWMS(request):
 @login_required(login_url="/login/")
 def plusMinus(request):
     id_inspection = request.GET['id_inspection']
-    id_unit = request.GET['id_unit']
+    id_unit = request.GET['id_unit'].strip()
     falseList=request.GET['list']
-    agvPos = request.GET['agvPos']
+    agvPos = request.GET['agvPos'].strip()
     data = []
+    dfw = pd.DataFrame
+    validation = False
+    falseIndex=0
+    comment=""
+
     wmsData = []
     pos=""
     unit=""
-    # print(id_inspection)
-    #falseList=json.load(falseList)
-    falseList=falseList[1:-1].replace(" ","")
-    falseList=falseList.replace("'","")
+    # print("lenfalseList: ",len(falseList),falseList)
+    if len(falseList)>0:
+        # print("falseList")
+        falseList=falseList[1:-1].replace(" ","")
+        falseList=falseList.replace("'","")
+        falseList=falseList.split(",")
 
-    falseList=falseList.split(",")
+    if id_unit in falseList:
+        # print("id_unit in falseList")
+        falseIndex =falseList.index(id_unit)
+        # print(falseIndex,falseList)
 
-    falseIndex =falseList.index(id_unit)
-    # print(falseIndex,falseList)
+        validationQuery = "select * from validationtbl where product like '"+id_unit+"' and id_inspection = "+str(id_inspection)+" order by id_validation desc limit 1;"
+        dfv=pdQuery.pdDF(validationQuery)
+        if len(dfv)>0:
+            messages.success(request,"Data Validated: " +str(dfv['validation'][0])+ " : "+ str(dfv['position'][0])+" , " + str(dfv['product'][0])+" : validated by "+ str(dfv['user'][0])+"    || Comments: "+str(dfv['comment'][0]))
+            # print("Comment: ",str(dfv['comment'][0]))
+            comment = dfv['comment'][0]
+            validation = dfv['validation']
 
-    validationQuery = "select * from validationtbl where product like '"+id_unit+"' and id_inspection = "+str(id_inspection)+" order by id_validation desc limit 1;"
-    dfv=pdQuery.pdDF(validationQuery)
-    if len(dfv)>0:
-        messages.success(request,"Data Validated: " +str(dfv['validation'][0])+ " : "+ str(dfv['position'][0])+" , " + str(dfv['product'][0])+" : validated by "+ str(dfv['user'][0])+"    || Comments: "+str(dfv['comment'][0]))
-        print("Comment: ",str(dfv['comment'][0]))
-    if len(id_unit)>3:
-        dfu = pdQuery.getRawDataByUnit(id_inspection, id_unit)
-        data = dfu.values.tolist()
-        unit = id_unit
+        if len(id_unit)>3:
+            dfu = pdQuery.getRawDataByUnit(id_inspection, id_unit)
+            data = dfu.values.tolist()
+            unit = id_unit
 
-        dfw = pdQuery.getWmsPosByUnit(id_inspection,id_unit)
+            dfw = pdQuery.getWmsPosByUnit(id_inspection,id_unit)
 
     if request.method == "POST":
-        print(request.POST.keys())
+        # print(request.POST.keys())
 
         if "comment" in request.POST.keys():
             if "acceptwms"in request.POST.keys():
                 query = "insert into validationtbl (id_inspection,position,product,comment,user,validation) values ("+str(id_inspection)+",'"+str(dfw["wmsPosition"][0])+"','"+str(id_unit)+"','"+request.POST["comment"]+"','"+request.user.username+"','wms')"
-                print(str(dfw["wmsPosition"][0])," : : dfw['wmsPosition']")
+                # print(str(dfw["wmsPosition"][0])," : : dfw['wmsPosition']")
                 querys.execute(query)
             if "discrep"in request.POST.keys():
                 query = "insert into validationtbl (id_inspection,position,product,comment,user,validation) values ("+str(id_inspection)+",'"+str(agvPos)+"','"+str(id_unit)+"','"+request.POST["comment"]+"','"+request.user.username+"','agv')"
@@ -1283,21 +1292,21 @@ def plusMinus(request):
 
 
         if "position" in request.POST.keys():
-            pos = request.POST["position"]
-            unit = request.POST["unit"]
+            pos = request.POST["position"].strip()
+            unit = request.POST["unit"].strip()
 
-            for key in request.POST.keys():
-                print(key,request.POST[key])
+            # for key in request.POST.keys():
+                # print(key,request.POST[key])
 
 
             if len(request.POST['position'])>= 10:
                 df = pdQuery.virtualRack(id_inspection)
-                print("Searching by pos:",pos)
+                # print("Searching by pos:",pos)
 
                 df['codePos_Sub'] = df['codePos'].apply(lambda x: x[0:10] if x is not None else x)
 
                 index = df[df['codePos'].str[0:10] == pos][['rack', 'vRack', 'x', 'codePos']].index[0]
-                print(index)
+                # print(index)
                 df[df['codePos'].str[0:10] == pos][['rack', 'vRack', 'x', 'codePos', 'codePos_Sub']]
                 bottomindex = 0 if index - 8 < 1 else index - 8
                 dfu =df.iloc[bottomindex:index + 20, [0, 1, 2, 5, 6, 7, 10, 15, 21, 22]]
@@ -1311,6 +1320,19 @@ def plusMinus(request):
 
                     dfw = pdQuery.getWmsPosByUnit(id_inspection, id_unit)
 
+    picPath = ""
+
+    # print(dfv)
+    if not id_unit == "":
+        # buscar foto por codeUnit
+        query = "select picPath from inventorymaptbl where id_inspection = " + id_inspection + " and codeUnit like '" + id_unit + "' ; "
+        picPath = querys.mysqlQuery(query)[0][0][0]
+    else:
+        # buscar foto por codePos
+        query = "select picPath from inventorymaptbl where id_inspection = " + id_inspection + " and codePos like '" + agvPos + "' ; "
+        picPath = querys.mysqlQuery(query)[0][0][0]
+
+    print(picPath)
 
     context = {"data": data,
                "description":['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel'],
@@ -1318,11 +1340,13 @@ def plusMinus(request):
                "lastSearchPos":pos,
                'inspection': querys.getInspectionData(request.GET['id_inspection']),
                'wmsData': dfw,
-               'validation':dfv['validation'],
+               'validation':validation,
+               'comment':comment,
                'falsePAList': falseList,
                'falseIndex': falseIndex,
                'nextUnit': falseList[falseIndex+1] if falseIndex<len(falseList)-1 else unit,
                'backUnit': falseList[falseIndex-1] if falseIndex>0 else unit,
+               'picPath':picPath,
 
                }
     return render(request, 'plusMinus.html', context)
@@ -1396,7 +1420,7 @@ def getStatusString(lastAcation):
     elif lastAcation == "0":
         return "Stopped"
     elif lastAcation == "Power On":
-        return "Powering On"
+        return "Power On"
     else:
         return "No Status"
 
