@@ -29,7 +29,8 @@ def engine():
     hostname = socket.gethostname()
     IPAddr = socket.gethostbyname(hostname)
     # print(IPAddr,hostname)
-    if IPAddr != '151.106.108.129' :
+    # para debug cambio de != a ==
+    if IPAddr == '151.106.108.129' :
         # print(" here")
         mysql_alchemyDevConString = 'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
     else:
@@ -39,6 +40,17 @@ def engine():
     sqlEngine = create_engine(mysql_alchemyDevConString)
 
     return sqlEngine
+
+
+def mysqlQuery(query):
+    # print("in MysqlQuery")
+    # print( query)
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+    df = pd.read_sql(query, dbConnection)
+    dbConnection.close()
+
+    return df
 
 # mysql_alchemyDevConString = secrets.mysql_alchemyDevConString
 
@@ -1596,21 +1608,27 @@ def pdDF(query):
 
 ###############################
 
+
 def getStatus(device):
     dfQuery = "select *  from status where device like '" + str(device) + "' and status not like 'x' order by id_status desc limit 1; "
-    dfVoltageQuery = "select *  from status where device like '" + str(device) + "' and status like 'x'; "
+    dfVoltageQuery = "select *  from status where device like '" + str(device) + "' order by id_status desc limit 1; "
     # print('dfQuery',dfQuery)
+    # print('dfVoltageQuery', dfVoltageQuery)
     sqlEngine = engine()
     dbConnection = sqlEngine.connect()
     dfStatus = pd.read_sql(dfQuery, dbConnection)
     # status = dfStatus['status'][0]
     df = pd.read_sql(dfVoltageQuery, dbConnection)
+    # print(df)
+
     voltage = df['voltages'][0]
+    zero_status = df['zero'][0]
+    # print("voltage: ")
     # print(voltage)
     dbConnection.close()
     # print("dfStatus:",dfStatus)
 
-    return dfStatus,voltage
+    return dfStatus,voltage,zero_status
 
 def getDevices():
     query = "select distinct device  from status ; "
@@ -1627,18 +1645,23 @@ def getDevices():
 
 
 def getLastPosition(device):
-    lastReadQuery = "select substring(codePos,5,6) from inventorymaptbl where device like '"+str(device)+"' and codePos not like '' order by id_Vector desc limit 1;"
-    # print(lastReadQuery)
-    lastRead = querys.mysqlQuery(lastReadQuery)
-    print("len LastRead: ",len(lastRead))
-    if len(lastRead)==0:
-        lastRead = lastRead[0][0][0]
-    if len(lastRead)==6:
+    lastReadQuery = "select substring(codePos,5,6) as pos from inventorymaptbl where device like '"+str(device)+"' and codePos not like '' order by id_Vector desc limit 1;"
 
-        lastRead = "Aisle:" + lastRead[0:3] + " Pos:" + lastRead[3:6]
-    else:
-        lastRead = ''
+    lastRead = mysqlQuery(lastReadQuery).iloc[0,0]
+    lastRead = "Aisle:" + lastRead[0:3] + " Pos:" + lastRead[3:6]
+
+
     return lastRead
+
+def vBarDistances(id_device):
+    distanceQuery = "select customCode3,visionBar from inventorymaptbl where device like '" + str(id_device) \
+                    + "'   AND customCode3 like '%%PALLET%%' order by id_vector desc LIMIT 20;"
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+    print(distanceQuery)
+    df = pd.read_sql(distanceQuery, dbConnection)
+
+    return df
 
 
 

@@ -1359,19 +1359,39 @@ def status(request):
     if user.groups.filter(name='driver').exists():
         messages.success(request, "You are an authorized User of this device")
         id_device = request.GET['device']
-        dfStatus,voltages = pdQuery.getStatus(id_device)
-        # print(voltages)
+        dfStatus,voltages,zero_status = pdQuery.getStatus(id_device)
+
+
         if len(dfStatus)>0:
-            statusString = getStatusString(dfStatus['status'][0])
+            statusString = getStatusString(str(dfStatus['status'][0]))
+            # statusString = str(dfStatus['status'][0])
+            # print("003.0")
         else:
+            # print("003.1")
             statusString = "n/a"
-        lastRead = pdQuery.getLastPosition(id_device)
+
+        lastReadQuery = "select substring(codePos,5,6) as pos from inventorymaptbl where device like '" + str(id_device) \
+                        + "' and codePos not like '' order by id_Vector desc limit 1;"
+        lastRead = querys.mysqlQuery(lastReadQuery)
+        # print("lastRead: ",lastRead[0][0][0])
+        lastRead = "Aisle:" + lastRead[0][0][0][0:3] + " Pos:" + lastRead[0][0][0][3:6]
+        # print("004")
+        batteries = voltages.split(':')
+        batteries[0] = batteries[0][:-2]
+        batteries[1] = batteries[1][:-2]
+
+
+        distances = pdQuery.vBarDistances(id_device)
+        print("distances:",distances)
+
         context = {"status":dfStatus,
                    "statusSubstring":statusString,
                    "voltages":voltages,
-                   "lastRead":lastRead
-
+                   "lastRead":lastRead,
+                   "zero_status":zero_status,
+                   "batteries":batteries
                    }
+        # print(context)
         return render(request,"status.html",context)
     else:
         messages.success(request, "You are NOT authorized to this device")
@@ -1404,10 +1424,10 @@ def devices(request):
 
 
 def getStatusString(lastAcation):
-    print("lastAcation: ",lastAcation)
+    # print("lastAcation: ",lastAcation)
     if lastAcation=="x":
         return "voltage"
-    elif lastAcation=="p":
+    elif lastAcation[-1]=="p":
         return "Following Line"
     elif lastAcation=="s":
         return "Backwards"
@@ -1422,7 +1442,8 @@ def getStatusString(lastAcation):
     elif lastAcation == "Power On":
         return "Power On"
     else:
-        return "No Status"
+
+        return lastAcation
 
 
 
