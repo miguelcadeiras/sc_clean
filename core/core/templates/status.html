@@ -63,7 +63,7 @@
 
     {% for value in distances%}
     {% with forloop.counter as index %}
-    <li class="list-group-item {% if value.0 < '60' or value.0 >90 %}bg-warning{% endif %}"><h5>vBar {{index}} Distance: {{value.0}} cm</h5></li>
+    <li class="list-group-item {% if value.0 < 60 or value.0 > 90 %}bg-warning{% endif %}"><h5>vBar {{index}} Distance: {{value.0}} cm</h5></li>
     {% endwith %}
     {% endfor %}
 
