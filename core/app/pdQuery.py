@@ -30,7 +30,7 @@ def engine():
     IPAddr = socket.gethostbyname(hostname)
     # print(IPAddr,hostname)
     # para debug cambio de != a ==
-    if IPAddr != '151.106.108.129' :
+    if IPAddr == '151.106.108.129' :
         # print(" here")
         mysql_alchemyDevConString = 'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
     else:
@@ -1660,6 +1660,7 @@ def vBarDistances(id_device):
     dbConnection = sqlEngine.connect()
     # print(distanceQuery)
     df = pd.read_sql(distanceQuery, dbConnection)
+    dbConnection.close()
     df[['a', 'state', 'dist', 'd', 'e', ]] = df['customCode3'].str.split(':', expand=True)
     df.drop(['d', 'e'], axis=1)
     df['dist'] = df['dist'].astype('int32')
@@ -1667,7 +1668,29 @@ def vBarDistances(id_device):
 
     return dist
 
+def lastInspectionTime(id_device):
+    last_id_inspection_query = "select id_inspection from inventorymaptbl where device like '"+\
+                    str(id_device)+"' and id_inspection not like '' order by id_vector desc LIMIT 1;"
 
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+    # print(distanceQuery)
+    df_li = pd.read_sql(last_id_inspection_query, dbConnection)
+    last_id_inspection = df_li['id_inspection'][0]
+    last_id_inspection =155
+    start_time = "select time from inventorymaptbl where device like '" + \
+                 str(id_device) + "' and id_inspection = " + str(
+        last_id_inspection) + " and time not like '' order by id_vector asc LIMIT 1;"
+    end_time = "select time from inventorymaptbl where device like '" \
+               + str(id_device) + "' and id_inspection = " + str(
+        last_id_inspection) + " and time not like '' order by id_vector desc LIMIT 1;"
+    df_st = pd.read_sql(start_time, dbConnection)
+    df_et = pd.read_sql(end_time, dbConnection)
+
+    dbConnection.close()
+    print ("lastInspectionTime",df_st,df_et)
+
+    return last_id_inspection,df_st,df_et
 
 
 

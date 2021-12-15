@@ -46,7 +46,7 @@ def openConnection():
     IPAddr = socket.gethostbyname(hostname)
     # print(" querys module" ,hostname,IPAddr)
 
-    if IPAddr != '151.106.108.129' :
+    if IPAddr == '151.106.108.129' :
         cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
                                       database=mysql_schemaDev,sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION')
 

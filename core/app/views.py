@@ -1383,6 +1383,11 @@ def status(request):
 
         distances = pdQuery.vBarDistances(id_device)
 
+        last_id_inspection,start_time,end_time = pdQuery.lastInspectionTime(id_device)
+        eleapsed_time = end_time['time']-start_time['time']
+        inspection_time = [last_id_inspection,start_time['time'][0],end_time['time'][0],eleapsed_time[0]]
+
+        print("inspection_time",inspection_time)
         context = {"status":dfStatus,
                    "statusSubstring":statusString,
                    "voltages":voltages,
@@ -1390,7 +1395,8 @@ def status(request):
                    "zero_status":zero_status,
                    "batteries":batteries,
                    "distances":distances.values.tolist(),
-                   "vBar":distances.index.values.tolist()
+                   "vBar":distances.index.values.tolist(),
+                   "time":inspection_time
                    }
         # print(context)
         return render(request,"status.html",context)

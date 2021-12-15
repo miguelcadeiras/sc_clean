@@ -56,8 +56,8 @@
     <li class="list-group-item">Updated: {{status.time.0}}</li>
     <li class="list-group-item {% if 'ex' in statusSubstring %}bg-danger{% endif %} {% if 'Following' in statusSubstring %}bg-success{% endif %} " ><h3>{{statusSubstring}}</h3></li>
 <!--    <li class="list-group-item{% if 'ex' in statusSubstring %}bg-danger{% endif %}">Batteries: {{voltages}}</li>-->
-     <li class="list-group-item{% if batteries.0 < 24.5  %}bg-danger{% endif %}"><h2><span style = "color:{% if batteries.0 < '24.5'  %}Red{% elif batteries.0 < '25.2' and batteries.0 >= '24.5' %}Yellow{% else %}Green{% endif %}">{{batteries.0}} v <i class="fas fa-battery-{% if batteries.0 < '24.5'  %}empty{% elif batteries.0 < '25.2' and batteries.0 >= '24.5' %}half{% else %}full{% endif %}"> </i></span></h2></li>
-     <li class="list-group-item{% if batteries.1 < 35.5  %}bg-danger{% endif %}"><h2><span style = "color:{% if batteries.1 < '35.2'  %}Red{% elif batteries.1 < '36.5' and batteries.1 >= '35.2' %}Yellow{% else %}Green{% endif %}">{{batteries.1}} v <i class="fas fa-battery-{% if batteries.1 < '35.2'  %}empty{% elif batteries.1 < '36.5' and batteries.1 >= '35.2' %}half{% else %}full{% endif %}"> </i></span></h2></li>
+     <li class="list-group-item{% if batteries.0 < 24.5  %}bg-danger{% endif %}"><h2><span style = "color:{% if batteries.0 < '24.5'  %}Red{% elif batteries.0 < '25.2' and batteries.0 >= '24.5' %}Yellow{% else %}Green{% endif %}">{{batteries.0}} v <i class="fas fa-battery-{% if batteries.0 < 24.5  %}empty{% elif batteries.0 < 25.2 and batteries.0 >= 24.5 %}half{% else %}full{% endif %}"> </i></span></h2></li>
+     <li class="list-group-item{% if batteries.1 < 35.5  %}bg-danger{% endif %}"><h2><span style = "color:{% if batteries.1 < 35.5  %}Red{% elif batteries.1 < 36.5 and batteries.1 >= 35.2 %}Yellow{% else %}Green{% endif %}">{{batteries.1}} v <i class="fas fa-battery-{% if batteries.1 < 35.2  %}empty{% elif batteries.1 < 36.5 and batteries.1 >= 35.2 %}half{% else %}full{% endif %}"> </i></span></h2></li>
 
     <li class="list-group-item text-center {% if 'not' in zero_status %}bg-warning{% endif %}">{{zero_status}}</li>
 
@@ -66,6 +66,11 @@
     <li class="list-group-item {% if value.0 < 60 or value.0 > 90 %}bg-warning{% endif %}"><h5>vBar {{index}} Distance: {{value.0}} cm</h5></li>
     {% endwith %}
     {% endfor %}
+    <li class="list-group-item "><h6>Inspection:  {{time.0}} </h6></li>
+    <li class="list-group-item "><h6>Start Time:  {{time.1}} </h6></li>
+    <li class="list-group-item "><h6>Last Time:  {{time.2}} </h6></li>
+    <li class="list-group-item "><h6>Eleapsed Time:  {{time.3}} </h6></li>
+
 
 
 
