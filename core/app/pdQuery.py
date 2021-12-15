@@ -1677,7 +1677,7 @@ def lastInspectionTime(id_device):
     # print(distanceQuery)
     df_li = pd.read_sql(last_id_inspection_query, dbConnection)
     last_id_inspection = df_li['id_inspection'][0]
-    last_id_inspection =155
+    # last_id_inspection =155
     start_time = "select time from inventorymaptbl where device like '" + \
                  str(id_device) + "' and id_inspection = " + str(
         last_id_inspection) + " and time not like '' order by id_vector asc LIMIT 1;"
