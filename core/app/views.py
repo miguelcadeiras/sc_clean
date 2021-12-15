@@ -1385,7 +1385,7 @@ def status(request):
 
         last_id_inspection,start_time,end_time = pdQuery.lastInspectionTime(id_device)
         eleapsed_time = end_time['time']-start_time['time']
-        inspection_time = [last_id_inspection,start_time['time'][0],end_time['time'][0],eleapsed_time[0]]
+        inspection_time = [last_id_inspection,start_time['time'][0],end_time['time'][0],eleapsed_time[0] if len(eleapsed_time>0) else 0]
 
         print("inspection_time",inspection_time)
         context = {"status":dfStatus,
