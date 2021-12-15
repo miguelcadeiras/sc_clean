@@ -1382,14 +1382,15 @@ def status(request):
 
 
         distances = pdQuery.vBarDistances(id_device)
-        print("distances:",distances)
 
         context = {"status":dfStatus,
                    "statusSubstring":statusString,
                    "voltages":voltages,
                    "lastRead":lastRead,
                    "zero_status":zero_status,
-                   "batteries":batteries
+                   "batteries":batteries,
+                   "distances":distances.values.tolist(),
+                   "vBar":distances.index.values.tolist()
                    }
         # print(context)
         return render(request,"status.html",context)

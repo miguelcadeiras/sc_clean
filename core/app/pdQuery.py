@@ -1658,10 +1658,14 @@ def vBarDistances(id_device):
                     + "'   AND customCode3 like '%%PALLET%%' order by id_vector desc LIMIT 20;"
     sqlEngine = engine()
     dbConnection = sqlEngine.connect()
-    print(distanceQuery)
+    # print(distanceQuery)
     df = pd.read_sql(distanceQuery, dbConnection)
+    df[['a', 'state', 'dist', 'd', 'e', ]] = df['customCode3'].str.split(':', expand=True)
+    df.drop(['d', 'e'], axis=1)
+    df['dist'] = df['dist'].astype('int32')
+    dist = df[['dist', 'visionBar']][df['state'] == "TRUE"].groupby('visionBar').agg('mean')
 
-    return df
+    return dist
 
 
 

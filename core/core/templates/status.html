@@ -38,7 +38,7 @@
 {% if messages %}
 <ul class="messages">
     {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
     {% endfor %}
 </ul>
 {% endif %}
@@ -59,9 +59,14 @@
      <li class="list-group-item{% if batteries.0 < 24.5  %}bg-danger{% endif %}"><h2><span style = "color:{% if batteries.0 < '24.5'  %}Red{% elif batteries.0 < '25.2' and batteries.0 >= '24.5' %}Yellow{% else %}Green{% endif %}">{{batteries.0}} v <i class="fas fa-battery-{% if batteries.0 < '24.5'  %}empty{% elif batteries.0 < '25.2' and batteries.0 >= '24.5' %}half{% else %}full{% endif %}"> </i></span></h2></li>
      <li class="list-group-item{% if batteries.1 < 35.5  %}bg-danger{% endif %}"><h2><span style = "color:{% if batteries.1 < '35.2'  %}Red{% elif batteries.1 < '36.5' and batteries.1 >= '35.2' %}Yellow{% else %}Green{% endif %}">{{batteries.1}} v <i class="fas fa-battery-{% if batteries.1 < '35.2'  %}empty{% elif batteries.1 < '36.5' and batteries.1 >= '35.2' %}half{% else %}full{% endif %}"> </i></span></h2></li>
 
-    <li class="list-group-item {% if 'not' in zero_status %}bg-warning{% endif %}">Zeros: {{zero_status}}</li>
-    <li class="list-group-item {% if 'not' in zero_status %}bg-warning{% endif %}">VBar 2 Distance: {{zero_status}}</li>
-        <li class="list-group-item {% if 'not' in zero_status %}bg-warning{% endif %}">VBar 1 Distance: {{zero_status}}</li>
+    <li class="list-group-item text-center {% if 'not' in zero_status %}bg-warning{% endif %}">{{zero_status}}</li>
+
+    {% for value in distances%}
+    {% with forloop.counter as index %}
+    <li class="list-group-item {% if 'not' in zero_status %}bg-warning{% endif %}"><h5>vBar {{index}} Distance: {{value.0}} cm</h5></li>
+    {% endwith %}
+    {% endfor %}
+
 
 
   </ul>
