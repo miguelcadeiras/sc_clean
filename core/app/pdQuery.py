@@ -30,7 +30,7 @@ def engine():
     IPAddr = socket.gethostbyname(hostname)
     # print(IPAddr,hostname)
     # para debug cambio de != a ==
-    if IPAddr == '151.106.108.129' :
+    if IPAddr != '151.106.108.129' :
         # print(" here")
         mysql_alchemyDevConString = 'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
     else:
