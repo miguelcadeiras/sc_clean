@@ -1401,8 +1401,8 @@ def status(request):
 
 
         distances = pdQuery.vBarDistances(id_device)
-        print("*--disntances--****"*3)
-        print(distances)
+        # print("*--disntances--****"*3)
+        # print(distances)
         last_id_inspection,start_time,end_time = pdQuery.lastInspectionTime(id_device)
 
         eleapsed_time = end_time['time']-start_time['time']
