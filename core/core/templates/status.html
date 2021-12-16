@@ -46,9 +46,9 @@
   {% block content %}
 
 <!-- {{status}}-->
-batteries.1
-{% if batteries.1 < 10 %}
-True
+{{batteries.1}}
+{% if batteries.1|stringformat:".2f" < 10 %}
+True {% else %} false3
 {% endif %}
 
 <div class="card" style="width: 18rem;">
