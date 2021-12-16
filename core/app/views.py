@@ -1396,17 +1396,19 @@ def status(request):
             batteries.append( "warning")
         else:
             batteries.append("success")
-
-
+        print("$--Batteries--$$$$" * 10)
+        print()
         distances = pdQuery.vBarDistances(id_device)
-
+        print("*--disntances--****"*10)
+        print(distances)
         last_id_inspection,start_time,end_time = pdQuery.lastInspectionTime(id_device)
+
         eleapsed_time = end_time['time']-start_time['time']
-        # print(start_time.empty)
+        print(eleapsed_time[0].strftime("%H:%M:%S"))
         if start_time.empty:
             inspection_time = [last_id_inspection, "Didn't Start", "", ""]
         else:
-            inspection_time = [last_id_inspection,start_time['time'][0],end_time['time'][0],eleapsed_time[0]]
+            inspection_time = [last_id_inspection,start_time['time'][0],end_time['time'][0],eleapsed_time[0].strftime("%H:%M:%S")]
 
         print("inspection_time",inspection_time)
         context = {"status":dfStatus,
