@@ -1383,18 +1383,18 @@ def status(request):
         batteries[1] = float(batteries[1][:-2])
 
         if batteries[0]< battery_24_limits[0]:
-            batteries[2] = "danger"
+            batteries.append( "danger")
         elif batteries[0]>= battery_24_limits[0] and batteries[0]<= battery_24_limits[1]:
-            batteries[2] = "warning"
+            batteries.append( "warning")
         else:
-            batteries[2] = "success"
+            batteries.append( "success")
 
         if batteries[0]< battery_36_limits[0]:
-            batteries[3] = "danger"
+            batteries.append("danger")
         elif batteries[0]>= battery_36_limits[0] and batteries[0]<= battery_36_limits[1]:
-            batteries[3] = "warning"
+            batteries.append( "warning")
         else:
-            batteries[3] = "success"
+            batteries.append("success")
 
 
         distances = pdQuery.vBarDistances(id_device)
