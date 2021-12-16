@@ -1,4 +1,5 @@
 import json
+import time
 from django.shortcuts import render
 import numpy as np
 import pandas as pd
@@ -1396,15 +1397,17 @@ def status(request):
             batteries.append( "warning")
         else:
             batteries.append("success")
-        print("$--Batteries--$$$$" * 10)
-        print()
+        print("$--Batteries--$$$$" * 2)
+        print(batteries)
         distances = pdQuery.vBarDistances(id_device)
-        print("*--disntances--****"*10)
+        print("*--disntances--****"*3)
         print(distances)
         last_id_inspection,start_time,end_time = pdQuery.lastInspectionTime(id_device)
 
         eleapsed_time = end_time['time']-start_time['time']
+        print("-------------TIME--------------")
         print(eleapsed_time[0],type(eleapsed_time[0]))
+        print(eleapsed_time[0].strftime('%H:%M:%S'))
         if start_time.empty:
             inspection_time = [last_id_inspection, "Didn't Start", "", ""]
         else:
