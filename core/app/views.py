@@ -1407,7 +1407,7 @@ def status(request):
         eleapsed_time = end_time['time']-start_time['time']
         print("-------------TIME--------------")
         print(eleapsed_time[0],type(eleapsed_time[0]))
-        print(pd.to_datetime(eleapsed_time[0]).df.strftime('%H:%M:%S'))
+
         if start_time.empty:
             inspection_time = [last_id_inspection, "Didn't Start", "", ""]
         else:
