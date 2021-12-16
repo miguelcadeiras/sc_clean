@@ -1391,9 +1391,9 @@ def status(request):
         else:
             batteries.append( "success")
 
-        if batteries[0]< battery_36_limits[0]:
+        if batteries[1]< battery_36_limits[0]:
             batteries.append("danger")
-        elif batteries[0]>= battery_36_limits[0] and batteries[0]<= battery_36_limits[1]:
+        elif batteries[1]>= battery_36_limits[0] and batteries[0]<= battery_36_limits[1]:
             batteries.append( "warning")
         else:
             batteries.append("success")
