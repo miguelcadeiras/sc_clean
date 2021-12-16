@@ -46,10 +46,6 @@
   {% block content %}
 
 <!-- {{status}}-->
-{{batteries.1}}
-{% if batteries.1|stringformat:".2f" < 10 %}
-True {% else %} false3
-{% endif %}
 
 <div class="card" style="width: 18rem;">
   <div class="card-header bg-primary">
@@ -60,10 +56,10 @@ True {% else %} false3
     <li class="list-group-item">Updated: {{status.time.0}}</li>
     <li class="list-group-item {% if 'ex' in statusSubstring %}bg-danger{% endif %} {% if 'Following' in statusSubstring %}bg-success{% endif %} " ><h3>{{statusSubstring}}</h3></li>
 <!--    <li class="list-group-item{% if 'ex' in statusSubstring %}bg-danger{% endif %}">Batteries: {{voltages}}</li>-->
-     <li class="list-group-item{% if batteries.0 < '24.5'  %}bg-danger{% endif %}"><h2><span style = "color:{% if batteries.0 < '24.5'  %}Red{% elif batteries.0 < '25.2' and batteries.0 >= '24.5' %}Yellow{% else %}Green{% endif %}">{{batteries.0}} v
-       <i class="fas fa-battery-{% if batteries.0 < '24.5'  %}empty{% elif batteries.0 < '25.2' and batteries.0 >= '24.5' %}half{% else %}full{% endif %}"> </i></span></h2></li>
-     <li class="list-group-item{% if batteries.1 < '35.5'  %}bg-danger{% endif %}"><h2><span style = "color:{% if batteries.1 < '35.5'  %}Red{% elif batteries.1 < '36.5' and batteries.1 >= '35.2' %}Yellow{% else %}Green{% endif %}">{{batteries.1}} v
-       <i class="fas fa-battery-{% if batteries.1 < 35.2  %}empty{% elif batteries.1 < 36.5 and batteries.1 >= 35.2 %}half{% else %}full{% endif %}"> </i></span></h2></li>
+     <li class="list-group-item bg-{{batteries.3}}"><h2><span style = "color:{% if batteries.0 < '24.5'  %}Red{% elif batteries.0 < '25.2' and batteries.0 >= '24.5' %}Yellow{% else %}Green{% endif %}">{{batteries.0}} v
+       <i class="fas fa-battery-{% if batteries.3 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></span></h2></li>
+     <li class="list-group-item bg-{{batteries.4}}"><h2><span style = "color:{% if batteries.4 == 'danger' %}Red{% elif batteries.4 == 'warning' %}Yellow{% else %}Green{% endif %}">{{batteries.1}} v
+       <i class="fas fa-battery-{% if batteries.4 == 'danger'  %}empty{% elif batteries.4 == 'warning' %}half{% else %}full{% endif %}"> </i></span></h2></li>
 
     <li class="list-group-item text-center {% if 'not' in zero_status %}bg-warning{% endif %}">{{zero_status}}</li>
 

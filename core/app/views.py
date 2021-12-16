@@ -1376,9 +1376,25 @@ def status(request):
         # print("lastRead: ",lastRead[0][0][0])
         lastRead = "Aisle:" + lastRead[0][0][0][0:3] + " Pos:" + lastRead[0][0][0][3:6]
         # print("004")
+        battery_24_limits = [24.4,25.4]
+        battery_36_limits = [35.5,36.5]
         batteries = voltages.split(':')
         batteries[0] = batteries[0][:-2]
         batteries[1] = batteries[1][:-2]
+
+        if batteries[0]< battery_24_limits[0]:
+            batteries[2] = "danger"
+        elif batteries[0]>= battery_24_limits[0] and batteries[0]<= battery_24_limits[1]:
+            batteries[2] = "warning"
+        else:
+            batteries[2] = "success"
+
+        if batteries[0]< battery_36_limits[0]:
+            batteries[3] = "danger"
+        elif batteries[0]>= battery_36_limits[0] and batteries[0]<= battery_36_limits[1]:
+            batteries[3] = "warning"
+        else:
+            batteries[3] = "success"
 
 
         distances = pdQuery.vBarDistances(id_device)
