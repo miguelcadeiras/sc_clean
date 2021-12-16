@@ -1394,9 +1394,14 @@ def status(request):
         if batteries[1]< battery_36_limits[0]:
             batteries.append("danger")
         elif batteries[1]>= battery_36_limits[0] and batteries[0]<= battery_36_limits[1]:
+            print("%%%%%%%% warining %%%%%%%%%%%%%%%%%55")
+            print("batteries[1]",batteries[1],battery_36_limits[0],batteries[1]>= battery_36_limits[0])
+            print("batteries[1]",batteries[1],battery_36_limits[1],batteries[0]<= battery_36_limits[1])
+
             batteries.append( "warning")
         else:
             batteries.append("success")
+
         print("$--Batteries--$$$$" * 2)
         print(batteries)
         distances = pdQuery.vBarDistances(id_device)
