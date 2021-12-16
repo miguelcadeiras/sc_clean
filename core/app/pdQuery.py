@@ -1688,7 +1688,7 @@ def lastInspectionTime(id_device):
     df_et = pd.read_sql(end_time, dbConnection)
 
     dbConnection.close()
-    print ("lastInspectionTime",df_st,df_et)
+    # print ("lastInspectionTime",df_st,df_et)
 
     return last_id_inspection,df_st,df_et
 
