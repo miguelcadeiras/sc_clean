@@ -1379,8 +1379,8 @@ def status(request):
         battery_24_limits = [24.4,25.4]
         battery_36_limits = [35.5,36.5]
         batteries = voltages.split(':')
-        batteries[0] = batteries[0][:-2]
-        batteries[1] = batteries[1][:-2]
+        batteries[0] = float(batteries[0][:-2])
+        batteries[1] = float(batteries[1][:-2])
 
         if batteries[0]< battery_24_limits[0]:
             batteries[2] = "danger"
