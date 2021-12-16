@@ -1396,9 +1396,9 @@ def status(request):
         elif batteries[1]>= battery_36_limits[0] and batteries[0]<= battery_36_limits[1]:
             print("%%%%%%%% warining %%%%%%%%%%%%%%%%%55")
             print("batteries[1]",type(batteries[1]),type(battery_36_limits[0]),batteries[1]>= battery_36_limits[0])
-            print("batteries[1]",batteries[1],battery_36_limits[1],batteries[0] < battery_36_limits[1])
+            print("batteries[1]",batteries[1],battery_36_limits[1],":",batteries[0] < battery_36_limits[1],":",batteries[0],"<",battery_36_limits[1])
 
-            batteries.append( "warning")
+            batteries.append("warning")
         else:
             batteries.append("success")
 
@@ -1410,15 +1410,15 @@ def status(request):
         last_id_inspection,start_time,end_time = pdQuery.lastInspectionTime(id_device)
 
         eleapsed_time = end_time['time']-start_time['time']
-        print("-------------TIME--------------")
-        print(eleapsed_time[0],type(eleapsed_time[0]))
+        # print("-------------TIME--------------")
+        # print(eleapsed_time[0],type(eleapsed_time[0]))
 
         if start_time.empty:
             inspection_time = [last_id_inspection, "Didn't Start", "", ""]
         else:
             inspection_time = [last_id_inspection,start_time['time'][0],end_time['time'][0],eleapsed_time[0]]
 
-        print("inspection_time",inspection_time)
+        # print("inspection_time",inspection_time)
         context = {"status":dfStatus,
                    "statusSubstring":statusString,
                    "voltages":voltages,
