@@ -30,6 +30,7 @@
 
 
 
+
 </div>
 {% endblock %}
 
@@ -85,14 +86,15 @@
                                 <td>
                                     <div class="text-center">
                                         {% if row.4 != row.5  %}
-                                        <a href="media/smarti/{{item}}" ><img src="media/smarti/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
+                                        <a href="media/smarti/{{request.GET.id_inspection}}/{{item}}" ><img src="media/smarti/{{request.GET.id_inspection}}/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
                                         {% endif %}
                                     </div>
                                 </td>
                                 {% else %}
                                 <td>
                                     {% if item != '0' and row.4 != row.5%}
-                                    <a href="media/smarti/{{item}}" ><i class="fa fa-camera" aria-hidden="true"></i></a>
+
+                                    <a href="media/smarti/{{request.GET.id_inspection}}/{{item}}" ><i class="fa fa-camera" aria-hidden="true"></i></a>
                                     {% endif %}
                                 </td>
                                 {% endif %}
