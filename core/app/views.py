@@ -1334,7 +1334,7 @@ def plusMinus(request):
         picPath = querys.mysqlQuery(query)[0][0][0]
 
     print("%"*50)
-    print("picPath:","/"++picPath)
+    print("picPath:","media/smarti/"+str(id_inspection)+"/"++picPath)
 
     context = {"data": data,
                "description":['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel'],
