@@ -1334,6 +1334,8 @@ def plusMinus(request):
         picPath = querys.mysqlQuery(query)[0][0][0]
 
     print("%"*50)
+    picPath = "media/smarti/"+str(id_inspection)+"/"+picPath
+
     print("picPath:","media/smarti/"+str(id_inspection)+"/"+picPath)
 
     context = {"data": data,
