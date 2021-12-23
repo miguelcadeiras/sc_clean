@@ -1333,7 +1333,8 @@ def plusMinus(request):
         query = "select picPath from inventorymaptbl where id_inspection = " + id_inspection + " and codePos like '" + agvPos + "' ; "
         picPath = querys.mysqlQuery(query)[0][0][0]
 
-    # print(picPath)
+    print("%"*50)
+    print("picPath:",picPath)
 
     context = {"data": data,
                "description":['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel'],
