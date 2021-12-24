@@ -993,7 +993,11 @@ def decodeMachPAVR(id_inspection):
     # DONDE NO HAY PRODUCTO EN EL WMS
 
     df_noProduct = dfPos1.merge(dfwms[(dfwms['wmsProduct'].isna())], left_on='pos', right_on='wmsPos', how='right')
-    df_noProduct['match'] = df_noProduct.apply(lambda x: True if x['pos'] == x['wmsPos'] else np.nan, axis=1)
+
+    if df_noProduct.empty:
+        df_noProduct['match'] = ""
+    else:
+        df_noProduct['match'] = df_noProduct.apply(lambda x: True if x['pos'] == x['wmsPos'] else np.nan, axis=1)
 
     # UNIMOS LOS 2
     dfTotalMatch = df_testProduct.append(df_noProduct)
