@@ -1115,6 +1115,117 @@ def decodeMachVR_noPD(id_inspection):
 
     return dfResult_nPA
 
+def decodeMachVR_noPD_levels_sorted(id_inspection):
+    df = virtualRack(id_inspection)
+
+    # GETTING JUST POSITION and vRack
+    dfPos = df[["codePos", "vRack", "nivel"]]
+    # nos quedamos con los digitos de Posicion
+    dfPos["pos"] = df["codePos"].str[0:10]
+    # solo nos quedamos con las posiciones no nulas y vacías q tienen virtualRack
+    dfPos = dfPos[(dfPos["codePos"].notnull()) & (dfPos["codePos"].str.len() > 0)]
+    dfPos1 = dfPos[["pos", "vRack"]].drop_duplicates()
+    # dfPos1.sort_values('pos')
+
+    # EN ESTA SITUACIÓN NO TENEMOS INFORMACIÓN DE DETECCIÓN DE PALLETS.
+    # # NOS QUEDAMOS CON EL TRUE-FALSE DE LOS PALLETS
+    # dfPallet = df[["vRack", "customCode3", "nivel", "picPath"]]
+    # dfPallet = dfPallet[(dfPallet["customCode3"].str.contains('PALLET', regex=False))]
+    # dfPallet['Pallet'] = (dfPallet["customCode3"].str.contains('TRUE', regex=False))
+    # del dfPallet["customCode3"]
+    # dfPallet.drop(dfPallet[dfPallet['vRack'] == 0].index, inplace=True)
+
+    ## UNITS por vRack
+    dfUnits = df[["vRack", "x", "codeUnit", "visionBar", "nivel", "picPath"]]
+    dfUnits = dfUnits[(dfUnits["codeUnit"].notnull()) & (dfUnits["codeUnit"].str.len() > 0)]
+    dfUnits = dfUnits.sort_values(['vRack','nivel'],ascending=(True,False))
+    dfUnits = dfUnits.drop_duplicates(subset="codeUnit", keep="first")
+
+    ###### COMENZAMOS CON LOS MERGE
+    #UNIONES entre UNITS ,vrack y Posiciones y Vrack
+    df_posUnits = pd.merge(dfPos1,
+                           dfUnits,
+                           left_on=["vRack"],
+                           right_on=["vRack"],
+                           how="right"
+                           )
+    df_posUnits = df_posUnits.drop_duplicates(subset="codeUnit", keep="first")
+
+
+    #### CONECTAMOS AL WMS-IMPORTED
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+    dfwms = pd.read_sql(
+        "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsdesc2 from wmspositionmaptbl where id_inspection =" + str(
+            id_inspection), dbConnection)
+    dbConnection.close()
+    dfwms = dfwms.replace(r'^\s*$', np.nan, regex=True)
+    dfwms["wPos"] = dfwms["wmsPosition"].str[4:10]
+    dfwms["wmsPos"] = dfwms['wmsPosition'].str[0:10]
+
+    ## HAY Q EVITAR LOS NAN.. entonces comparamos por separado,: donde hay prod, y donde No
+    # DONDE HAY PRODUCTO
+    df_productsResult = pd.merge(df_posUnits, dfwms.dropna(subset=['wmsProduct']),
+                                 how="right",
+                                 left_on="codeUnit",
+                                 right_on="wmsProduct")
+
+    # DONDE NO HAY PRODUCTO EN EL WMS
+
+    # merge de products where no son nan
+    df_noProductTest = pd.merge(dfwms[dfwms['wmsProduct'].isna()], dfPos1["pos"],
+                                how="left",
+                                left_on="wmsPos",
+                                right_on="pos")
+    df_noProductTest = df_noProductTest.drop_duplicates(subset='wmsPosition')
+
+
+
+    # UNIMOS LOS 2
+    def reason(x):
+        r = ""
+        #     print(isinstance(x['aPos'],float) & isinstance(x['wmsProduct'],float))
+        #     print(x['aPos'],type(x['aPos']),isinstance(x['aPos'],str))
+
+        if x['pos'] == x['wmsPos']:
+            r = "match"
+
+        elif isinstance(x['codeUnit'], float):
+            r = "not readed"
+            if isinstance(x['aPos'], float) & isinstance(x['wmsProduct'], float):
+                r = "n/a"
+        elif x['pos'] == np.nan:
+            r = "wait"
+
+
+
+        elif isinstance(x['aPos'], str) & isinstance(x['wPos'], str):
+
+            if abs(int(x['wPos']) - int(x['aPos'])) == 2:
+                r = "2"
+            else:
+                r = "missMatch"
+
+        #     print("r",r,"*"*25)
+        return r
+
+    dfResult_nPA = df_productsResult.append(df_noProductTest)
+    dfResult_nPA['aPos'] = dfResult_nPA['pos'].str[4:10]
+    dfResult_nPA['match']=False
+    dfResult_nPA['desc'] =""
+
+    dfResult_nPA['match'] = dfResult_nPA.apply(lambda x: True if x['pos'] == x['wmsPos'] else False, axis=1)
+
+    dfResult_nPA['desc'] = dfResult_nPA.apply(lambda x: reason(x), axis=1)
+
+    col_names = ['pos',
+                 'wmsPos', 'vRack', 'x', 'wmsProduct', 'codeUnit', 'visionBar', 'nivel',
+                 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'wPos', 'aPos', 'match', 'desc', 'picPath']
+    dfResult_nPA = dfResult_nPA.reindex(columns=col_names)
+
+
+    return dfResult_nPA
+
 
 def decodeMachVR(id_inspection, export_to_excel=False):
     return
