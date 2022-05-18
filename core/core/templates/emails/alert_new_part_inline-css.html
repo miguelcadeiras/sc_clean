@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" style="box-sizing: border-box;font-family: sans-serif;line-height: 1.15;-webkit-text-size-adjust: 100%;-webkit-tap-highlight-color: transparent;">
+<head style="box-sizing: border-box;">
+
+</head>
+
+<table class="body-wrap" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;box-sizing: border-box;font-size: 14px;width: 100%;background-color: #f6f6f6;margin: 0;border-collapse: collapse;" bgcolor="#f6f6f6">
+    <tbody style="box-sizing: border-box;">
+    <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;box-sizing: border-box;font-size: 14px;margin: 0;page-break-inside: avoid;">
+        <td style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;" valign="top"></td>
+        <td class="container" width="600" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;box-sizing: border-box;font-size: 14px;vertical-align: top;display: block !important;max-width: 600px !important;clear: both !important;margin: 0 auto;width: 100%;padding-right: 15px;padding-left: 15px;margin-right: auto;margin-left: auto;min-width: 992px!important;" valign="top">
+            <div class="content" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; max-width: 600px; display: block; margin: 0 auto; padding: 20px;">
+                <table class="main" width="100%" cellpadding="0" cellspacing="0" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;box-sizing: border-box;font-size: 14px;border-radius: 3px;background-color: #fff;margin: 0;border: 1px solid #e9e9e9;border-collapse: collapse;" bgcolor="#fff">
+                    <tbody style="box-sizing: border-box;">
+                    <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;box-sizing: border-box;font-size: 14px;margin: 0;page-break-inside: avoid;">
+                        <td class="" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; color: #fff; font-weight: 500; text-align: center; border-radius: 3px 3px 0 0; background-color: #38414a; margin: 0; padding: 20px;" align="center" bgcolor="#71b6f9" valign="top">
+                            <a href="https://keystats.kreometrology.com" style="font-size: 32px;color: #fff;box-sizing: border-box;text-decoration: underline;background-color: transparent;"> KEYSTATS</a> <br style="box-sizing: border-box;">
+
+                        </td>
+                    </tr>
+                    <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;box-sizing: border-box;font-size: 14px;margin: 0;page-break-inside: avoid;">
+                        <td class="content-wrap" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 20px;" valign="top">
+                            <div class="row justify-content-center" style="box-sizing: border-box;display: flex;-ms-flex-wrap: wrap;flex-wrap: wrap;margin-right: -15px;margin-left: -15px;-ms-flex-pack: center!important;justify-content: center!important;">
+                                <a href="https://keystats.kreometrology.com" class="btn btn-primary" role="button" style="box-sizing: border-box;color: #fff;text-decoration: none;background-color: #007bff;display: inline-block;font-weight: 400;text-align: center;vertical-align: middle;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border: 1px solid transparent;padding: .375rem .75rem;font-size: 1rem;line-height: 1.5;border-radius: .25rem;transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;border-color: #007bff;">New Parts Uploaded</a>
+                            </div>
+                            <div class="row" style="height: 20px;box-sizing: border-box;display: flex;-ms-flex-wrap: wrap;flex-wrap: wrap;margin-right: -15px;margin-left: -15px;"></div>
+                            <table class="table table-sm" style="box-sizing: border-box;border-collapse: collapse!important;width: 100%;margin-bottom: 1rem;color: #212529;">
+                                <thead style="box-sizing: border-box;display: table-header-group;">
+                                <tr role="row" class="odd" style="box-sizing: border-box;page-break-inside: avoid;">
+                                    <th align="center" style="box-sizing: border-box;text-align: inherit;padding: .3rem;vertical-align: bottom;border-top: 1px solid #dee2e6;border-bottom: 2px solid #dee2e6;background-color: #fff!important;">Workspace</th>
+                                    <th style="box-sizing: border-box;text-align: inherit;padding: .3rem;vertical-align: bottom;border-top: 1px solid #dee2e6;border-bottom: 2px solid #dee2e6;background-color: #fff!important;">Project name</th>
+                                </tr>
+
+                                </thead>
+                                <tbody style="box-sizing: border-box;">
+
+                                {% for project in projects_uploaded %}
+                                <tr role="row" class="odd" style="box-sizing: border-box;page-break-inside: avoid;">
+                                    <td style="box-sizing: border-box;padding: .3rem;vertical-align: top;border-top: 1px solid #dee2e6;background-color: #fff!important;">{{project.0}}</td>
+                                    <td style="box-sizing: border-box;padding: .3rem;vertical-align: top;border-top: 1px solid #dee2e6;background-color: #fff!important;">{{project.1}}</td>
+                                </tr>
+                                {% endfor %}
+
+
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="footer" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; clear: both; color: #999; margin: 0; padding: 20px;">
+                    <table width="100%" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;box-sizing: border-box;font-size: 14px;margin: 0;border-collapse: collapse;">
+                        <tbody style="box-sizing: border-box;">
+                        <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;box-sizing: border-box;font-size: 14px;margin: 0;page-break-inside: avoid;">
+                            <td class="aligncenter content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; vertical-align: top; color: #999; text-align: center; margin: 0; padding: 0 0 20px;" align="center" valign="top"><a href="https://keystats.kreometrology.com/main/userAlertsPanel" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;box-sizing: border-box;font-size: 12px;color: #999;text-decoration: underline;margin: 0;background-color: transparent;">Unsubscribe</a> from these alerts.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </td>
+        <td style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;" valign="top"></td>
+    </tr>
+    </tbody>
+</table>
+
+</html>

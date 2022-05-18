@@ -161,6 +161,13 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'miguel@kreometrology.com'
 EMAIL_HOST_PASSWORD = 'xkxoifjwrcakcqlk'
 EMAIL_USE_TLS = True
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'mail.keystats.kreometrology.com'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'alert@keystats.kreometrology.com'
+# EMAIL_HOST_PASSWORD = 'njxycrvyurofzyvo'
+# EMAIL_USE_TLS = True
 ####################################################
 
 

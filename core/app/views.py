@@ -17,7 +17,7 @@ from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 
 import csv, os
-from . import querys,utils,pdQuery
+from . import querys,utils,pdQuery,flags
 from .models import *
 
 
@@ -1336,7 +1336,12 @@ def plusMinus(request):
     print("%"*50)
     picPath = "media/smarti/"+str(id_inspection)+"/"+picPath
 
-    print("picPath:","media/smarti/"+str(id_inspection)+"/"+picPath)
+    # print("picPath:","media/smarti/"+str(id_inspection)+"/"+picPath)
+    pos = dfw['wmsPosition'][0]
+    wmsPosAsLv = [pos[4:7],pos[7:10],pos[10:12]]
+    agvPosAsLv = [agvPos[4:7],agvPos[7:10],pos[10:12]]
+    print(agvPosAsLv)
+
 
     context = {"data": data,
                "description":['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel'],
@@ -1344,6 +1349,8 @@ def plusMinus(request):
                "lastSearchPos":pos,
                'inspection': querys.getInspectionData(request.GET['id_inspection']),
                'wmsData': dfw,
+               'wmsPosAsLv': wmsPosAsLv,
+               'agvPosAsLv': agvPosAsLv,
                'validation':validation,
                'comment':comment,
                'falsePAList': falseList,
@@ -1358,6 +1365,7 @@ def plusMinus(request):
 @login_required(login_url="/login/")
 def status(request):
     user = User.objects.get(username=request.user.username)  # get Some User.
+    list_mails = ['miguel@kreometrology.com', 'bianchi.alejandro@hotmail.com']
 
     # print(user.groups.filter(name='driver').exists())
     if user.groups.filter(name='driver').exists():
@@ -1368,10 +1376,18 @@ def status(request):
 
         if len(dfStatus)>0:
             statusString = getStatusString(str(dfStatus['status'][0]))
+            if "ex" in statusString:
+                try:
+                    if flags.flag_EX[id_device]:
+                        utils.sendAlert(list_mails, "Alert!! - ScanBot EX:"+statusString)
+                        flags.flag_EX[id_device] = False
+                except:
+                    flags.flag_EX[id_device] = True
             # statusString = str(dfStatus['status'][0])
             # print("003.0")
         else:
             # print("003.1")
+            flags.flag_EX[id_device]=True
             statusString = "n/a"
 
         lastReadQuery = "select substring(codePos,5,6) as pos from inventorymaptbl where device like '" + str(id_device) \
@@ -1387,19 +1403,39 @@ def status(request):
         batteries[0] = float(batteries[0][:-2])
         batteries[1] = float(batteries[1][:-2])
 
+
+
         if batteries[0]< battery_24_limits[0]:
             batteries.append( "danger")
+            try:
+                if flags.flag_24v[id_device]:
+                    utils.sendAlert(list_mails,"WARNING!! - 24v Battery Low")
+                    flags.flag_24v[id_device]=False
+            except:
+                flags.flag_24v[id_device] = True
+
         elif batteries[0]>= battery_24_limits[0] and batteries[0]<= battery_24_limits[1]:
+            flags.flag_24v[id_device] = True
             batteries.append( "warning")
         else:
+            flags.flag_24v[id_device] = True
             batteries.append( "success")
 
         if batteries[1]< battery_36_limits[0]:
             batteries.append("danger")
+            try:
+                if flags.flag_36v[id_device]:
+                    utils.sendAlert(list_mails,"WARNING!! - 36v Battery Low")
+                    flags.flag_36v[id_device] = False
+            except:
+                flags.flag_36v[id_device] = True
+
         elif batteries[1]>= battery_36_limits[0] and batteries[1]<= battery_36_limits[1]:
 
+            flags.flag_36v[id_device] = True
             batteries.append("warning")
         else:
+            flags.flag_36v[id_device] = True
             batteries.append("success")
 
 

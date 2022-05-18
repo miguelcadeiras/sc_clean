@@ -40,6 +40,10 @@
         <h1>LAST Search: {{lastSearchUnit}}
             <br> {{request.GET.agvPos}}<h1>
     </div>
+     <div class ="col-4">
+        <h1>AGV Aisle: {{agvPosAsLv.0}}
+            <br> AGV Pos: {{agvPosAsLv.1}}<h1>
+    </div>
 
 </div>
 {% endblock %}
@@ -149,11 +153,11 @@
 
                 </div>
                 <div class="card-body">
+                    <h3>Aisle:<span>{{wmsPosAsLv.0}}</span>  | Pos: <span>{{wmsPosAsLv.1}}</span></h3>
+                    <h4>Position<br><span>{{wmsData.wmsPosition.0}}</span><br>
+                        Unit<br><span>{{wmsData.wmsProduct.0}}</span><br></h4>
 
-                    <h3>Position<br><span>{{wmsData.wmsPosition.0}}</span><br>
-                        Unit<br><span>{{wmsData.wmsProduct.0}}</span><br></h3>
                     <h5>DESCRIPTION: <br></h5>
-
                     <span>{{wmsData.wmsDesc1.0}}</span><br><br>
                     <span>{{wmsData.wmsDesc.0}}</span><br><br>
                     <span>{{wmsData.wmsDesc2.0}}</span><br>
