@@ -1138,7 +1138,7 @@ def decodeMachVR_noPD_levels_sorted(id_inspection):
     ## UNITS por vRack
     dfUnits = df[["vRack", "x", "codeUnit", "visionBar", "nivel", "picPath"]]
     dfUnits = dfUnits[(dfUnits["codeUnit"].notnull()) & (dfUnits["codeUnit"].str.len() > 0)]
-    dfUnits = dfUnits.sort_values(['vRack','nivel'],ascending=(True,False))
+    dfUnits = dfUnits.sort_values(['vRack','nivel'],ascending=(True,True))
     dfUnits = dfUnits.drop_duplicates(subset="codeUnit", keep="first")
 
     ###### COMENZAMOS CON LOS MERGE
