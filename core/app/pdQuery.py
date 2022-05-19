@@ -1125,11 +1125,11 @@ def decodeMachVR_noPD_levels_sorted(id_inspection):
     # solo nos quedamos con las posiciones no nulas y vacías q tienen virtualRack
     dfPos = dfPos[(dfPos["codePos"].notnull()) & (dfPos["codePos"].str.len() > 0)]
     dfPos = dfPos.sort_values(['vRack', 'nivel'], ascending=(True, False))
-    print("&" * 30)
-    print(dfPos)
+    # print("&" * 30)
+    # print(dfPos)
     dfPos1 = dfPos[["pos", "vRack"]].drop_duplicates()
-    print("&" * 30)
-    print(dfPos)
+    # print("&" * 30)
+    # print(dfPos1)
     # dfPos1.sort_values('pos')
 
     # EN ESTA SITUACIÓN NO TENEMOS INFORMACIÓN DE DETECCIÓN DE PALLETS.

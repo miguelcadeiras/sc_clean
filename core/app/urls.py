@@ -12,8 +12,8 @@ urlpatterns = [
    # The home page
     path('', views.index, name='home'),
     path('inspections',views.inspections,name='inspections'),
-    path('all',views.allVR_noPD,name='all'),
-    path('all_1',views.allVR_noPD_1,name='all_1'),
+    path('all_old',views.allVR_noPD,name='all_old'),
+    path('all',views.allVR_noPD_1,name='all'),
     # path('allPD',views.allPD,name='allPD'),
     path('allPDvr', views.allPDvr, name='allPDvr'),
     path('allVR_noPD', views.allVR_noPD, name='allVR_noPD'),
