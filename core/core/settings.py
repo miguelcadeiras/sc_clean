@@ -155,19 +155,19 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 #################################################
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'miguel@kreometrology.com'
-EMAIL_HOST_PASSWORD = 'xkxoifjwrcakcqlk'
-EMAIL_USE_TLS = True
-
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'mail.keystats.kreometrology.com'
+# EMAIL_HOST = 'smtp.gmail.com'
 # EMAIL_PORT = 587
-# EMAIL_HOST_USER = 'alert@keystats.kreometrology.com'
-# EMAIL_HOST_PASSWORD = 'njxycrvyurofzyvo'
+# EMAIL_HOST_USER = 'miguel@kreometrology.com'
+# EMAIL_HOST_PASSWORD = 'xkxoifjwrcakcqlk'
 # EMAIL_USE_TLS = True
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.hostinger.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'alerts@smartcubik.com'
+EMAIL_HOST_PASSWORD = '@1234Cubik'
+EMAIL_USE_TLS = True
 ####################################################
 
 
