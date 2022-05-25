@@ -1368,15 +1368,15 @@ def importWMS(request):
             # print("myfile", request.POST['myfile'])
 
             myfile = request.FILES.get('myfile', False)
-            print("myfile: ",myfile)
+            # print("myfile: ",myfile)
             if myfile != False:
                 fs = FileSystemStorage()
                 filename = fs.save(myfile.name,myfile)
-                print(  "aqui",filename)
+                # print(  "aqui",filename)
                 # uploaded_file_url = fs.url(filename)
                 # print(uploaded_file_url)
                 importBool = querys.importDataBulk(os.path.join(settings.MEDIA_ROOT,filename),id_inspection)
-                print("001")
+                # print("001")
                 os.remove(os.path.join(settings.MEDIA_ROOT,filename))
                 if importBool:
                     messages.success(request,"Your Data has been Imported correctly")
