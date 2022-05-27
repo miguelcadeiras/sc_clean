@@ -33,6 +33,8 @@ def engine():
     if IPAddr != '151.106.108.129' :
         # print(" here")
         mysql_alchemyDevConString = 'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
+        # mysql_alchemyDevConString = 'mysql+pymysql://smartcubik:Smartcubik1Root!@151.106.108.129/inventory'
+
     else:
         # print(" 2here")
         mysql_alchemyDevConString = 'mysql+pymysql://smartcubik:Smartcubik1Root!@151.106.108.129/inventory'

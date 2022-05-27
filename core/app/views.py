@@ -746,8 +746,8 @@ def allVR_noPD_1(request):
         description = ['vf','wmsProduct','codeUnit','N','AGVpos','wmsPos','D1','Description','D2','c','desc','p']
 
         if request.GET['matching']=='2':
-            print('here')
-            df = df[(df['match']==False) and (df['wmsProduct']!='')]
+
+            df = df[(df['match']==False) & (df['wmsProduct']!='')]
 
     data = df.values.tolist()
     # description = list(df.columns.values)
