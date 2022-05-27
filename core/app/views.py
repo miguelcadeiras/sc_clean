@@ -747,7 +747,7 @@ def allVR_noPD_1(request):
 
         if request.GET['matching']=='2':
             print('here')
-            df = df[df['match']==False]
+            df = df[(df['match']==False) and (df['wmsProduct']!='')]
 
     data = df.values.tolist()
     # description = list(df.columns.values)
@@ -1643,11 +1643,13 @@ def status(request):
                    "vBar":distances.index.values.tolist(),
                    "time":inspection_time
                    }
-        # print(context)
+        print(context)
         return render(request,"status.html",context)
     else:
         messages.success(request, "You are NOT authorized to this device")
         return redirect("/login/")
+
+
 
 
 @login_required(login_url="/login/")
