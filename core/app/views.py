@@ -1547,7 +1547,7 @@ def plusMinus(request):
             if 'wms' in request.get_full_path():
                 return redirect(
                     '/plusMinus?id_inspection=' + str(id_inspection) + '&id_unit=' + unit + '&agvPos=' + str(
-                        agvPos) + 'wms=1&list=' + str(falseList))
+                        agvPos) + '&wms=1&list=' + str(falseList))
             return redirect('/plusMinus?id_inspection='+str(id_inspection)+'&id_unit='+unit+'&agvPos='+str(agvPos)+'&list='+str(falseList))
 
 
