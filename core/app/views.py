@@ -212,9 +212,9 @@ def allPD(request):
     if request.GET['matching'] == '0':
         # print('in Get - matching =0')
         # df = pdQuery.fullDeDupR1(id_inspection)
-        print("allPD.view","*"*20)
+        # print("allPD.view","*"*20)
         df = pdQuery.fullDeDupR1(id_inspection)
-        print("allPD.view1", "*" * 20)
+        # print("allPD.view1", "*" * 20)
         df = df[['rack','AGVpos','codeUnit','nivel_y','Ppic']]
         description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
     else:
@@ -537,7 +537,7 @@ def allVR_noPD(request):
         # df = pdQuery.fullDeDupR1(id_inspection)
         # print("allPD.view","*"*20)
         df = pdQuery.runningPosVR(id_inspection)
-        print("allPD.view1", "*" * 20)
+        # print("allPD.view1", "*" * 20)
         df = df[['vRack','pos','codeUnit','nivel','picPath']]
         description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
         # print("runningPosVR-completed: ",df)
@@ -716,7 +716,7 @@ def allVR_noPD_1(request):
         # df = pdQuery.fullDeDupR1(id_inspection)
         # print("allPD.view","*"*20)
         df = pdQuery.runningPosVR(id_inspection)
-        print("allPD.view1", "*" * 20)
+        # print("allPD.view1", "*" * 20)
         df = df[['vRack','pos','codeUnit','nivel','picPath']]
         description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
         # print("runningPosVR-completed: ",df)
@@ -1600,9 +1600,10 @@ def plusMinus(request):
             picPath = ""
     else:
         # buscar foto por codePos
-        print("007.else")
-        query = "select picPath from inventorymaptbl where id_inspection = " + id_inspection + " and codePos like '" + agvPos + "' ; "
-        picPath = querys.mysqlQuery(query)[0][0][0]
+        # print("007.else")
+        if "wms" not in request.get_full_path():
+            query = "select picPath from inventorymaptbl where id_inspection = " + id_inspection + " and codePos like '" + agvPos + "' ; "
+            picPath = querys.mysqlQuery(query)[0][0][0]
 
     # print("%"*50)
     picPath = "media/smarti/"+str(id_inspection)+"/"+picPath
