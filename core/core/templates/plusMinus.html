@@ -112,7 +112,12 @@
                         </thead>
                         <tbody>
                         {% for row in data %}
-                        <tr role="row" class="odd {% if row.4 == lastSearchUnit %}bg-danger{% endif %}">
+                            {% if 'wms' not in request.get_full_path %}
+                                <tr role="row" class="odd {% if row.4 == lastSearchUnit %}bg-danger{% endif %}">
+                            {% else %}
+                                <tr role="row" class="odd {% if request.GET.agvPos in row.3 %}bg-danger{% endif %}">
+                            {% endif %}
+
                             {% for item in row %}
                             <td>
                                 {{item}}

@@ -1617,6 +1617,7 @@ def plusMinus(request):
     print("agvPosAsLv",agvPosAsLv)
 
     print("falseList:",falseList)
+
     context = {"data": dfu.values.tolist(),
                "description":['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel'],
                "lastSearchUnit":  unit,
