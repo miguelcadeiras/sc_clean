@@ -1481,10 +1481,10 @@ def plusMinus(request):
     wmsData = []
     pos=""
     unit=""
-    print("---------DATA-----")
-    print(id_unit,agvPos)
-
-    print("lenfalseList: ",len(falseList),id_unit in falseList)
+    # print("---------DATA-----")
+    # print(id_unit,agvPos)
+    #
+    # print("lenfalseList: ",len(falseList),id_unit in falseList)
     # print(request.get_full_path())
     if len(falseList)>0:
         # print("falseList")
@@ -1519,11 +1519,11 @@ def plusMinus(request):
 
 
     else:
-        print("0-------DFU----------")
+        # print("0-------DFU----------")
         dfu,picPath = pdQuery.getRawDataByPos(id_inspection, agvPos)
-        print("-------DFU----------")
-        print("picPath")
-        print(dfu)
+        # print("-------DFU----------")
+        # print("picPath")
+        # print(dfu)
 
         if "wms" in request.get_full_path():
             dfw = pdQuery.getWmsPosByUnit(id_inspection, id_unit)
@@ -1577,22 +1577,22 @@ def plusMinus(request):
                     data = dfu.values.tolist()
 
                     dfw = pdQuery.getWmsPosByUnit(id_inspection, id_unit)
-                    print("*******DFW --"*8)
-                    print(dfw)
+                    # print("*******DFW --"*8)
+                    # print(dfw)
 
 
-    print("006")
+    # print("006")
 
     # print(dfv)
     if not id_unit == "" and "wms" not in request.get_full_path():
         # buscar foto por codeUnit
-        print("007")
+        # print("007")
         query = "select picPath from inventorymaptbl where id_inspection = " + id_inspection + " and codeUnit like '" + id_unit + "' ; "
         try:
-            print("007.1")
+            # print("007.1")
             picPath = querys.mysqlQuery(query)[0][0][0]
         except:
-            print("007.e")
+            # print("007.e")
             picPath = ""
     else:
         # buscar foto por codePos
@@ -1600,13 +1600,13 @@ def plusMinus(request):
         query = "select picPath from inventorymaptbl where id_inspection = " + id_inspection + " and codePos like '" + agvPos + "' ; "
         picPath = querys.mysqlQuery(query)[0][0][0]
 
-    print("%"*50)
+    # print("%"*50)
     picPath = "media/smarti/"+str(id_inspection)+"/"+picPath
-    print('008__---')
+    # print('008__---')
 
     # print("picPath:","media/smarti/"+str(id_inspection)+"/"+picPath)
     if not "wms" in request.get_full_path():
-        print(dfw['wmsPosition'])
+        # print(dfw['wmsPosition'])
         pos = dfw['wmsPosition'][0]
         wmsPosAsLv = [pos[4:7],pos[7:10],pos[10:12]]
         agvPosAsLv = [agvPos[4:7],agvPos[7:10],pos[10:12]]
@@ -1614,9 +1614,9 @@ def plusMinus(request):
         wmsPosAsLv = [agvPos[4:7],agvPos[7:10],pos[10:12]]
         agvPosAsLv =wmsPosAsLv
 
-    print("agvPosAsLv",agvPosAsLv)
-
-    print("falseList:",falseList)
+    # print("agvPosAsLv",agvPosAsLv)
+    #
+    # print("falseList:",falseList)
 
     context = {"data": dfu.values.tolist(),
                "description":['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel'],
