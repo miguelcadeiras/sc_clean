@@ -1694,9 +1694,9 @@ def getRawDataByUnit(id_inspection,unit):
 
 def getRawDataByPos(id_inspection,wms_position):
 
-    query0 = "set @vector=0 ;"
+    # query0 = "set @vector=0 ;"
     query1 = "select id_Vector into @vector from inventorymaptbl where id_inspection=" + str(
-        id_inspection) + " and codePos like '" + wms_position[:10] + "%%' order by rack desc limit 1;"
+        id_inspection) + " and codePos like '" + wms_position[:12] + "%%' order by rack desc limit 1;"
     query3 = "select * from inventorymaptbl where id_inspection= "+str(id_inspection)+" and id_Vector>@vector-10 and id_Vector<@vector+15 order by rack desc;"
     print("^^"*15)
     print(query1)
@@ -1707,11 +1707,17 @@ def getRawDataByPos(id_inspection,wms_position):
     # dfv = pd.read_sql("select @vector", dbConnection)
     # print("dfv:",dfv)
     dfp = pd.read_sql(query3, dbConnection)
+    dfp.replace(np.NaN,'',inplace=True)
+    picPath =""
+    if not dfp.empty:
+        picPath = dfp['picPath'][dfp['codePos'].str.contains(wms_position[:12])].values[0]
+        print("picPath: ", picPath)
     print("####"*5)
+
     print(dfp)
     dbConnection.close()
 
-    return dfp[['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel']]
+    return dfp[['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel']],picPath
 
 def getWmsPosByUnit(id_inspection,unit):
     query1 = "select * from wmspositionmaptbl where id_inspection= " + str(

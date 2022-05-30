@@ -1476,16 +1476,19 @@ def plusMinus(request):
     validation = False
     falseIndex=0
     comment=""
+    picPath=""
 
     wmsData = []
     pos=""
     unit=""
     print("---------DATA-----")
     print(id_unit,agvPos)
+
     print("lenfalseList: ",len(falseList),id_unit in falseList)
-    print(request.get_full_path())
+    # print(request.get_full_path())
     if len(falseList)>0:
         # print("falseList")
+
         falseList=falseList[1:-1].replace(" ","")
         falseList=falseList.replace("'","")
         falseList=falseList.split(",")
@@ -1517,8 +1520,9 @@ def plusMinus(request):
 
     else:
         print("0-------DFU----------")
-        dfu = pdQuery.getRawDataByPos(id_inspection, agvPos)
+        dfu,picPath = pdQuery.getRawDataByPos(id_inspection, agvPos)
         print("-------DFU----------")
+        print("picPath")
         print(dfu)
 
         if "wms" in request.get_full_path():
@@ -1551,7 +1555,7 @@ def plusMinus(request):
                 # print(key,request.POST[key])
 
 
-            if len(request.POST['position'])>= 10:
+            if len(request.POST['position'])>= 10 :
                 df = pdQuery.virtualRack(id_inspection)
                 # print("Searching by pos:",pos)
 
@@ -1565,6 +1569,7 @@ def plusMinus(request):
                 data = dfu.values.tolist()
 
 
+
             else:
 
                 if len(request.POST['unit'])>= 7:
@@ -1575,11 +1580,11 @@ def plusMinus(request):
                     print("*******DFW --"*8)
                     print(dfw)
 
-    picPath = ""
+
     print("006")
 
     # print(dfv)
-    if not id_unit == "":
+    if not id_unit == "" and "wms" not in request.get_full_path():
         # buscar foto por codeUnit
         print("007")
         query = "select picPath from inventorymaptbl where id_inspection = " + id_inspection + " and codeUnit like '" + id_unit + "' ; "
@@ -1612,7 +1617,7 @@ def plusMinus(request):
     print("agvPosAsLv",agvPosAsLv)
 
     print("falseList:",falseList)
-    context = {"data": data,
+    context = {"data": dfu.values.tolist(),
                "description":['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel'],
                "lastSearchUnit":  unit,
                "lastSearchPos":pos,
