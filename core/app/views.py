@@ -1544,6 +1544,10 @@ def plusMinus(request):
 
             messages.success(request,"PA - Validated. Thank you")
             # print('plusMinus?id_inspection='+str(id_inspection)+'&id_unit='+unit+'&agvPos='+str(agvPos))
+            if 'wms' in request.get_full_path():
+                return redirect(
+                    '/plusMinus?id_inspection=' + str(id_inspection) + '&id_unit=' + unit + '&agvPos=' + str(
+                        agvPos) + 'wms=1&list=' + str(falseList))
             return redirect('/plusMinus?id_inspection='+str(id_inspection)+'&id_unit='+unit+'&agvPos='+str(agvPos)+'&list='+str(falseList))
 
 
