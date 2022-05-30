@@ -734,10 +734,11 @@ def allVR_noPD_1(request):
             id_inspection) + " order by id_validation;"
         dfv= pdQuery.pdDF(validationQuery)
         dfv = dfv.drop_duplicates(subset='product', keep='last')
-
+        print("df--------","+"*20)
+        print(df)
         df['verified'] =""
         df['verified'] = df.apply(
-            lambda x: dfv['validation'][dfv['product'] == x['codeUnit']].tolist()[0] if x['codeUnit'] in dfv[
+            lambda x: dfv['validation'][dfv['product'] == x['wmsProduct']].tolist()[0] if x['codeUnit'] in dfv[
                 'product'].tolist() else False, axis=1)
         # print(df[df.wmsProduct.isin(dfv['product'].tolist())])
 
@@ -791,7 +792,6 @@ def allVR_noPD_1(request):
 
                    }
 
-            # return render(request, 'fail_by.html', context)
 
     data = df.values.tolist()
 
