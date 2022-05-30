@@ -734,15 +734,15 @@ def allVR_noPD_1(request):
             id_inspection) + " order by id_validation;"
         dfv= pdQuery.pdDF(validationQuery)
         dfv = dfv.drop_duplicates(subset='product', keep='last')
-        print("df--------","+"*20)
-        print(df)
+
+        # print("dfV--------","+"*20)
+        # print(dfv)
         df['verified'] =""
         df['verified'] = df.apply(
-            lambda x: dfv['validation'][dfv['product'] == x['wmsProduct']].tolist()[0] if x['codeUnit'] in dfv[
+            lambda x: dfv['validation'][dfv['product'] == x['wmsProduct']].tolist()[0] if x['wmsProduct'] in dfv[
                 'product'].tolist() else False, axis=1)
-        # print(df[df.wmsProduct.isin(dfv['product'].tolist())])
-
-        #print(df.columns)
+        # print("df--VERIFIED --", "+" * 20)
+        # print(df)
         df = df[['verified','wmsProduct','codeUnit','nivel','pos','wmsPosition','wmsDesc','wmsDesc1','wmsdesc2','match','desc','picPath']]
         description = ['vf','wmsProduct','codeUnit','N','AGVpos','wmsPos','D1','Description','D2','c','desc','p']
 
