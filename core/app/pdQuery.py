@@ -1692,6 +1692,27 @@ def getRawDataByUnit(id_inspection,unit):
 
     return dfp[['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel']]
 
+def getRawDataByPos(id_inspection,wms_position):
+
+    query0 = "set @vector=0 ;"
+    query1 = "select id_Vector into @vector from inventorymaptbl where id_inspection=" + str(
+        id_inspection) + " and codePos like '" + wms_position[:10] + "%%' order by rack desc limit 1;"
+    query3 = "select * from inventorymaptbl where id_inspection= "+str(id_inspection)+" and id_Vector>@vector-10 and id_Vector<@vector+15 order by rack desc;"
+    print("^^"*15)
+    print(query1)
+    sqlEngine = engine()
+    dbConnection = sqlEngine.connect()
+
+    dbConnection.execute(query1)
+    # dfv = pd.read_sql("select @vector", dbConnection)
+    # print("dfv:",dfv)
+    dfp = pd.read_sql(query3, dbConnection)
+    print("####"*5)
+    print(dfp)
+    dbConnection.close()
+
+    return dfp[['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel']]
+
 def getWmsPosByUnit(id_inspection,unit):
     query1 = "select * from wmspositionmaptbl where id_inspection= " + str(
         id_inspection) + " and wmsProduct like '"+unit+"';"
@@ -1707,20 +1728,20 @@ def getWmsPosByUnit(id_inspection,unit):
     dbConnection.close()
     return dfp
 
-def getWmsPosByUnit(id_inspection,unit):
-    query1 = "select * from wmspositionmaptbl where id_inspection= " + str(
-        id_inspection) + " and wmsProduct like '"+unit+"';"
-
-    # print(query1)
-    sqlEngine = engine()
-    dbConnection = sqlEngine.connect()
-    # dbConnection.execute(query1)
-    # dfv = pd.read_sql("select @vector", dbConnection)
-    # print("dfv:",dfv)
-    dfp = pd.read_sql(query1, dbConnection)
-    # print("dfp"*20,dfp)
-    dbConnection.close()
-    return dfp
+# def getWmsPosByUnit(id_inspection,unit):
+#     query1 = "select * from wmspositionmaptbl where id_inspection= " + str(
+#         id_inspection) + " and wmsProduct like '"+unit+"';"
+#
+#     # print(query1)
+#     sqlEngine = engine()
+#     dbConnection = sqlEngine.connect()
+#     # dbConnection.execute(query1)
+#     # dfv = pd.read_sql("select @vector", dbConnection)
+#     # print("dfv:",dfv)
+#     dfp = pd.read_sql(query1, dbConnection)
+#     # print("dfp"*20,dfp)
+#     dbConnection.close()
+#     return dfp
 
 def pdDF(query):
     sqlEngine = engine()

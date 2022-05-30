@@ -2,6 +2,8 @@ import json
 
 import mysql.connector
 import csv
+
+import pandas as pd
 from mysql.connector import errorcode,constants
 from time import process_time
 from django.conf import settings
@@ -513,6 +515,9 @@ def importDataBulk(myfile,id_inspection):
     # Start the stopwatch / counter
     t1_start = process_time()
 
+    df_read=pd.read_csv(myfile)
+    print(df_read)
+
     with open(myfile, 'r',encoding='utf-8',errors='surrogateescape') as csv_file:
             header = "insert into wmspositionmaptbl (wmsposition,wmsproduct,wmsdesc,wmsdesc1,wmsdesc2,id_inspection) values"
             query= header
@@ -520,32 +525,35 @@ def importDataBulk(myfile,id_inspection):
 
             rowCount = 0
             r=0
-            print("here")
-            for index,row in enumerate(reader):
-
-                if index == 0:
-                    next
-                    #print(row)
-                else:
-                    if "'" in row[3] :
-                        row[3]=row[3].replace("'"," ")
-                    query += "('"+row[0]+"','"+row[1]+"','"+row[2]+"','"+row[3]+"','"+row[4]+"',"+str(id_inspection)+"),"
+            # print("here")
+            # for index,row in enumerate(reader):
+            for index, row in df_read.iterrows():
+                    # print("index:",index)
+                    # print("row",row)
+                    print("----------",row[0])
+                # if index == 0:
+                #     next
+                #     #print(row)
+                # else:
+                    if "'" in str(row[3]) :
+                        row[3]=str(row[3]).replace("'"," ")
+                    query += "('"+str(row[0])+"','"+str(row[1])+"','"+str(row[2])+"','"+str(row[3])+"','"+str(row[4])+"',"+str(id_inspection)+"),"
                     # print("query", query)
-                    if index == 1:
-                        # print("query",query)
-                        next
+                    # if index == 1:
+                    #     # print("query",query)
+                    #     next
 
                     if rowCount > 5000:
-                        print("ROWWW:",r)
-                        print("query", query[:-1])
+                        # print("ROWWW:",r)
+                        # print("query", query[:-1])
                         execute(query[:-1])
-                        print("executed")
+                        # print("executed")
                         query = header
                         rowCount = 0
-                rowCount += 1
-                r +=1
+                    rowCount += 1
+                    r +=1
 
-            print("query", query)
+            # print("query", query)
             if len(query) > len(header):
                 execute(query[:-1])
 

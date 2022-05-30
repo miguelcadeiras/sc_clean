@@ -749,10 +749,58 @@ def allVR_noPD_1(request):
 
             df = df[(df['match']==False) & (df['wmsProduct']!='')]
 
+        if request.GET['matching']=='3':
+
+            df = df[(df['match']==False) & (df['wmsProduct']!='')]
+            # print(df)
+            try:
+                df['waisle'] = df['wmsPosition'].str[4:7]
+                df['wlevel'] = df['wmsPosition'].str[10:12]
+                df['wpos'] = df['wmsPosition'].str[7:10]
+
+            except:
+                messages.warning(request,"There are values on Aisle, Level or Pos that brings conflicts. Sorry. Help us work around")
+                # print("Something went wrong")
+            # print(df)
+            # print(df[['wmsPosition', 'wmsProduct', 'picPath', 'aisle', 'level', 'pos']])
+            # table = pd.pivot_table(df[['wmsPosition', 'wmsProduct',  'aisle', 'level', 'pos','picPath']],index = ['aisle', 'level', 'pos'])
+            # print(table.sort_values(['aisle', 'level', 'pos']))
+            df = df[['waisle', 'wlevel', 'wpos','verified','wmsProduct','codeUnit','nivel','pos','wmsPosition',
+                      'wmsDesc','wmsDesc1','wmsdesc2','match','desc',
+                      'picPath']].sort_values(['waisle', 'wlevel', 'wpos'], ascending=[True,True,True])
+
+            groups = df.groupby(['waisle', 'wlevel', 'wpos', 'wmsPosition', 'wmsProduct', 'pos', 'codeUnit']).size()
+            groups = pd.DataFrame(groups)
+            groups.drop(0,inplace=True,axis=1)
+
+            context = {
+                    'data': df.values.tolist(),
+                    'groups':groups.to_html(border=0,classes='table table-head-fixed table-striped table-sm table-hover text-right', table_id = 'fails_by_aisle'),
+                   'data1':df.to_html(),
+                   'description': df.columns.tolist(),
+                   'clientName': request.user.profile.client,
+                   'id_warehouse': id_warehouse,
+                   'warehouseName': querys.getWarehouseName(request.GET['id_inspection']),
+                   'fail_count': df.shape[0],
+                   'picpath': picpath,
+                   'levels': levels,
+                   'lastRead': lastRead,
+                   'falsePAlist': df['codeUnit'][
+                       (df['match'] == False) & (df['codeUnit'].str.len() > 0)].tolist() if int(
+                       request.GET['matching']) > 0 else ""
+
+                   }
+
+            # return render(request, 'fail_by.html', context)
+
     data = df.values.tolist()
+
+
     # description = list(df.columns.values)
     # print("data:"*10)
     # print(df.empty)
+
+
 
     query = 'select count(wmsposition) from wmspositionmaptbl where id_inspection=' + str(id_inspection)
     warehouseTotalPositions = querys.mysqlQuery(query)[0][0][0]
@@ -857,7 +905,9 @@ def allVR_noPD_1(request):
     # print(lastRead)
 
     context = {'data':data,
-               'description':description,
+
+               # 'description':description,
+               'description':df.columns.tolist(),
                'clientName': request.user.profile.client,
                'id_warehouse':id_warehouse,
                'warehouseName': querys.getWarehouseName(request.GET['id_inspection']),
@@ -876,6 +926,10 @@ def allVR_noPD_1(request):
 
                }
 
+    if request.GET['matching']=='3':
+        context['groups'] = groups.to_html(border=0,classes='table table-head-fixed table-striped table-sm table-hover text-right', table_id = 'fails_by_aisle')
+        context['data1'] = df.to_html()
+        return render(request, 'fail_by.html', context)
     return render(request, 'allPD.html', context)
 
 @login_required(login_url="/login/")
@@ -1426,7 +1480,10 @@ def plusMinus(request):
     wmsData = []
     pos=""
     unit=""
-    # print("lenfalseList: ",len(falseList),falseList)
+    print("---------DATA-----")
+    print(id_unit,agvPos)
+    print("lenfalseList: ",len(falseList),id_unit in falseList)
+    print(request.get_full_path())
     if len(falseList)>0:
         # print("falseList")
         falseList=falseList[1:-1].replace(" ","")
@@ -1434,7 +1491,8 @@ def plusMinus(request):
         falseList=falseList.split(",")
 
     if id_unit in falseList:
-        # print("id_unit in falseList")
+        print("id_unit in falseList")
+        print(id_unit)
         falseIndex =falseList.index(id_unit)
         # print(falseIndex,falseList)
 
@@ -1452,8 +1510,22 @@ def plusMinus(request):
             unit = id_unit
 
             dfw = pdQuery.getWmsPosByUnit(id_inspection,id_unit)
+            print("dfw--2",dfw)
+
+
+
+
+    else:
+        print("0-------DFU----------")
+        dfu = pdQuery.getRawDataByPos(id_inspection, agvPos)
+        print("-------DFU----------")
+        print(dfu)
+
+        if "wms" in request.get_full_path():
+            dfw = pdQuery.getWmsPosByUnit(id_inspection, id_unit)
 
     if request.method == "POST":
+
         # print(request.POST.keys())
 
         if "comment" in request.POST.keys():
@@ -1492,6 +1564,7 @@ def plusMinus(request):
                 dfu =df.iloc[bottomindex:index + 20, [0, 1, 2, 5, 6, 7, 10, 15, 21, 22]]
                 data = dfu.values.tolist()
 
+
             else:
 
                 if len(request.POST['unit'])>= 7:
@@ -1499,29 +1572,46 @@ def plusMinus(request):
                     data = dfu.values.tolist()
 
                     dfw = pdQuery.getWmsPosByUnit(id_inspection, id_unit)
+                    print("*******DFW --"*8)
+                    print(dfw)
 
     picPath = ""
+    print("006")
 
     # print(dfv)
     if not id_unit == "":
         # buscar foto por codeUnit
+        print("007")
         query = "select picPath from inventorymaptbl where id_inspection = " + id_inspection + " and codeUnit like '" + id_unit + "' ; "
-        picPath = querys.mysqlQuery(query)[0][0][0]
+        try:
+            print("007.1")
+            picPath = querys.mysqlQuery(query)[0][0][0]
+        except:
+            print("007.e")
+            picPath = ""
     else:
         # buscar foto por codePos
+        print("007.else")
         query = "select picPath from inventorymaptbl where id_inspection = " + id_inspection + " and codePos like '" + agvPos + "' ; "
         picPath = querys.mysqlQuery(query)[0][0][0]
 
     print("%"*50)
     picPath = "media/smarti/"+str(id_inspection)+"/"+picPath
+    print('008__---')
 
     # print("picPath:","media/smarti/"+str(id_inspection)+"/"+picPath)
-    pos = dfw['wmsPosition'][0]
-    wmsPosAsLv = [pos[4:7],pos[7:10],pos[10:12]]
-    agvPosAsLv = [agvPos[4:7],agvPos[7:10],pos[10:12]]
-    print(agvPosAsLv)
+    if not "wms" in request.get_full_path():
+        print(dfw['wmsPosition'])
+        pos = dfw['wmsPosition'][0]
+        wmsPosAsLv = [pos[4:7],pos[7:10],pos[10:12]]
+        agvPosAsLv = [agvPos[4:7],agvPos[7:10],pos[10:12]]
+    else:
+        wmsPosAsLv = [agvPos[4:7],agvPos[7:10],pos[10:12]]
+        agvPosAsLv =wmsPosAsLv
 
+    print("agvPosAsLv",agvPosAsLv)
 
+    print("falseList:",falseList)
     context = {"data": data,
                "description":['id_Vector','rack','x','codePos','codeUnit','customCode3','nivel'],
                "lastSearchUnit":  unit,
