@@ -32,4 +32,4 @@ def sendAlert(list_mails,Subject="",message=""):
     connection.send_messages(email_messages)
     # We need to manually close the connection.
     connection.close()
-    # print("mail_alerts SENT!!! ","#"*20)
+    print("mail_alerts SENT!!! ","#"*20)
