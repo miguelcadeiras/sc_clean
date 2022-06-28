@@ -14,7 +14,7 @@ def sendAlert(list_mails,Subject="",message=""):
 
     htmly = get_template('emails/alert_pause.html')
     context = {}
-
+    print("sendAlert00")
     text_content = message
     html_content = htmly.render(context)
     new_message = EmailMultiAlternatives(subject='ALERT- '+Subject,
@@ -25,7 +25,7 @@ def sendAlert(list_mails,Subject="",message=""):
                                            )
     new_message.attach_alternative(html_content, "text/html")
     email_messages.append(new_message)
-
+    print("sendAlert01")
     connection = get_connection()
     # Manually open the connection
     connection.open()
