@@ -18,7 +18,7 @@ def sendAlert(list_mails,Subject="",message=""):
     text_content = message
     html_content = htmly.render(context)
     new_message = EmailMultiAlternatives(subject='ALERT- '+Subject,
-                                           from_email='alert@smartcubik.com',
+                                           from_email='alerts@smartcubik.com',
                                            to=[],
                                            bcc=list_mails,
                                            body=text_content,
