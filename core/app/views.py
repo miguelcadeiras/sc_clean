@@ -1672,7 +1672,10 @@ def status(request):
                         print("sending Alerts by mail...")
                         # utils.sendAlert(list_mails, "Alert!! - ScanBot EX:"+statusString)
                         flags.flag_EX[id_device] = False
+                        print("Flag set to False by mail...")
+
                 except:
+                    print("exception detected -- flag set to True")
                     flags.flag_EX[id_device] = True
             # statusString = str(dfStatus['status'][0])
             # print("003.0")

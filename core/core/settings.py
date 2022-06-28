@@ -165,8 +165,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.hostinger.com'
 EMAIL_PORT = 465
-EMAIL_HOST_USER = 'alerts@smartcubik.com'
-EMAIL_HOST_PASSWORD = 'aMcsDXg*e8D4/xg'
+EMAIL_HOST_USER = 'scanbotalert@smartcubik.com'
+EMAIL_HOST_PASSWORD = 'aMcsDXg*e8D4xg'
 EMAIL_USE_TLS = True
 ####################################################
 
