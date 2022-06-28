@@ -1660,12 +1660,14 @@ def status(request):
 
         if len(dfStatus)>0:
             statusString = getStatusString(str(dfStatus['status'][0]))
-            print("dfStatus")
-            print(dfStatus)
+            # print("dfStatus")
+            # print(dfStatus)
             print("statusString:",statusString)
 
             if "ex" in statusString:
                 try:
+                    print(flags)
+                    print(flags.flag_EX)
                     if flags.flag_EX[id_device]:
                         print("sending Alerts by mail...")
                         utils.sendAlert(list_mails, "Alert!! - ScanBot EX:"+statusString)
