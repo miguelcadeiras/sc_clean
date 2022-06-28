@@ -1670,7 +1670,7 @@ def status(request):
                     print(flags.flag_EX)
                     if flags.flag_EX[id_device]:
                         print("sending Alerts by mail...")
-                        utils.sendAlert(list_mails, "Alert!! - ScanBot EX:"+statusString)
+                        # utils.sendAlert(list_mails, "Alert!! - ScanBot EX:"+statusString)
                         flags.flag_EX[id_device] = False
                 except:
                     flags.flag_EX[id_device] = True
