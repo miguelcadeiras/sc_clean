@@ -21,6 +21,8 @@ from . import querys,utils,pdQuery,flags
 from .models import *
 
 
+
+
 @login_required(login_url="/login/")
 def index(request):
     # HOME PAGE SHOULD: show warehouses, and select Inspections
@@ -1644,6 +1646,8 @@ def plusMinus(request):
 
 @login_required(login_url="/login/")
 def status(request):
+
+
     user = User.objects.get(username=request.user.username)  # get Some User.
     list_mails = ['miguel@kreometrology.com', 'bianchi.alejandro@hotmail.com']
 
@@ -1656,9 +1660,14 @@ def status(request):
 
         if len(dfStatus)>0:
             statusString = getStatusString(str(dfStatus['status'][0]))
+            print("dfStatus")
+            print(dfStatus)
+            print("statusString:",statusString)
+
             if "ex" in statusString:
                 try:
                     if flags.flag_EX[id_device]:
+                        print("sending Alerts by mail...")
                         utils.sendAlert(list_mails, "Alert!! - ScanBot EX:"+statusString)
                         flags.flag_EX[id_device] = False
                 except:
@@ -1666,7 +1675,8 @@ def status(request):
             # statusString = str(dfStatus['status'][0])
             # print("003.0")
         else:
-            # print("003.1")
+            print("003.1")
+            print("flag to True")
             flags.flag_EX[id_device]=True
             statusString = "n/a"
 
