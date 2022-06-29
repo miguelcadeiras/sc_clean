@@ -85,8 +85,8 @@
   </div>
 </div>
 <div class="card">
-  <canvas id="front_cam_image" width="330" height="250"><canvas/>
-<!--  <img class="img-fluid img-thumbnail" id="front_cam_image" src="media/smarti/webcam.jpg" style="" alt="">-->
+
+  <img class="img-fluid img-thumbnail" id="front_cam_image" src="media/smarti/webcam.jpg" style="" alt="">
 </div>
 </div>
 
@@ -128,12 +128,9 @@ var imageURI = 'media/smarti/webcam.jpg';
 var x=0, y=0;
 var img = new Image();
 img.onload = function() {
-    var canvas = document.getElementById("front_cam_image");
-    var context = canvas.getContext("2d");
 
-    context.drawImage(img, x, y);
-    x+=20; y+=20;
-    setTimeout(timedRefresh,timeoutPeriod);
+   img = document.getElementById("front_cam_image");
+   setTimeout(timedRefresh,timeoutPeriod);
 };
 
 function timedRefresh() {
