@@ -15,6 +15,7 @@ from django.http import HttpResponse
 from django import template
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
+from django.http import JsonResponse
 
 import csv, os
 from . import querys,utils,pdQuery,flags
@@ -1669,7 +1670,7 @@ def status(request):
             # print("dfStatus")
             # print(dfStatus)
             print("statusString:",statusString)
-
+            statusString = "ex:algunaExcepcion"
             if "ex" in statusString:
                 try:
                     print(flags)
@@ -1771,6 +1772,121 @@ def status(request):
         messages.success(request, "You are NOT authorized to this device")
         return redirect("/login/")
 
+@login_required(login_url="/login/")
+def status_ajax(request):
+
+
+    user = User.objects.get(username=request.user.username)  # get Some User.
+    list_mails = ['miguel@kreometrology.com', 'bianchi.alejandro@hotmail.com']
+
+    messages.success(request, "You are an authorized User of this device")
+    id_device = request.GET['device']
+    dfStatus,voltages,zero_status = pdQuery.getStatus(id_device)
+
+    print("len df status:",len(dfStatus))
+    if len(dfStatus)>0:
+        statusString = getStatusString(str(dfStatus['status'][0]))
+        # print("dfStatus")
+        # print(dfStatus)
+        print("statusString:",statusString)
+        statusString = "ex:algunaExcepcion"
+        if "ex" in statusString:
+            try:
+                print(flags)
+                print(flags.flag_EX)
+                if flags.flag_EX[id_device]:
+                    print("sending Alerts by mail...")
+                    # utils.sendAlert(list_mails, "Alert!! - ScanBot EX:"+statusString)
+                    flags.flag_EX[id_device] = False
+                    print("Flag set to False by mail...")
+
+            except:
+                print("exception detected -- flag set to True")
+                flags.flag_EX[id_device] = True
+        # statusString = str(dfStatus['status'][0])
+        # print("003.0")
+    else:
+        print("003.1")
+        print("flag to True")
+        flags.flag_EX[id_device]=True
+        statusString = "n/a"
+
+    lastReadQuery = "select substring(codePos,5,6) as pos from inventorymaptbl where device like '" + str(id_device) \
+                    + "' and codePos not like '' order by id_Vector desc limit 1;"
+    lastRead = querys.mysqlQuery(lastReadQuery)
+    # print("lastRead: ",lastRead[0][0][0])
+    lastRead = "Aisle:" + lastRead[0][0][0][0:3] + " Pos:" + lastRead[0][0][0][3:6]
+    # print("004")
+    battery_24_limits = [24.4,25.4]
+    battery_36_limits = [35.5,36.5]
+
+    batteries = voltages.split(':')
+    batteries[0] = float(batteries[0][:-2])
+    batteries[1] = float(batteries[1][:-2])
+
+
+
+    if batteries[0]< battery_24_limits[0]:
+        batteries.append( "danger")
+        try:
+            if flags.flag_24v[id_device]:
+                # utils.sendAlert(list_mails,"WARNING!! - 24v Battery Low")
+                flags.flag_24v[id_device]=False
+        except:
+            flags.flag_24v[id_device] = True
+
+    elif batteries[0]>= battery_24_limits[0] and batteries[0]<= battery_24_limits[1]:
+        flags.flag_24v[id_device] = True
+        batteries.append( "warning")
+    else:
+        flags.flag_24v[id_device] = True
+        batteries.append( "success")
+
+    if batteries[1]< battery_36_limits[0]:
+        batteries.append("danger")
+        try:
+            if flags.flag_36v[id_device]:
+                # utils.sendAlert(list_mails,"WARNING!! - 36v Battery Low")
+                flags.flag_36v[id_device] = False
+        except:
+            flags.flag_36v[id_device] = True
+
+    elif batteries[1]>= battery_36_limits[0] and batteries[1]<= battery_36_limits[1]:
+
+        flags.flag_36v[id_device] = True
+        batteries.append("warning")
+    else:
+        flags.flag_36v[id_device] = True
+        batteries.append("success")
+
+
+    distances = pdQuery.vBarDistances(id_device)
+    # print("*--disntances--****"*3)
+    # print(distances)
+    last_id_inspection,start_time,end_time = pdQuery.lastInspectionTime(id_device)
+
+    eleapsed_time = end_time['time']-start_time['time']
+    # print("-------------TIME--------------")
+    # print(eleapsed_time[0],type(eleapsed_time[0]))
+
+    if start_time.empty:
+        inspection_time = [last_id_inspection, "Didn't Start", "", ""]
+    else:
+        inspection_time = [last_id_inspection,start_time['time'][0],end_time['time'][0],eleapsed_time[0]]
+
+    # print("inspection_time",inspection_time)
+    context = {"status":dfStatus.to_json(),
+               "statusSubstring":statusString,
+               "voltages":voltages,
+               "lastRead":lastRead,
+               "zero_status":zero_status,
+               "batteries":batteries,
+               "distances":distances.values.tolist(),
+               "vBar":distances.index.values.tolist(),
+               "time":str(inspection_time)
+               }
+    print(context)
+    return JsonResponse(context)
 
 
 

@@ -85,7 +85,7 @@
   </div>
 </div>
 <div class="card">
-  <img class="img-fluid img-thumbnail" src="media/smarti/webcam.jpg" style="" alt="">
+  <img class="img-fluid img-thumbnail" id="front_cam_image" src="media/smarti/webcam.jpg" style="" alt="">
 </div>
 </div>
 
@@ -108,7 +108,7 @@
 </html>
 
 <script>
-    window.setInterval('refresh()', 5000);
+    window.setInterval('refresh()', 10000);
     // Call a function every 10000 milliseconds
     // (OR 10 seconds).
 
@@ -119,5 +119,28 @@
 
 
 </script>
+
+<!--IMAGE REFRESH-->
+<script>
+  var timeoutPeriod = 1000;
+var imageURI = 'media/smarti/webcam.jpg';
+var x=0, y=0;
+var img = new Image();
+img.onload = function() {
+    var canvas = document.getElementById("front_cam_image");
+    var context = canvas.getContext("2d");
+
+    context.drawImage(img, x, y);
+    x+=20; y+=20;
+    setTimeout(timedRefresh,timeoutPeriod);
+};
+
+function timedRefresh() {
+    // just change src attribute, will always trigger the onload callback
+    img.src = imageURI + '?d=' + Date.now();
+}
+</script>
+
+
 
 

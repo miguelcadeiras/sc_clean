@@ -44,6 +44,8 @@ urlpatterns = [
          auth_views.PasswordResetCompleteView.as_view(template_name="registration/password_reset_complete.html"),
          name="password_reset_complete"),
     path('status', views.status, name='status'),
+    path('status_ajax', views.status_ajax, name='status_ajax'),
+
     path('devices', views.devices, name='devices') ,
 
 ]
