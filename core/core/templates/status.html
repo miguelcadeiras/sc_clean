@@ -146,7 +146,7 @@
                     url: "/status_ajax?device={{request.GET.device}}",
                     // on success
                     success: function (response) {
-                        console.log(response.distances.length);
+                        console.log('Vision bar distances:'+response.distances);
                         document.getElementById("lastRead").innerHTML =response.lastRead;
                         document.getElementById("updated").innerHTML =response.response.status['time']['0'];
                         document.getElementById("statusSubstring").innerHTML =response.statusSubstring;
