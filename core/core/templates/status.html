@@ -128,12 +128,13 @@ var imageURI = 'media/smarti/webcam.jpg';
 var x=0, y=0;
 var img = new Image();
 img.onload = function() {
-
+console.log(1);
    img = document.getElementById("front_cam_image");
    setTimeout(timedRefresh,timeoutPeriod);
 };
 
 function timedRefresh() {
+console.log(2);
     // just change src attribute, will always trigger the onload callback
     img.src = imageURI + '?d=' + Date.now();
 }
