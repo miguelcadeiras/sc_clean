@@ -1410,7 +1410,13 @@ def level(request):
 
 
 def testPage(request):
+    print("inTestPage.")
     querys.connect()
+    list_mails = ['miguel@kreometrology.com', 'bianchi.alejandro@hotmail.com']
+
+    utils.sendAlert(list_mails, "Alert!! - ScanBot EX:" + "testEmail")
+    messages.warning(request,"email atempt sent")
+    print ("testPage completed...")
     return render(request, 'base.html', {})
 
 @login_required(login_url="/login/")
@@ -1657,7 +1663,7 @@ def status(request):
         id_device = request.GET['device']
         dfStatus,voltages,zero_status = pdQuery.getStatus(id_device)
 
-
+        print("len df status:",len(dfStatus))
         if len(dfStatus)>0:
             statusString = getStatusString(str(dfStatus['status'][0]))
             # print("dfStatus")

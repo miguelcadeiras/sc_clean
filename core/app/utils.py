@@ -17,18 +17,21 @@ def sendAlert(list_mails,Subject="",message=""):
     print("sendAlert00")
     text_content = message
     html_content = htmly.render(context)
-    new_message = EmailMultiAlternatives(subject='ALERT- '+Subject,
-                                           from_email='alerts@smartcubik.com',
-                                           to=[],
-                                           bcc=list_mails,
+    new_message = EmailMultiAlternatives(subject='ALERT1- '+Subject,
+                                           from_email='scanbotalert@smartcubik.com',
+                                           to=list_mails,
+                                           # bcc=,
                                            body=text_content,
                                            )
     new_message.attach_alternative(html_content, "text/html")
     email_messages.append(new_message)
+    print(new_message)
     print("sendAlert01")
-    connection = get_connection()
+    connection = get_connection(fail_silently=False)
     # Manually open the connection
+    print("sendAlert02")
     connection.open()
+    print("sendAlert03")
     connection.send_messages(email_messages)
     # We need to manually close the connection.
     print("mail_alerts SENT!!! ", "#" * 20)
