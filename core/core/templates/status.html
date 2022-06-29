@@ -48,31 +48,31 @@
 <!-- {{status}}-->
 <div class="row">
 <div class="card" style="width: 18rem;">
-  <div class="card-header bg-primary">
+  <div  class="card-header bg-primary">
     DEVICE STATUS <br>
-    <h1>{{lastRead}}</h1>
+    <h1 id="lastRead">{{lastRead}}</h1>
   </div>
   <ul class="list-group list-group-flush">
-    <li class="list-group-item">Updated: {{status.time.0}}</li>
-    <li class="list-group-item {% if 'ex' in statusSubstring %}bg-danger{% endif %} {% if 'Following' in statusSubstring %}bg-success{% endif %} " ><h3>{{statusSubstring}}</h3></li>
+    <li id="updated" class="list-group-item">Updated: {{status.time.0}}</li>
+    <li id="statusSubstring" class="list-group-item {% if 'ex' in statusSubstring %}bg-danger{% endif %} {% if 'Following' in statusSubstring %}bg-success{% endif %} " ><h3>{{statusSubstring}}</h3></li>
 <!--    <li class="list-group-item{% if 'ex' in statusSubstring %}bg-danger{% endif %}">Batteries: {{voltages}}</li>-->
-     <li class="list-group-item {% if batteries.2 != 'success' %}bg-{{batteries.2}} {% endif %}"><h2><span style = "color:{% if batteries.2 == 'danger'  %}White{% elif batteries.2 == 'warning' %}White{% else %}Green{% endif %}">{{batteries.0}} v
+     <li id="batteries_0" class="list-group-item {% if batteries.2 != 'success' %}bg-{{batteries.2}} {% endif %}"><h2><span style = "color:{% if batteries.2 == 'danger'  %}White{% elif batteries.2 == 'warning' %}White{% else %}Green{% endif %}">{{batteries.0}} v
        <i class="fas fa-battery-{% if batteries.2 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></span></h2></li>
 
-    <li class="list-group-item {% if batteries.3 != 'success' %} bg-{{batteries.3}} {% endif %}"><h2><span style = "color:{% if batteries.3 == 'danger' %}White{% elif batteries.3 == 'warning' %}White{% else %}Green{% endif %}">{{batteries.1}} v
+    <li id="batteries_1" class="list-group-item {% if batteries.3 != 'success' %} bg-{{batteries.3}} {% endif %}"><h2><span style = "color:{% if batteries.3 == 'danger' %}White{% elif batteries.3 == 'warning' %}White{% else %}Green{% endif %}">{{batteries.1}} v
        <i class="fas fa-battery-{% if batteries.3 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></span></h2></li>
 
-    <li class="list-group-item text-center {% if 'not' in zero_status %}bg-warning{% endif %}">{{zero_status}}</li>
+    <li id="zero_status" class="list-group-item text-center {% if 'not' in zero_status %}bg-warning{% endif %}">{{zero_status}}</li>
 
     {% for value in distances%}
     {% with forloop.counter as index %}
-    <li class="list-group-item {% if value.0 < 60 or value.0 > 90 %}bg-warning{% endif %}"><h5>vBar {{index}} Distance: {{value.0}} cm</h5></li>
+    <li id="vBarDist_{{forloop.counter}}" class="list-group-item {% if value.0 < 60 or value.0 > 90 %}bg-warning{% endif %}"><h5>vBar {{index}} Distance: {{value.0}} cm</h5></li>
     {% endwith %}
     {% endfor %}
-    <li class="list-group-item "><h6>Inspection:  {{time.0}} </h6></li>
-    <li class="list-group-item "><h6>Start Time:  {{time.1}} </h6></li>
-    <li class="list-group-item "><h6>Last Time:  {{time.2}} </h6></li>
-    <li class="list-group-item "><h6>Eleapsed Time:  {{time.3}} </h6></li>
+
+    <li  class="list-group-item "><h6>Start Time:  <h6 id="time_1">{{time.1}}</h6> </h6></li>
+    <li  class="list-group-item "><h6>Last Time:  <h6 id="time_2">{{time.2}}</h6> </h6></li>
+    <li  class="list-group-item "><h6>Eleapsed Time:  <h6 id="time_3">{{time.3}}</h6> </h6></li>
 
 
 
@@ -122,39 +122,69 @@
 <!--</script>-->
 
 <!--IMAGE REFRESH-->
-<script>
-  setInterval(function() {
-    var myImageElement = document.getElementById('front_cam_image');
-    myImageElement.src = 'media/smarti/webcam.jpg?rand=' + Math.random();
-    console.log(new_image);
-}, 1000);
+<!--<script>-->
+<!--  setInterval(function() {-->
+<!--    var myImageElement = document.getElementById('front_cam_image');-->
+<!--    myImageElement.src = 'media/smarti/webcam.jpg?rand=' + Math.random();-->
+<!--    console.log(new_image);-->
+<!--}, 1000000);-->
 
-</script>
+<!--</script>-->
 
 <!--DATA REFRESH -->
 <script>
-  setInterval(function() {
-    $.ajax({  //Call ajax function sending the option loaded
-      url: "/status_ajax",  //This is the url of the ajax view where you make the search
-      type: 'GET',
-      //data: datastring,
-        success: function(response) {
-            result = JSON.parse(response);  // Get the results sended from ajax to here
-            console.log(response);
+<!--  setInterval(function() {-->
+<!--    console.log('interval');-->
 
-            if (result.error) { // If the function fails
-                // Error
-                alert(result.error_text);
-            } else {  // Success
 
-                    //Here do whatever you need with the result;
-                }
-            }
-        }
-    });
 
-  }, 10000);
 
+<!--  }, 1000);-->
+
+</script>
+
+<script>
+console.log('init to ajax');
+ $(document).ready(function () {
+            // catch the form's submit event
+           // $('#id_username').keyup(function () {
+                // create an AJAX call
+                console.log('before ajax');
+                $.ajax({
+                    //data: $(this).serialize(), // get the form data
+                    url: "/status_ajax?device=84C5A676A7AB",
+                    // on success
+                    success: function (response) {
+                        console.log(response.distances.length);
+                        document.getElementById("lastRead").innerHTML =response.lastRead;
+                        document.getElementById("updated").innerHTML =response.response.status['time']['0'];
+                        document.getElementById("statusSubstring").innerHTML =response.statusSubstring;
+                        document.getElementById("batteries_0").innerHTML =response.batteries['0'];
+                        document.getElementById("batteries_1").innerHTML =response.batteries['1'];
+                        document.getElementById("zero_status").innerHTML =response.zero_status;
+
+                        // faltaria actualizar las distancias de las barras.  vBarDist_{{forloop.counter}}
+                        //for(let i=1;i<response.distances.length;++i){
+                        //  document.getElementById("vBarDist_"+i).innerHTML =response.distances[i];
+                        //}
+
+
+                        document.getElementById("time_1").innerHTML =response.time['1'];
+                        document.getElementById("time_2").innerHTML =response.time['2'];
+                        document.getElementById("time_3").innerHTML =response.time['3'];
+
+                    },
+                    // on error
+                    error: function (response) {
+                        // alert the error if any error occured
+                        console.log(response.responseJSON.errors)
+                    }
+                });
+
+                return false;
+           // });
+        })
+console.log('after_ajax');
 </script>
 
 

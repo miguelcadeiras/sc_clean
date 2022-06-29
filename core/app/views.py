@@ -1711,7 +1711,7 @@ def status(request):
             batteries.append( "danger")
             try:
                 if flags.flag_24v[id_device]:
-                    utils.sendAlert(list_mails,"WARNING!! - 24v Battery Low")
+                    # utils.sendAlert(list_mails,"WARNING!! - 24v Battery Low")
                     flags.flag_24v[id_device]=False
             except:
                 flags.flag_24v[id_device] = True
@@ -1727,7 +1727,7 @@ def status(request):
             batteries.append("danger")
             try:
                 if flags.flag_36v[id_device]:
-                    utils.sendAlert(list_mails,"WARNING!! - 36v Battery Low")
+                    # utils.sendAlert(list_mails,"WARNING!! - 36v Battery Low")
                     flags.flag_36v[id_device] = False
             except:
                 flags.flag_36v[id_device] = True
