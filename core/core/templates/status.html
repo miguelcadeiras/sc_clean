@@ -122,37 +122,28 @@
 <!--</script>-->
 
 <!--IMAGE REFRESH-->
-<!--<script>-->
-<!--  setInterval(function() {-->
-<!--    var myImageElement = document.getElementById('front_cam_image');-->
-<!--    myImageElement.src = 'media/smarti/webcam.jpg?rand=' + Math.random();-->
-<!--    console.log(new_image);-->
-<!--}, 1000000);-->
+<script>
+  setInterval(function() {
+    var myImageElement = document.getElementById('front_cam_image');
+    myImageElement.src = 'media/smarti/webcam.jpg?rand=' + Math.random();
+}, 2000);
 
-<!--</script>-->
+</script>
 
 <!--DATA REFRESH -->
 <script>
-<!--  setInterval(function() {-->
-<!--    console.log('interval');-->
 
-
-
-
-<!--  }, 1000);-->
 
 </script>
 
 <script>
-console.log('init to ajax');
- $(document).ready(function () {
-            // catch the form's submit event
-           // $('#id_username').keyup(function () {
+ function getData () {
+
                 // create an AJAX call
-                console.log('before ajax');
+                //console.log('before ajax');
                 $.ajax({
                     //data: $(this).serialize(), // get the form data
-                    url: "/status_ajax?device=84C5A676A7AB",
+                    url: "/status_ajax?device={{request.GET.device}}",
                     // on success
                     success: function (response) {
                         console.log(response.distances.length);
@@ -182,9 +173,13 @@ console.log('init to ajax');
                 });
 
                 return false;
-           // });
-        })
-console.log('after_ajax');
+
+        }
+//console.log('after_ajax');
+
+setInterval(function() {
+    getData();
+  }, 10000);
 </script>
 
 
