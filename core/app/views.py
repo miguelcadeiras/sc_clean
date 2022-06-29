@@ -1779,7 +1779,7 @@ def status_ajax(request):
     user = User.objects.get(username=request.user.username)  # get Some User.
     list_mails = ['miguel@kreometrology.com', 'bianchi.alejandro@hotmail.com']
 
-    messages.success(request, "You are an authorized User of this device")
+    # messages.success(request, "You are an authorized User of this device")
     id_device = request.GET['device']
     dfStatus,voltages,zero_status = pdQuery.getStatus(id_device)
 
