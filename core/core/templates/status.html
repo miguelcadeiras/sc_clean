@@ -148,12 +148,15 @@
                     success: function (response) {
                         console.log('Vision bar distances:'+response.distances);
                         console.log('lastRead:'+response.lastRead);
-                        console.log('updated: '+response.status['time'][0]);
+                        console.log('updated: '+response.status['time']);
                         console.log('substring: '+response.statusSubstring);
                         console.log('batteries 0: '+response.batteries['0']);
                         console.log('batteries 1: '+response.batteries['1']);
                         console.log('zero_status: '+response.zero_status);
-                        console.log('time 1'+response.time['1']);
+                        console.log('time 1: '+response.time['1']);
+                        console.log('time 2: '+response.time['2']);
+                        console.log('time 3: '+response.time['3']);
+
 
                         document.getElementById("lastRead").innerHTML =response.lastRead;
                         document.getElementById("updated").innerHTML =response.status['time']['0'];
