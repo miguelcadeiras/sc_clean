@@ -1,0 +1,202 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ScanBot Status{% endblock %}</title>
+
+  <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Tempusdominus Bootstrap 4 -->
+  <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+  <!-- iCheck -->
+  <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+  <!-- JQVMap -->
+  <link rel="stylesheet" href="{% static 'plugins/jqvmap/jqvmap.min.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="{% static 'plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
+  <!-- Daterange picker -->
+  <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+  <!-- summernote -->
+  <link rel="stylesheet" href="{% static 'plugins/summernote/summernote-bs4.min.css' %}">
+<!--  DataTable icons Plugin-->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/af-2.3.5/b-1.6.5/b-colvis-1.6.5/b-flash-1.6.5/b-html5-1.6.5/cr-1.5.3/fc-3.3.2/fh-3.1.7/datatables.min.css"/>
+
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/af-2.3.5/b-1.6.5/b-colvis-1.6.5/b-flash-1.6.5/b-html5-1.6.5/cr-1.5.3/fc-3.3.2/fh-3.1.7/datatables.min.js"></script>
+</head>
+<body class="login-page" style="min-height:512 px;">
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+  {% block content %}
+  
+<!-- {{status}}-->
+<div class="row">
+<div class="card" style="width: 18rem;">
+  <div  class="card-header bg-primary">
+    DEVICE STATUS <br>
+    <h1 id="lastRead">{{lastRead}}</h1>
+  </div>
+  <ul class="list-group list-group-flush">
+    <li id="updated" class="list-group-item">Updated: {{status.time.0}}</li>
+    <li id="statusSubstring" class="list-group-item {% if 'ex' in statusSubstring %}bg-danger{% endif %} {% if 'Following' in statusSubstring %}bg-success{% endif %} " ><h3>{{statusSubstring}}</h3></li>
+<!--    <li class="list-group-item{% if 'ex' in statusSubstring %}bg-danger{% endif %}">Batteries: {{voltages}}</li>-->
+     <li id="batteries_0" class="list-group-item {% if batteries.2 != 'success' %}bg-{{batteries.2}} {% endif %}"><h2><span style = "color:{% if batteries.2 == 'danger'  %}White{% elif batteries.2 == 'warning' %}White{% else %}Green{% endif %}">{{batteries.0}} v
+       <i class="fas fa-battery-{% if batteries.2 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></span></h2></li>
+
+    <li id="batteries_1" class="list-group-item {% if batteries.3 != 'success' %} bg-{{batteries.3}} {% endif %}"><h2><span style = "color:{% if batteries.3 == 'danger' %}White{% elif batteries.3 == 'warning' %}White{% else %}Green{% endif %}">{{batteries.1}} v
+       <i class="fas fa-battery-{% if batteries.3 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></span></h2></li>
+
+    <li id="zero_status" class="list-group-item text-center {% if 'not' in zero_status %}bg-warning{% endif %}">{{zero_status}}</li>
+
+    {% for value in distances%}
+    {% with forloop.counter as index %}
+    <li id="vBarDist_{{forloop.counter}}" class="list-group-item {% if value.0 < 60 or value.0 > 90 %}bg-warning{% endif %}"><h5>vBar {{index}} Distance: {{value.0}} cm</h5></li>
+    {% endwith %}
+    {% endfor %}
+
+    <li id="time_1" class="list-group-item "><h6>Start Time:  {{time.1}} </h6></li>
+    <li id="time_2" class="list-group-item "><h6>Last Time:  {{time.2}} </h6></li>
+    <li id="time_3" class="list-group-item "><h6>Eleapsed Time:  {{time.3}} </h6></li>
+
+
+
+
+  </ul>
+
+  <div class="card-footer text-center">
+        <h2>{{request.GET.device}}</h2>
+
+  </div>
+</div>
+<div class="card">
+
+  <img class="img-fluid img-thumbnail" id="front_cam_image" src="media/smarti/webcam.jpg" style="" alt="">
+</div>
+</div>
+
+  {% endblock %}
+  <!-- /.row (main row) -->
+
+
+
+<!-- Control Sidebar -->
+<aside class="control-sidebar control-sidebar-dark">
+  <!-- Control sidebar content goes here -->
+</aside>
+<!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+{% include '_includes/scripts.html' %}
+</body>
+
+</html>
+REFRESH PAGE SCRIPT
+<script>
+    window.setInterval('refresh()', 10000);
+    // Call a function every 10000 milliseconds
+    // (OR 10 seconds).
+
+    // Refresh or reload page.
+    function refresh() {
+        window .location.reload();
+    }
+
+
+</script>
+
+<!--IMAGE REFRESH-->
+<script>
+  setInterval(function() {
+    var myImageElement = document.getElementById('front_cam_image');
+    myImageElement.src = 'media/smarti/webcam.jpg?rand=' + Math.random();
+}, 2000);
+
+</script>
+
+<!--DATA REFRESH -->
+<script>
+
+
+</script>
+
+<!--Ajax Refresh -->
+<!--<script>-->
+<!-- function getData () {-->
+
+<!--                // create an AJAX call-->
+<!--                //console.log('before ajax');-->
+<!--                $.ajax({-->
+<!--                    //data: $(this).serialize(), // get the form data-->
+<!--                    url: "/status_ajax?device={{request.GET.device}}",-->
+<!--                    // on success-->
+<!--                    success: function (response) {-->
+<!--                        console.log("response.time:"+response.time);-->
+<!--                        console.log('Vision bar distances lenght:'+response.distances.length);-->
+<!--                        console.log('Vision bar distances:'+response.distances);-->
+<!--                        console.log('lastRead:'+response.lastRead);-->
+<!--                        console.log('updated: '+response.status['time']);-->
+<!--                        console.log('substring: '+response.statusSubstring);-->
+<!--                        console.log('batteries 0: '+response.batteries[0]);-->
+<!--                        console.log('batteries 1: '+response.batteries[1]);-->
+<!--                        console.log('zero_status: '+response.zero_status);-->
+<!--                        console.log('time 1: '+response.time[1]);-->
+<!--                        console.log('time 2: '+response.time[2]);-->
+<!--                        console.log('time 3: '+response.time[3]);-->
+
+
+<!--                        document.getElementById("lastRead").innerHTML ="-"+response.lastRead;-->
+<!--                        document.getElementById("updated").innerHTML ='-'+response.status['time'];-->
+<!--                        document.getElementById("statusSubstring").innerHTML ='<h3>'+response.statusSubstring+'</h3>';-->
+<!--                        document.getElementById("batteries_0").innerHTML ='-'+response.batteries['0'];-->
+<!--                        document.getElementById("batteries_1").innerHTML ='-'+response.batteries['1'];-->
+<!--                        document.getElementById("zero_status").innerHTML ='-'+response.zero_status;-->
+
+<!--                        // faltaria actualizar las distancias de las barras.  vBarDist_{{forloop.counter}}-->
+<!--                        for(let i=0;i<response.distances.length;++i){-->
+<!--                        console.log("vBarDist_"+(i+1));-->
+<!--                          document.getElementById("vBarDist_"+(i+1)).innerHTML ='-'+response.distances[i];-->
+<!--                        }-->
+
+
+<!--                        document.getElementById("time_1").innerHTML ='-'+response.time['1'];-->
+<!--                        document.getElementById("time_2").innerHTML ='-'+response.time['2'];-->
+<!--                        document.getElementById("time_3").innerHTML ='-'+response.time['3'];-->
+
+<!--                    },-->
+<!--                    // on error-->
+<!--                    error: function (response) {-->
+<!--                        // alert the error if any error occured-->
+<!--                        console.log(response.responseJSON.errors)-->
+<!--                    }-->
+<!--                });-->
+
+<!--                return false;-->
+
+<!--        }-->
+<!--//console.log('after_ajax');-->
+
+<!--setInterval(function() {-->
+<!--    getData();-->
+<!--  }, 10000);-->
+<!--</script>-->
+
+
+
+
