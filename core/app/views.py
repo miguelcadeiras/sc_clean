@@ -1664,7 +1664,7 @@ def status(request):
         id_device = request.GET['device']
         dfStatus,voltages,zero_status = pdQuery.getStatus(id_device)
 
-        print("len df status:",len(dfStatus))
+        # print("len df status:",len(dfStatus))
         if len(dfStatus)>0:
             statusString = getStatusString(str(dfStatus['status'][0]))
             # print("dfStatus")
@@ -1711,7 +1711,7 @@ def status(request):
             batteries.append( "danger")
             try:
                 if flags.flag_24v[id_device]:
-                    # utils.sendAlert(list_mails,"WARNING!! - 24v Battery Low")
+                    utils.sendAlert(list_mails,"WARNING!! - 24v Battery Low")
                     flags.flag_24v[id_device]=False
             except:
                 flags.flag_24v[id_device] = True
@@ -1727,7 +1727,7 @@ def status(request):
             batteries.append("danger")
             try:
                 if flags.flag_36v[id_device]:
-                    # utils.sendAlert(list_mails,"WARNING!! - 36v Battery Low")
+                    utils.sendAlert(list_mails,"WARNING!! - 36v Battery Low")
                     flags.flag_36v[id_device] = False
             except:
                 flags.flag_36v[id_device] = True
@@ -1806,8 +1806,8 @@ def status_ajax(request):
         # statusString = str(dfStatus['status'][0])
         # print("003.0")
     else:
-        print("003.1")
-        print("flag to True")
+        # print("003.1")
+        # print("flag to True")
         flags.flag_EX[id_device]=True
         statusString = "n/a"
 
