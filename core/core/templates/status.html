@@ -70,9 +70,9 @@
     {% endwith %}
     {% endfor %}
 
-    <li  class="list-group-item "><h6>Start Time:  <h6 id="time_1">{{time.1}}</h6> </h6></li>
-    <li  class="list-group-item "><h6>Last Time:  <h6 id="time_2">{{time.2}}</h6> </h6></li>
-    <li  class="list-group-item "><h6>Eleapsed Time:  <h6 id="time_3">{{time.3}}</h6> </h6></li>
+    <li id="time_1" class="list-group-item "><h6>Start Time:  {{time.1}} </h6></li>
+    <li id="time_2" class="list-group-item "><h6>Last Time:  {{time.2}} </h6></li>
+    <li id="time_3" class="list-group-item "><h6>Eleapsed Time:  {{time.3}} </h6></li>
 
 
 
@@ -107,19 +107,19 @@
 </body>
 
 </html>
-<!--REFRESH PAGE SCRIPT-->
-<!--<script>-->
-<!--    window.setInterval('refresh()', 10000);-->
-<!--    // Call a function every 10000 milliseconds-->
-<!--    // (OR 10 seconds).-->
+REFRESH PAGE SCRIPT
+<script>
+    window.setInterval('refresh()', 10000);
+    // Call a function every 10000 milliseconds
+    // (OR 10 seconds).
 
-<!--    // Refresh or reload page.-->
-<!--    function refresh() {-->
-<!--        window .location.reload();-->
-<!--    }-->
+    // Refresh or reload page.
+    function refresh() {
+        window .location.reload();
+    }
 
 
-<!--</script>-->
+</script>
 
 <!--IMAGE REFRESH-->
 <script>
@@ -136,62 +136,66 @@
 
 </script>
 
-<script>
- function getData () {
+<!--Ajax Refresh -->
+<!--<script>-->
+<!-- function getData () {-->
 
-                // create an AJAX call
-                //console.log('before ajax');
-                $.ajax({
-                    //data: $(this).serialize(), // get the form data
-                    url: "/status_ajax?device={{request.GET.device}}",
-                    // on success
-                    success: function (response) {
-                        console.log('Vision bar distances:'+response.distances);
-                        console.log('lastRead:'+response.lastRead);
-                        console.log('updated: '+response.status['time']);
-                        console.log('substring: '+response.statusSubstring);
-                        console.log('batteries 0: '+response.batteries['0']);
-                        console.log('batteries 1: '+response.batteries['1']);
-                        console.log('zero_status: '+response.zero_status);
-                        console.log('time 1: '+response.time['1']);
-                        console.log('time 2: '+response.time['2']);
-                        console.log('time 3: '+response.time['3']);
-
-
-                        document.getElementById("lastRead").innerHTML =response.lastRead;
-                        document.getElementById("updated").innerHTML =response.status['time']['0'];
-                        document.getElementById("statusSubstring").innerHTML =response.statusSubstring;
-                        document.getElementById("batteries_0").innerHTML =response.batteries['0'];
-                        document.getElementById("batteries_1").innerHTML =response.batteries['1'];
-                        document.getElementById("zero_status").innerHTML =response.zero_status;
-
-                        // faltaria actualizar las distancias de las barras.  vBarDist_{{forloop.counter}}
-                        //for(let i=1;i<response.distances.length;++i){
-                        //  document.getElementById("vBarDist_"+i).innerHTML =response.distances[i];
-                        //}
+<!--                // create an AJAX call-->
+<!--                //console.log('before ajax');-->
+<!--                $.ajax({-->
+<!--                    //data: $(this).serialize(), // get the form data-->
+<!--                    url: "/status_ajax?device={{request.GET.device}}",-->
+<!--                    // on success-->
+<!--                    success: function (response) {-->
+<!--                        console.log("response.time:"+response.time);-->
+<!--                        console.log('Vision bar distances lenght:'+response.distances.length);-->
+<!--                        console.log('Vision bar distances:'+response.distances);-->
+<!--                        console.log('lastRead:'+response.lastRead);-->
+<!--                        console.log('updated: '+response.status['time']);-->
+<!--                        console.log('substring: '+response.statusSubstring);-->
+<!--                        console.log('batteries 0: '+response.batteries[0]);-->
+<!--                        console.log('batteries 1: '+response.batteries[1]);-->
+<!--                        console.log('zero_status: '+response.zero_status);-->
+<!--                        console.log('time 1: '+response.time[1]);-->
+<!--                        console.log('time 2: '+response.time[2]);-->
+<!--                        console.log('time 3: '+response.time[3]);-->
 
 
-                        document.getElementById("time_1").innerHTML =response.time['1'];
-                        document.getElementById("time_2").innerHTML =response.time['2'];
-                        document.getElementById("time_3").innerHTML =response.time['3'];
+<!--                        document.getElementById("lastRead").innerHTML ="-"+response.lastRead;-->
+<!--                        document.getElementById("updated").innerHTML ='-'+response.status['time'];-->
+<!--                        document.getElementById("statusSubstring").innerHTML ='<h3>'+response.statusSubstring+'</h3>';-->
+<!--                        document.getElementById("batteries_0").innerHTML ='-'+response.batteries['0'];-->
+<!--                        document.getElementById("batteries_1").innerHTML ='-'+response.batteries['1'];-->
+<!--                        document.getElementById("zero_status").innerHTML ='-'+response.zero_status;-->
 
-                    },
-                    // on error
-                    error: function (response) {
-                        // alert the error if any error occured
-                        console.log(response.responseJSON.errors)
-                    }
-                });
+<!--                        // faltaria actualizar las distancias de las barras.  vBarDist_{{forloop.counter}}-->
+<!--                        for(let i=0;i<response.distances.length;++i){-->
+<!--                        console.log("vBarDist_"+(i+1));-->
+<!--                          document.getElementById("vBarDist_"+(i+1)).innerHTML ='-'+response.distances[i];-->
+<!--                        }-->
 
-                return false;
 
-        }
-//console.log('after_ajax');
+<!--                        document.getElementById("time_1").innerHTML ='-'+response.time['1'];-->
+<!--                        document.getElementById("time_2").innerHTML ='-'+response.time['2'];-->
+<!--                        document.getElementById("time_3").innerHTML ='-'+response.time['3'];-->
 
-setInterval(function() {
-    getData();
-  }, 10000);
-</script>
+<!--                    },-->
+<!--                    // on error-->
+<!--                    error: function (response) {-->
+<!--                        // alert the error if any error occured-->
+<!--                        console.log(response.responseJSON.errors)-->
+<!--                    }-->
+<!--                });-->
+
+<!--                return false;-->
+
+<!--        }-->
+<!--//console.log('after_ajax');-->
+
+<!--setInterval(function() {-->
+<!--    getData();-->
+<!--  }, 10000);-->
+<!--</script>-->
 
 
 
