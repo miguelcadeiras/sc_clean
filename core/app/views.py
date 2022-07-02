@@ -1741,10 +1741,10 @@ def plusMinus(request):
 
     if True:
     # if id_unit in falseList:  lO PUENTEO PORQUE AHORA NO ESTA ANDANDO.
-        print("id_unit in falseList")
-        print(id_unit)
-        falseIndex =falseList.index(id_unit)
-        # print(falseIndex,falseList)
+    #     print("id_unit in falseList")
+    #     print(id_unit)
+    #     falseIndex =falseList.index(id_unit)
+    #     # print(falseIndex,falseList)
 
         validationQuery = "select * from validationtbl where product like '"+id_unit+"' and id_inspection = "+str(id_inspection)+" order by id_validation desc limit 1;"
         dfv=pdQuery.pdDF(validationQuery)
