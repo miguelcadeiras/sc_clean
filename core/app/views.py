@@ -1739,7 +1739,8 @@ def plusMinus(request):
         falseList=falseList.replace("'","")
         falseList=falseList.split(",")
 
-    if id_unit in falseList:
+    if True:
+    # if id_unit in falseList:  lO PUENTEO PORQUE AHORA NO ESTA ANDANDO.
         print("id_unit in falseList")
         print(id_unit)
         falseIndex =falseList.index(id_unit)
