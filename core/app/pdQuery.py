@@ -373,6 +373,7 @@ def virtualRack_348(id_inspection):
 
                 df['x1'][i] = 0.0
                 x_val = 0.0
+    df['x'] = df['x1']
 
     # calculo la mediana de las x de los ZEROS para el default. Excluimos los outliers
     defaultRlenght = df[(df["ZERO"]) & (df["x"] > 0.7) & (df["x"] < 3.8)].x.median()
