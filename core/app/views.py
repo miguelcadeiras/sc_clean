@@ -938,7 +938,7 @@ def allVR_noPD_1(request):
 @login_required(login_url="/login/")
 def allVR_noPD_348(request):
     # dvr =pdQuery.virtualRack(98)
-    # print(dvr)
+
     # dfpm10=pdQuery.plusminus10Pos(98,"UBG1002002")
 
 
