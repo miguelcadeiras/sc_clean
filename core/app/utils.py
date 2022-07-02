@@ -14,25 +14,28 @@ def sendAlert(list_mails,Subject="",message=""):
 
     htmly = get_template('emails/alert_pause.html')
     context = {}
-    print("sendAlert00")
+    # print("sendAlert00")
     text_content = message
     html_content = htmly.render(context)
     new_message = EmailMultiAlternatives(subject='ALERT1- '+Subject,
-                                           from_email='scanbotalert@smartcubik.com',
+                                           from_email='cubikalert@smartcubik.com',
                                            to=list_mails,
                                            # bcc=,
                                            body=text_content,
                                            )
     new_message.attach_alternative(html_content, "text/html")
     email_messages.append(new_message)
-    print(new_message)
-    print("sendAlert01")
+    # print(new_message)
+    # print("sendAlert01")
     connection = get_connection(fail_silently=False)
     # Manually open the connection
-    print("sendAlert02")
-    connection.open()
-    print("sendAlert03")
-    connection.send_messages(email_messages)
-    # We need to manually close the connection.
-    print("mail_alerts SENT!!! ", "#" * 20)
-    connection.close()
+    # print("sendAlert02")
+    try:
+        connection.open()
+        # print("sendAlert03")
+        connection.send_messages(email_messages)
+        # We need to manually close the connection.
+        print("mail_alerts SENT!!! ", "#" * 20)
+        connection.close()
+    except:
+        print("mail couldn't be sent :-(")

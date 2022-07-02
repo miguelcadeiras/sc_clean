@@ -14,7 +14,7 @@ import os
 from decouple import config
 from unipath import Path
 from django.contrib.messages import constants as messages
-
+from os import environ
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = Path(__file__).parent
@@ -23,7 +23,7 @@ PROJECT_DIR = Path(__file__).parent
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '67xtp3x=wm2w4$y*xa2w9)#0%-0%o$@totaqn%mdr38f=48!se'
+SECRET_KEY = '67xtp3x=wm2w4$y*xa2w9)#0%-0%o($)@totaqn%mdr38f=48!se'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -165,8 +165,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.hostinger.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'scanbotalert@smartcubik.com'
-EMAIL_HOST_PASSWORD = 'aMcsDXg*e8D4xg'
+EMAIL_HOST_USER = 'cubikAlert@smartcubik.com'
+EMAIL_HOST_PASSWORD = environ['SCANBOTALERT']
 EMAIL_USE_TLS = True
 ####################################################
 

@@ -53,26 +53,26 @@
     <h1 id="lastRead">{{lastRead}}</h1>
   </div>
   <ul class="list-group list-group-flush">
-    <li id="updated" class="list-group-item">Updated: {{status.time.0}}</li>
-    <li id="statusSubstring" class="list-group-item {% if 'ex' in statusSubstring %}bg-danger{% endif %} {% if 'Following' in statusSubstring %}bg-success{% endif %} " ><h3>{{statusSubstring}}</h3></li>
+    <li  class="list-group-item">Updated: <span id="updated">{{status.time.0}}</span></li>
+    <li  class="list-group-item {% if 'ex' in statusSubstring %}bg-danger{% endif %} {% if 'Following' in statusSubstring %}bg-success{% endif %} " ><h3><span id="statusSubstring">{{statusSubstring}}</span></h3></li>
 <!--    <li class="list-group-item{% if 'ex' in statusSubstring %}bg-danger{% endif %}">Batteries: {{voltages}}</li>-->
-     <li id="batteries_0" class="list-group-item {% if batteries.2 != 'success' %}bg-{{batteries.2}} {% endif %}"><h2><span style = "color:{% if batteries.2 == 'danger'  %}White{% elif batteries.2 == 'warning' %}White{% else %}Green{% endif %}">{{batteries.0}} v
+     <li  class="list-group-item {% if batteries.2 != 'success' %}bg-{{batteries.2}} {% endif %}"><h2><span id="batteries_0" style = "color:{% if batteries.2 == 'danger'  %}White{% elif batteries.2 == 'warning' %}White{% else %}Green{% endif %}">{{batteries.0}} v
        <i class="fas fa-battery-{% if batteries.2 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></span></h2></li>
 
-    <li id="batteries_1" class="list-group-item {% if batteries.3 != 'success' %} bg-{{batteries.3}} {% endif %}"><h2><span style = "color:{% if batteries.3 == 'danger' %}White{% elif batteries.3 == 'warning' %}White{% else %}Green{% endif %}">{{batteries.1}} v
+    <li  class="list-group-item {% if batteries.3 != 'success' %} bg-{{batteries.3}} {% endif %}"><h2><span id="batteries_1"style = "color:{% if batteries.3 == 'danger' %}White{% elif batteries.3 == 'warning' %}White{% else %}Green{% endif %}">{{batteries.1}} v
        <i class="fas fa-battery-{% if batteries.3 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></span></h2></li>
 
-    <li id="zero_status" class="list-group-item text-center {% if 'not' in zero_status %}bg-warning{% endif %}">{{zero_status}}</li>
+    <li  class="list-group-item text-center {% if 'not' in zero_status %}bg-warning{% endif %}"><span id="zero_status">{{zero_status}}</span></li>
 
     {% for value in distances%}
     {% with forloop.counter as index %}
-    <li id="vBarDist_{{forloop.counter}}" class="list-group-item {% if value.0 < 60 or value.0 > 90 %}bg-warning{% endif %}"><h5>vBar {{index}} Distance: {{value.0}} cm</h5></li>
+    <li  class="list-group-item {% if value.0 < 60 or value.0 > 90 %}bg-warning{% endif %}"><h5><span id="vBarDist_{{forloop.counter}}">vBar {{index}} Distance: {{value.0}} cm</span></h5></li>
     {% endwith %}
     {% endfor %}
 
-    <li id="time_1" class="list-group-item "><h6>Start Time:  {{time.1}} </h6></li>
-    <li id="time_2" class="list-group-item "><h6>Last Time:  {{time.2}} </h6></li>
-    <li id="time_3" class="list-group-item "><h6>Eleapsed Time:  {{time.3}} </h6></li>
+    <li  class="list-group-item "><h6>Start Time:  <span id="time_1"  >{{time.1}}</span> </h6></li>
+    <li  class="list-group-item "><h6>Last Time:  <span id="time_2">{{time.2}}</span> </h6></li>
+    <li class="list-group-item "><h6>Eleapsed Time:  <span  id="time_3">{{time.3}}</span> </h6></li>
 
 
 
@@ -107,19 +107,18 @@
 </body>
 
 </html>
-REFRESH PAGE SCRIPT
-<script>
-    window.setInterval('refresh()', 10000);
-    // Call a function every 10000 milliseconds
-    // (OR 10 seconds).
+<!--REFRESH PAGE SCRIPT-->
+<!--<script>-->
+<!--    window.setInterval('refresh()', 10000);-->
+<!--    // Call a function every 10000 milliseconds-->
+<!--    // (OR 10 seconds).-->
 
-    // Refresh or reload page.
-    function refresh() {
-        window .location.reload();
-    }
+<!--    // Refresh or reload page.-->
+<!--    function refresh() {-->
+<!--        window .location.reload();-->
+<!--    }-->
 
-
-</script>
+<!--</script>-->
 
 <!--IMAGE REFRESH-->
 <script>
@@ -137,65 +136,65 @@ REFRESH PAGE SCRIPT
 </script>
 
 <!--Ajax Refresh -->
-<!--<script>-->
-<!-- function getData () {-->
+<script>
+ function getData () {
 
-<!--                // create an AJAX call-->
-<!--                //console.log('before ajax');-->
-<!--                $.ajax({-->
-<!--                    //data: $(this).serialize(), // get the form data-->
-<!--                    url: "/status_ajax?device={{request.GET.device}}",-->
-<!--                    // on success-->
-<!--                    success: function (response) {-->
-<!--                        console.log("response.time:"+response.time);-->
-<!--                        console.log('Vision bar distances lenght:'+response.distances.length);-->
-<!--                        console.log('Vision bar distances:'+response.distances);-->
-<!--                        console.log('lastRead:'+response.lastRead);-->
-<!--                        console.log('updated: '+response.status['time']);-->
-<!--                        console.log('substring: '+response.statusSubstring);-->
-<!--                        console.log('batteries 0: '+response.batteries[0]);-->
-<!--                        console.log('batteries 1: '+response.batteries[1]);-->
-<!--                        console.log('zero_status: '+response.zero_status);-->
-<!--                        console.log('time 1: '+response.time[1]);-->
-<!--                        console.log('time 2: '+response.time[2]);-->
-<!--                        console.log('time 3: '+response.time[3]);-->
-
-
-<!--                        document.getElementById("lastRead").innerHTML ="-"+response.lastRead;-->
-<!--                        document.getElementById("updated").innerHTML ='-'+response.status['time'];-->
-<!--                        document.getElementById("statusSubstring").innerHTML ='<h3>'+response.statusSubstring+'</h3>';-->
-<!--                        document.getElementById("batteries_0").innerHTML ='-'+response.batteries['0'];-->
-<!--                        document.getElementById("batteries_1").innerHTML ='-'+response.batteries['1'];-->
-<!--                        document.getElementById("zero_status").innerHTML ='-'+response.zero_status;-->
-
-<!--                        // faltaria actualizar las distancias de las barras.  vBarDist_{{forloop.counter}}-->
-<!--                        for(let i=0;i<response.distances.length;++i){-->
-<!--                        console.log("vBarDist_"+(i+1));-->
-<!--                          document.getElementById("vBarDist_"+(i+1)).innerHTML ='-'+response.distances[i];-->
-<!--                        }-->
+                // create an AJAX call
+                //console.log('before ajax');
+                $.ajax({
+                    //data: $(this).serialize(), // get the form data
+                    url: "/status_ajax?device={{request.GET.device}}",
+                    // on success
+                    success: function (response) {
+                        console.log("response.time:"+response.time);
+                        console.log('Vision bar distances lenght:'+response.distances.length);
+                        console.log('Vision bar distances:'+response.distances);
+                        console.log('lastRead:'+response.lastRead);
+                        console.log('updated: '+response.status['time']);
+                        console.log('substring: '+response.statusSubstring);
+                        console.log('batteries 0: '+response.batteries[0]);
+                        console.log('batteries 1: '+response.batteries[1]);
+                        console.log('zero_status: '+response.zero_status);
+                        console.log('time 1: '+response.time);
+                        console.log('time 2: '+response.time[2]);
+                        console.log('time 3: '+response.time[3]);
 
 
-<!--                        document.getElementById("time_1").innerHTML ='-'+response.time['1'];-->
-<!--                        document.getElementById("time_2").innerHTML ='-'+response.time['2'];-->
-<!--                        document.getElementById("time_3").innerHTML ='-'+response.time['3'];-->
+                        document.getElementById("lastRead").innerHTML ="-"+response.lastRead;
+                        document.getElementById("updated").innerHTML ='-'+response.status['time'];
+                        document.getElementById("statusSubstring").innerHTML ='<h3>'+response.statusSubstring+'</h3>';
+                        document.getElementById("batteries_0").innerHTML ='-'+response.batteries['0'];
+                        document.getElementById("batteries_1").innerHTML ='-'+response.batteries['1'];
+                        document.getElementById("zero_status").innerHTML ='-'+response.zero_status;
 
-<!--                    },-->
-<!--                    // on error-->
-<!--                    error: function (response) {-->
-<!--                        // alert the error if any error occured-->
-<!--                        console.log(response.responseJSON.errors)-->
-<!--                    }-->
-<!--                });-->
+                        // faltaria actualizar las distancias de las barras.  vBarDist_{{forloop.counter}}
+                        for(let i=0;i<response.distances.length;++i){
+                        console.log("vBarDist_"+(i+1));
+                          document.getElementById("vBarDist_"+(i+1)).innerHTML ='vBar '+(i+1)+' Distance:'+response.distances[i]+'cm';
+                        }
 
-<!--                return false;-->
 
-<!--        }-->
-<!--//console.log('after_ajax');-->
+                        document.getElementById("time_1").innerHTML ='-'+response.time['1'];
+                        document.getElementById("time_2").innerHTML ='-'+response.time['2'];
+                        document.getElementById("time_3").innerHTML ='-'+response.time['3'];
 
-<!--setInterval(function() {-->
-<!--    getData();-->
-<!--  }, 10000);-->
-<!--</script>-->
+                    },
+                    // on error
+                    error: function (response) {
+                        // alert the error if any error occured
+                        console.log(response.responseJSON.errors)
+                    }
+                });
+
+                return false;
+
+        }
+//console.log('after_ajax');
+
+setInterval(function() {
+    getData();
+  }, 10000);
+</script>
 
 
 
