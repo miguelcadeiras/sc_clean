@@ -1158,9 +1158,11 @@ def allVR_noPD_348(request):
                'picpath': picpath,
                'levels': levels,
                'lastRead':lastRead,
-               'falsePAlist':df['codeUnit'][(df['match']==False) & (df['codeUnit'].str.len()>0)].tolist() if int(request.GET['matching'])>0 else ""
+               # 'falsePAlist':df['codeUnit'][(df['match']==False) & (df['codeUnit'].str.len()>0)].tolist() if int(request.GET['matching'])>0 else ""
 
-               }
+                'falsePAlist': [""]
+
+    }
 
     if request.GET['matching']=='3':
         context['groups'] = groups.to_html(border=0,classes='table table-head-fixed table-striped table-sm table-hover text-right', table_id = 'fails_by_aisle')
@@ -1712,8 +1714,8 @@ def importWMS(request):
 def plusMinus(request):
     id_inspection = request.GET['id_inspection']
     id_unit = request.GET['id_unit'].strip()
-    # falseList=request.GET['list']
-    falseList=[]
+    falseList=request.GET['list']
+    # falseList=[]
     agvPos = request.GET['agvPos'].strip()
     data = []
     dfw = pd.DataFrame
