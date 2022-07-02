@@ -1712,7 +1712,8 @@ def importWMS(request):
 def plusMinus(request):
     id_inspection = request.GET['id_inspection']
     id_unit = request.GET['id_unit'].strip()
-    falseList=request.GET['list']
+    # falseList=request.GET['list']
+    falseList=[0]
     agvPos = request.GET['agvPos'].strip()
     data = []
     dfw = pd.DataFrame
