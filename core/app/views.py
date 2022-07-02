@@ -1877,9 +1877,12 @@ def plusMinus(request):
                'validation':validation,
                'comment':comment,
                'falsePAList': falseList,
+
                'falseIndex': falseIndex,
-               'nextUnit': falseList[falseIndex+1] if falseIndex<len(falseList)-1 else unit,
-               'backUnit': falseList[falseIndex-1] if falseIndex>0 else unit,
+               # 'nextUnit': falseList[falseIndex+1] if falseIndex<len(falseList)-1 else unit,
+               # 'backUnit': falseList[falseIndex-1] if falseIndex>0 else unit,
+               'nextUnit': unit,
+               'backUnit': unit,
                'picPath':picPath,
 
                }
