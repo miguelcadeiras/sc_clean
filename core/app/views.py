@@ -1860,14 +1860,14 @@ def plusMinus(request):
     ## tocando porque no anda 22-0701
     ##########################################
     ########################################
-    # if not "wms" in request.get_full_path():
-    #     # print(dfw['wmsPosition'])
-    #     pos = dfw['wmsPosition'][0]
-    #     wmsPosAsLv = [pos[4:7],pos[7:10],pos[10:12]]
-    #     agvPosAsLv = [agvPos[4:7],agvPos[7:10],pos[10:12]]
-    # else:
-    #     wmsPosAsLv = [agvPos[4:7],agvPos[7:10],pos[10:12]]
-    #     agvPosAsLv =wmsPosAsLv
+    if not "wms" in request.get_full_path():
+        # print(dfw['wmsPosition'])
+        pos = dfw['wmsPosition'][0]
+        wmsPosAsLv = [pos[4:7],pos[7:10],pos[10:12]]
+        agvPosAsLv = [agvPos[4:7],agvPos[7:10],pos[10:12]]
+    else:
+        wmsPosAsLv = [agvPos[4:7],agvPos[7:10],pos[10:12]]
+        agvPosAsLv =wmsPosAsLv
 
     # print("agvPosAsLv",agvPosAsLv)
     #
@@ -1879,10 +1879,8 @@ def plusMinus(request):
                "lastSearchPos":pos,
                'inspection': querys.getInspectionData(request.GET['id_inspection']),
                'wmsData': dfw,
-               # 'wmsPosAsLv': wmsPosAsLv,
-               # 'agvPosAsLv': agvPosAsLv,
-               'wmsPosAsLv': "wmsPosAsLv",
-               'agvPosAsLv': "agvPosAsLv",
+               'wmsPosAsLv': wmsPosAsLv,
+               'agvPosAsLv': agvPosAsLv,
                'validation':validation,
                'comment':comment,
                'falsePAList': falseList,
