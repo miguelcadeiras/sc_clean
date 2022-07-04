@@ -1922,7 +1922,7 @@ def status(request):
                     print(flags.flag_EX)
                     if flags.flag_EX[id_device]:
                         print("sending Alerts by mail...")
-                        # utils.sendAlert(list_mails, "Alert!! - ScanBot EX:"+statusString)
+                        utils.sendAlert(list_mails, "Alert!! - ScanBot EX:"+statusString)
                         flags.flag_EX[id_device] = False
                         print("Flag set to False by mail...")
 
@@ -2077,7 +2077,7 @@ def status_ajax(request):
         batteries.append( "danger")
         try:
             if flags.flag_24v[id_device]:
-                # utils.sendAlert(list_mails,"WARNING!! - 24v Battery Low")
+                utils.sendAlert(list_mails,"WARNING!! - 24v Battery Low")
                 flags.flag_24v[id_device]=False
         except:
             flags.flag_24v[id_device] = True
@@ -2093,7 +2093,7 @@ def status_ajax(request):
         batteries.append("danger")
         try:
             if flags.flag_36v[id_device]:
-                # utils.sendAlert(list_mails,"WARNING!! - 36v Battery Low")
+                utils.sendAlert(list_mails,"WARNING!! - 36v Battery Low")
                 flags.flag_36v[id_device] = False
         except:
             flags.flag_36v[id_device] = True
