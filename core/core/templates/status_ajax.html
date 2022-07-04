@@ -163,8 +163,8 @@
                         console.log('time 3: '+response.time[3]);
 
 
-                        document.getElementById("lastRead").innerHTML ="-"+response.lastRead;
-                        document.getElementById("updated").innerHTML ='-'+response.status['time'];
+                        document.getElementById("lastRead").innerHTML =response.lastRead;
+                        document.getElementById("updated").innerHTML ='Updated: '+response.status.time[2].split(',')[2];
                         document.getElementById("statusSubstring").innerHTML ='<h3>'+response.statusSubstring+'</h3>';
 
 
@@ -181,9 +181,9 @@
                         }
 
 
-                        document.getElementById("time_1").innerHTML ='-'+response.time['1'];
-                        document.getElementById("time_2").innerHTML ='-'+response.time['2'];
-                        document.getElementById("time_3").innerHTML ='-'+response.time['3'];
+                        document.getElementById("time_1").innerHTML ='-'+response.status.time[2].split(',')[2];
+                        document.getElementById("time_2").innerHTML ='-'+response.status.time[3].split(',')[2]response.time['2'];
+                        document.getElementById("time_3").innerHTML ='-'+response.status.time[4].split(',')[2];
 
                     },
                     // on error
