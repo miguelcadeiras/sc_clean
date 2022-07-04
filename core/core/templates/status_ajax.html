@@ -57,7 +57,7 @@
     <li  id="statusSubstring" class="list-group-item {% if 'ex' in statusSubstring %}bg-danger{% endif %} {% if 'Following' in statusSubstring %}bg-success{% endif %} " ><span><h3>{{statusSubstring}}</h3></span></li>
 <!--    <li class="list-group-item{% if 'ex' in statusSubstring %}bg-danger{% endif %}">Batteries: {{voltages}}</li>-->
      <li  id="batteries_0" class="list-group-item {% if batteries.2 != 'success' %}bg-{{batteries.2}} {% endif %}"><span  style = "color:{% if batteries.2 == 'danger'  %}White{% elif batteries.2 == 'warning' %}White{% else %}Green{% endif %}"><h2>{{batteries.0}} v
-       <i class="fas fa-battery-{% if batteries.2 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></h2></span></li>
+       <i class="fas fa-battery-{% if batteries.2 == 'danger'  %}empty{% elif batteries.2 == 'warning' %}half{% else %}full{% endif %}"> </i></h2></span></li>
 
     <li id="batteries_1" class="list-group-item {% if batteries.3 != 'success' %} bg-{{batteries.3}} {% endif %}">
       <span  style = "color:{% if batteries.3 == 'danger' %}White{% elif batteries.3 == 'warning' %}White{% else %}Green{% endif %}"><h2>{{batteries.1}} v
@@ -149,18 +149,18 @@
                     // on success
                     success: function (response) {
                         data_received=response;
-                        console.log("response.time:"+response.time);
-                        console.log('Vision bar distances lenght:'+response.distances.length);
-                        console.log('Vision bar distances:'+response.distances);
-                        console.log('lastRead:'+response.lastRead);
-                        console.log('updated: '+response.status['time']);
-                        console.log('substring: '+response.statusSubstring);
+                        //console.log("response.time:"+response.time);
+                        //console.log('Vision bar distances lenght:'+response.distances.length);
+                        //console.log('Vision bar distances:'+response.distances);
+                        //console.log('lastRead:'+response.lastRead);
+                        //console.log('updated: '+response.status['time']);
+                        //console.log('substring: '+response.statusSubstring);
                         console.log('batteries 0: '+response.batteries[0]);
                         console.log('batteries 1: '+response.batteries[1]);
-                        console.log('zero_status: '+response.zero_status);
-                        console.log('time 1: '+response.time.split(',')[1]);
-                        console.log('time 2: '+response.time.split(',')[2]);
-                        console.log('time 3: '+response.time.split(',')[3]);
+                        //console.log('zero_status: '+response.zero_status);
+                        //console.log('time 1: '+response.time.split(',')[1]);
+                        //console.log('time 2: '+response.time.split(',')[2]);
+                        //console.log('time 3: '+response.time.split(',')[3]);
 
                         let line = '';
                         document.getElementById("lastRead").innerHTML =response.lastRead;
@@ -174,7 +174,7 @@
 
                         document.getElementById("batteries_0").HTML =line;
 
-                        line= '<li id="batteries_1" class="list-group-item {% if batteries.3 != "success" %} bg-{{batteries.3}} {% endif %}"><span  style = "color:{% if batteries.3 == "danger" %}White{% elif batteries.3 == "warning" %}White{% else %}Green{% endif %}"><h2>{{batteries.1}} v<i class="fas fa-battery-{% if batteries.3 == "danger"  %}empty{% elif batteries.3 == "warning" %}half{% else %}full{% endif %}"> </i></h2></span></li>';
+                        line= '<li id="batteries_1" class="list-group-item {% if batteries.3 != "success" %} bg-{{batteries.3}} {% endif %}"><span  style = "color:{% if batteries.3 == "danger" %}White{% elif batteries.2 == "warning" %}White{% else %}Green{% endif %}"><h2>{{batteries.1}} v<i class="fas fa-battery-{% if batteries.3 == "danger"  %}empty{% elif batteries.3 == "warning" %}half{% else %}full{% endif %}"> </i></h2></span></li>';
                         document.getElementById("batteries_1").HTML =line;
                         line = '<li id="zero_status" class="list-group-item text-center {% if "not" in zero_status %}bg-warning{% endif %}"><span >{{zero_status}}</span></li>';
                         document.getElementById("zero_status").HTML =line;
