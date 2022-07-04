@@ -169,6 +169,8 @@
 
 
                         let line='<span id="batteries_0" style="color:Green">  '+response.batteries['0']+ '<i class="fas fa-battery-full"> </i></span>';
+                        line = `<li  id="batteries_0" class="list-group-item {% if batteries.2 != 'success' %}bg-{{batteries.2}} {% endif %}"><span  style = "color:{% if batteries.2 == 'danger'  %}White{% elif batteries.2 == 'warning' %}White{% else %}Green{% endif %}"><h2>{{batteries.0}} v
+       <i class="fas fa-battery-{% if batteries.2 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></h2></span></li>`
                         document.getElementById("batteries_0").innerHTML =line;
                         line='<span id="batteries_1" style="color:Green">  '+response.batteries['1']+ '<i class="fas fa-battery-full"> </i></span>';
                         document.getElementById("batteries_1").innerHTML =line;
