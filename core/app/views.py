@@ -2036,7 +2036,7 @@ def status_ajax(request):
         # print("dfStatus")
         # print(dfStatus)
         print("statusString:",statusString)
-        statusString = "ex:algunaExcepcion"
+        # statusString = "ex:algunaExcepcion"
         if "ex" in statusString:
             try:
                 print(flags)
