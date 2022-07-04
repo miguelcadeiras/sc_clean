@@ -2012,7 +2012,9 @@ def status(request):
                    "time":inspection_time
                    }
         # print(context)
-        return render(request,"status.html",context)
+        # return render(request,"status.html",context)
+        return render(request, "status_ajax.html", context)
+
     else:
         messages.success(request, "You are NOT authorized to this device")
         return redirect("/login/")
@@ -2041,7 +2043,7 @@ def status_ajax(request):
                 print(flags.flag_EX)
                 if flags.flag_EX[id_device]:
                     print("sending Alerts by mail...")
-                    # utils.sendAlert(list_mails, "Alert!! - ScanBot EX:"+statusString)
+                    utils.sendAlert(list_mails, "Alert!! - ScanBot EX:"+statusString)
                     flags.flag_EX[id_device] = False
                     print("Flag set to False by mail...")
 

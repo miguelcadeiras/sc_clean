@@ -53,26 +53,27 @@
     <h1 id="lastRead">{{lastRead}}</h1>
   </div>
   <ul class="list-group list-group-flush">
-    <li  class="list-group-item">Updated: <span id="updated">{{status.time.0}}</span></li>
-    <li  class="list-group-item {% if 'ex' in statusSubstring %}bg-danger{% endif %} {% if 'Following' in statusSubstring %}bg-success{% endif %} " ><h3><span id="statusSubstring">{{statusSubstring}}</span></h3></li>
+    <li  class="list-group-item"><span id="updated">Updated: {{status.time.0}}</span></li>
+    <li  id="statusSubstring" class="list-group-item {% if 'ex' in statusSubstring %}bg-danger{% endif %} {% if 'Following' in statusSubstring %}bg-success{% endif %} " ><span><h3>{{statusSubstring}}</h3></span></li>
 <!--    <li class="list-group-item{% if 'ex' in statusSubstring %}bg-danger{% endif %}">Batteries: {{voltages}}</li>-->
-     <li  class="list-group-item {% if batteries.2 != 'success' %}bg-{{batteries.2}} {% endif %}"><h2><span id="batteries_0" style = "color:{% if batteries.2 == 'danger'  %}White{% elif batteries.2 == 'warning' %}White{% else %}Green{% endif %}">{{batteries.0}} v
-       <i class="fas fa-battery-{% if batteries.2 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></span></h2></li>
+     <li  id="batteries_0" class="list-group-item {% if batteries.2 != 'success' %}bg-{{batteries.2}} {% endif %}"><span  style = "color:{% if batteries.2 == 'danger'  %}White{% elif batteries.2 == 'warning' %}White{% else %}Green{% endif %}"><h2>{{batteries.0}} v
+       <i class="fas fa-battery-{% if batteries.2 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></h2></span></li>
 
-    <li  class="list-group-item {% if batteries.3 != 'success' %} bg-{{batteries.3}} {% endif %}"><h2><span id="batteries_1"style = "color:{% if batteries.3 == 'danger' %}White{% elif batteries.3 == 'warning' %}White{% else %}Green{% endif %}">{{batteries.1}} v
-       <i class="fas fa-battery-{% if batteries.3 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></span></h2></li>
+    <li id="batteries_1" class="list-group-item {% if batteries.3 != 'success' %} bg-{{batteries.3}} {% endif %}">
+      <span  style = "color:{% if batteries.3 == 'danger' %}White{% elif batteries.3 == 'warning' %}White{% else %}Green{% endif %}"><h2>{{batteries.1}} v
+       <i class="fas fa-battery-{% if batteries.3 == 'danger'  %}empty{% elif batteries.3 == 'warning' %}half{% else %}full{% endif %}"> </i></h2></span></li>
 
-    <li  class="list-group-item text-center {% if 'not' in zero_status %}bg-warning{% endif %}"><span id="zero_status">{{zero_status}}</span></li>
+    <li id="zero_status" class="list-group-item text-center {% if 'not' in zero_status %}bg-warning{% endif %}"><span >{{zero_status}}</span></li>
 
     {% for value in distances%}
     {% with forloop.counter as index %}
-    <li  class="list-group-item {% if value.0 < 60 or value.0 > 90 %}bg-warning{% endif %}"><h5><span id="vBarDist_{{forloop.counter}}">vBar {{index}} Distance: {{value.0}} cm</span></h5></li>
+    <li id="vBarDist_{{forloop.counter}}" class="list-group-item {% if value.0 < 60 or value.0 > 90 %}bg-warning{% endif %}"><h5><span >vBar {{index}} Distance: {{value.0}} cm</span></h5></li>
     {% endwith %}
     {% endfor %}
 
-    <li  class="list-group-item "><h6>Start Time:  <span id="time_1"  >{{time.1}}</span> </h6></li>
-    <li  class="list-group-item "><h6>Last Time:  <span id="time_2">{{time.2}}</span> </h6></li>
-    <li class="list-group-item "><h6>Eleapsed Time:  <span  id="time_3">{{time.3}}</span> </h6></li>
+    <li id="time_1"  class="list-group-item "><span><h6>Start Time: {{time.1}}</h6></span> </li>
+    <li id="time_2" class="list-group-item "><span><h6>Last Time: {{time.2}}</h6></span> </h6</li>
+    <li id="time_3" class="list-group-item "><span  ><h6>Eleapsed Time: {{time.3}}</h6></span> </li>
 
 
 
@@ -122,10 +123,10 @@
 
 <!--IMAGE REFRESH-->
 <script>
-  setInterval(function() {
+ // setInterval(function() {
     var myImageElement = document.getElementById('front_cam_image');
     myImageElement.src = 'media/smarti/webcam.jpg?rand=' + Math.random();
-}, 2000);
+//}, 2000);
 
 </script>
 
@@ -137,6 +138,7 @@
 
 <!--Ajax Refresh -->
 <script>
+ var data_received = 0;
  function getData () {
 
                 // create an AJAX call
@@ -146,6 +148,7 @@
                     url: "/status_ajax?device={{request.GET.device}}",
                     // on success
                     success: function (response) {
+                        data_received=response;
                         console.log("response.time:"+response.time);
                         console.log('Vision bar distances lenght:'+response.distances.length);
                         console.log('Vision bar distances:'+response.distances);
@@ -163,8 +166,12 @@
                         document.getElementById("lastRead").innerHTML ="-"+response.lastRead;
                         document.getElementById("updated").innerHTML ='-'+response.status['time'];
                         document.getElementById("statusSubstring").innerHTML ='<h3>'+response.statusSubstring+'</h3>';
-                        document.getElementById("batteries_0").innerHTML ='-'+response.batteries['0'];
-                        document.getElementById("batteries_1").innerHTML ='-'+response.batteries['1'];
+
+
+                        let line='<span id="batteries_0" style="color:Green">  '+response.batteries['0']+ '<i class="fas fa-battery-full"> </i></span>';
+                        document.getElementById("batteries_0").innerHTML =line;
+                        line='<span id="batteries_1" style="color:Green">  '+response.batteries['1']+ '<i class="fas fa-battery-full"> </i></span>';
+                        document.getElementById("batteries_1").innerHTML =line;
                         document.getElementById("zero_status").innerHTML ='-'+response.zero_status;
 
                         // faltaria actualizar las distancias de las barras.  vBarDist_{{forloop.counter}}
@@ -191,9 +198,9 @@
         }
 //console.log('after_ajax');
 
-setInterval(function() {
+//setInterval(function() {
     getData();
-  }, 10000);
+//  }, 10000);
 </script>
 
 
