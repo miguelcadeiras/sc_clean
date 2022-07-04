@@ -158,33 +158,43 @@
                         console.log('batteries 0: '+response.batteries[0]);
                         console.log('batteries 1: '+response.batteries[1]);
                         console.log('zero_status: '+response.zero_status);
-                        console.log('time 1: '+response.time);
-                        console.log('time 2: '+response.time[2]);
-                        console.log('time 3: '+response.time[3]);
+                        console.log('time 1: '+response.time.split(',')[1]);
+                        console.log('time 2: '+response.time.split(',')[2]);
+                        console.log('time 3: '+response.time.split(',')[3]);
 
-
+                        let line = '';
                         document.getElementById("lastRead").innerHTML =response.lastRead;
-                        document.getElementById("updated").innerHTML ='Updated: '+response.status.time[2].split(',')[2];
-                        document.getElementById("statusSubstring").innerHTML ='<h3>'+response.statusSubstring+'</h3>';
+                        line = '<span id="updated">Updated: {{status.time.0}}</span>';
+                        document.getElementById("updated").innerHTML =line;
+                        line = '<li  id="statusSubstring" class="list-group-item {% if "ex" in statusSubstring %}bg-danger{% endif %} {% if "Following" in statusSubstring %}bg-success{% endif %} " ><span><h3>{{statusSubstring}}</h3></span></li>';
+                        document.getElementById("statusSubstring").HTML=line;
 
 
-                        let line='<span id="batteries_0" style="color:Green">  '+response.batteries['0']+ '<i class="fas fa-battery-full"> </i></span>';
                         line = '<li  id="batteries_0" class="list-group-item {% if batteries.2 != "success" %}bg-{{batteries.2}} {% endif %}"><span  style = "color:{% if batteries.2 == "danger"  %}White{% elif batteries.2 == "warning" %}White{% else %}Green{% endif %}"><h2>{{batteries.0}} v<i class="fas fa-battery-{% if batteries.2 == "danger"  %}empty{% elif batteries.3 == "warning" %}half{% else %}full{% endif %}"> </i></h2></span></li>';
-                        document.getElementById("batteries_0").innerHTML =line;
-                        line='<span id="batteries_1" style="color:Green">  '+response.batteries['1']+ '<i class="fas fa-battery-full"> </i></span>';
-                        document.getElementById("batteries_1").innerHTML =line;
-                        document.getElementById("zero_status").innerHTML ='-'+response.zero_status;
+
+                        document.getElementById("batteries_0").HTML =line;
+
+                        line= '<li id="batteries_1" class="list-group-item {% if batteries.3 != "success" %} bg-{{batteries.3}} {% endif %}"><span  style = "color:{% if batteries.3 == "danger" %}White{% elif batteries.3 == "warning" %}White{% else %}Green{% endif %}"><h2>{{batteries.1}} v<i class="fas fa-battery-{% if batteries.3 == "danger"  %}empty{% elif batteries.3 == "warning" %}half{% else %}full{% endif %}"> </i></h2></span></li>';
+                        document.getElementById("batteries_1").HTML =line;
+                        line = '<li id="zero_status" class="list-group-item text-center {% if "not" in zero_status %}bg-warning{% endif %}"><span >{{zero_status}}</span></li>';
+                        document.getElementById("zero_status").HTML =line;
 
                         // faltaria actualizar las distancias de las barras.  vBarDist_{{forloop.counter}}
                         for(let i=0;i<response.distances.length;++i){
                         console.log("vBarDist_"+(i+1));
-                          document.getElementById("vBarDist_"+(i+1)).innerHTML ='vBar '+(i+1)+' Distance:'+response.distances[i]+'cm';
+                        line = ' <li id="vBarDist_'+(i+1)+'" class="list-group-item {% if value.0 < 60 or value.0 > 90 %}bg-warning{% endif %}"><h5><span >vBar {{index}} Distance: {{value.0}} cm</span></h5></li>';
+                          document.getElementById("vBarDist_"+(i+1)).HTML =line;
                         }
 
 
-                        document.getElementById("time_1").innerHTML ='-'+response.status.time[2].split(',')[2];
-                        document.getElementById("time_2").innerHTML ='-'+response.status.time[3].split(',')[2]response.time['2'];
-                        document.getElementById("time_3").innerHTML ='-'+response.status.time[4].split(',')[2];
+
+
+                        line='<li id="time_1"  class="list-group-item "><span><h6>Start Time: {{time.1}}</h6></span> </li>';
+                        document.getElementById("time_1").HTML =line;
+                        line='<li id="time_2" class="list-group-item "><span><h6>Last Time: {{time.2}}</h6></span> </h6</li>';
+                        document.getElementById("time_2").HTML =line;
+                        line='<li id="time_3" class="list-group-item "><span  ><h6>Eleapsed Time: {{time.3}}</h6></span> </li>';
+                        document.getElementById("time_3").HTML =line;
 
                     },
                     // on error
@@ -201,7 +211,7 @@
 
 //setInterval(function() {
     getData();
-//  }, 10000);
+//  }, 2000);
 </script>
 
 
