@@ -2030,12 +2030,13 @@ def status_ajax(request):
     id_device = request.GET['device']
     dfStatus,voltages,zero_status = pdQuery.getStatus(id_device)
 
-    print("len df status:",len(dfStatus))
+    # print("len df status:",len(dfStatus))
     if len(dfStatus)>0:
+        # print(dfStatus['status'])
         statusString = getStatusString(str(dfStatus['status'][0]))
         # print("dfStatus")
         # print(dfStatus)
-        print("statusString:",statusString)
+        # print("statusString:",statusString)
         # statusString = "ex:algunaExcepcion"
         if "ex" in statusString:
             try:
@@ -2132,7 +2133,7 @@ def status_ajax(request):
                "vBar":distances.index.values.tolist(),
                "time":str(inspection_time)
                }
-    print(context)
+    # print(context)
     return JsonResponse(context)
 
 
@@ -2164,10 +2165,14 @@ def devices(request):
 
 def getStatusString(lastAcation):
     # print("lastAcation: ",lastAcation)
+
+
     if lastAcation=="x":
         return "voltage"
     elif lastAcation[-1]=="p":
         return "Following Line"
+    elif lastAcation[-1]=="r":
+        return "Sense Follow"
     elif lastAcation=="s":
         return "Backwards"
     elif lastAcation=="w":
@@ -2177,6 +2182,8 @@ def getStatusString(lastAcation):
     elif lastAcation=="d":
         return "Turning Right"
     elif lastAcation == "0":
+        return "Stopped"
+    elif lastAcation == "q":
         return "Stopped"
     elif lastAcation == "Power On":
         return "Power On"

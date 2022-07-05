@@ -1959,7 +1959,8 @@ def pdDF(query):
 
 
 def getStatus(device):
-    dfQuery = "select *  from status where device like '" + str(device) + "' and status not like 'x' order by id_status desc limit 1; "
+    lst = "('0','q','w','a','s','d','Power On','Power Off','r','p')"
+    dfQuery = "select *  from status where device like '" + str(device) + "' and status in "+lst+" order by id_status desc limit 1; "
     dfVoltageQuery = "select *  from status where device like '" + str(device) + "' order by id_status desc limit 1; "
     # print('dfQuery',dfQuery)
     # print('dfVoltageQuery', dfVoltageQuery)
