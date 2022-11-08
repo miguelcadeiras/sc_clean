@@ -1427,6 +1427,7 @@ def readedAnalysisVR_noPD(request):
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
     wms_data = querys.mysqlQuery("select count(distinct wmsposition) from wmspositionmaptbl where id_inspection = "+str(id_inspection))[0][0][0]
+    print(querys.mysqlQuery("select count(distinct wmsposition) from wmspositionmaptbl where id_inspection = "+str(id_inspection)))
     jsonData = []
     reqAsile = request.GET['asile']
     reqLevel = request.GET['level']
@@ -1496,6 +1497,8 @@ def readedAnalysisVR_noPD(request):
             'inspection': querys.getInspectionData(request.GET['id_inspection']),
 
     }
+    print("context ----------------------------------------------")
+    print(context)
     # print("readedAnalysisVR","end"*10,"*"*20)
 
     return render(request, 'readedAnalysis.html', context)

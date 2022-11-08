@@ -1613,8 +1613,8 @@ def agregatesVR(id_inspection,reqAsile,reqLevel):
 
     levelFactor = querys.getLevelFactor(id_inspection)
 
-
-    df = decodeMachPAVR(id_inspection)
+    df = decodeMachVR_noPD_levels_sorted(id_inspection)
+    # df = decodeMachPAVR(id_inspection)
     # print("carrousel df,")
     # print(df.columns)
     df = df[
@@ -1625,6 +1625,12 @@ def agregatesVR(id_inspection,reqAsile,reqLevel):
     df['position'] = df['wmsPosition'].str[8:11]
     df['level'] = df['wmsPosition'].str[10:12]
     # print("agregatesVR","1"*20)
+    # print(df.to_string())
+    # print('WMS products:', df[['wmsProduct']].drop_duplicates().dropna().shape[0])
+    # print('readed PA:',df[['codeUnit']].drop_duplicates().dropna().shape[0])
+    df.drop(['vRack','picPath'],axis=1,inplace=True)
+    df.drop_duplicates(inplace=True)
+    # print(df.sort_values(by='match').to_string())
 
     # dfx = df[df["wmsPosition"].notnull()]
     # print('dfx: ', dfx)
