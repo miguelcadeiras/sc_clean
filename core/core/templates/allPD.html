@@ -102,15 +102,19 @@
                             {% else %}
                             <td>
                                 {% if forloop.first  %}
-                                    {% if item != False %}{{item}} {% endif %}
+                                    {% if item != False %} {{item}} {% endif %}
                                 {% else %}
                                     {% if forloop.counter == 3 and row.9 == False %}
-                                    <a href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.4}}&list={{falsePAlist}}" target="_blank" >{{item}}</a>
+                                        {% if row.5 != '' %}
+                                        <a href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.4}}&list={{falsePAlist}}" target="_blank" >{{item}}
+                                            {{row.4}}</a>
+                                        {% else %}
+                                        <a href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos=&list={{falsePAlist}}" target="_blank" >{{item}} -2</a>
+
+                                        {% endif %}
                                     {% else %}
                                         {{item}}
                                     {% endif %}
-
-
 
                                 {% endif %}
                             </td>

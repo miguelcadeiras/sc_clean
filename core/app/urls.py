@@ -12,9 +12,9 @@ urlpatterns = [
    # The home page
     path('', views.index, name='home'),
     path('inspections',views.inspections,name='inspections'),
-    path('all_old',views.allVR_noPD,name='all_old'),
-    # path('all',views.allVR_noPD_1,name='all'), ## ESTA ES LA CORRECTA
-    path('all', views.allVR_noPD_348, name='348'),  ## PSEUDO INTENTO DE SALVATAJE POR ERROR ENCODER.
+    path('all_old_1',views.allVR_noPD,name='all_old'),
+    path('all',views.allVR_noPD_1,name='all'), ## ESTA ES LA CORRECTA
+    # path('all', views.allVR_noPD_348, name='348'),  ## PSEUDO INTENTO DE SALVATAJE POR ERROR ENCODER.
 
     # path('allPD',views.allPD,name='allPD'),
     path('allPDvr', views.allPDvr, name='allPDvr'),

@@ -748,6 +748,7 @@ def allVR_noPD_1(request):
         # print(df)
         df = df[['verified','wmsProduct','codeUnit','nivel','pos','wmsPosition','wmsDesc','wmsDesc1','wmsdesc2','match','desc','picPath']]
         description = ['vf','wmsProduct','codeUnit','N','AGVpos','wmsPos','D1','Description','D2','c','desc','p']
+        df = df[df['wmsProduct'] != 'nan']
 
         if request.GET['matching']=='2':
 
@@ -772,9 +773,12 @@ def allVR_noPD_1(request):
             df = df[['waisle', 'wlevel', 'wpos','verified','wmsProduct','codeUnit','nivel','pos','wmsPosition',
                       'wmsDesc','wmsDesc1','wmsdesc2','match','desc',
                       'picPath']].sort_values(['waisle', 'wlevel', 'wpos'], ascending=[True,True,True])
+            df = df[df['wmsProduct'] != 'nan']
 
             groups = df.groupby(['waisle', 'wlevel', 'wpos', 'wmsPosition', 'wmsProduct', 'pos', 'codeUnit']).size()
             groups = pd.DataFrame(groups)
+
+            # groups = groups[groups['wmsProduct']!=np.nan]
             groups.drop(0,inplace=True,axis=1)
 
             context = {
@@ -795,12 +799,14 @@ def allVR_noPD_1(request):
 
                    }
 
-
+    # print("data:" * 10)
+    # print("DATA" * 20)
+    # print(df.columns)
     data = df.values.tolist()
 
 
     # description = list(df.columns.values)
-    # print("data:"*10)
+
     # print(df.empty)
 
 
@@ -868,16 +874,17 @@ def allVR_noPD_1(request):
                 data = df.values.tolist()
 
             if position != '000':
-                print("in position:",position)
+                # print("in position:",position)
 
                 if matching == "0":
-                    print("in position1:", position)
-                    print(df["AGVpos"].str[8:10])
+                    # print("in position1:", position)
+                    # print(df["AGVpos"].str[8:10])
                     df = df[df["AGVpos"].str[7:10] == position]
                 else:
-                    print("in position2:", position)
+                    # print("in position2:", position)
 
                     df = df[df["wmsPosition"].str[8:10] == position]
+
 
             data = df.values.tolist()
 
