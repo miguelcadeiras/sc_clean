@@ -276,13 +276,13 @@ def correctionFactorVR(levelFactor,id_inspection):
     return df2
 
 def virtualRack(id_inspection):
-    # print("virtualRack ()","*"*20)
+    print("virtualRack ()","*"*20)
     dfQuery = "select *  from inventorymaptbl where id_inspection = " + str(id_inspection) + "; "
     sqlEngine = engine()
     dbConnection = sqlEngine.connect()
     df = pd.read_sql(dfQuery, dbConnection)
     dbConnection.close()
-
+    print("VR","1"*20)
     midRack = False
     subdivisions = 2
     # defaultRlenght=2.75
@@ -297,6 +297,7 @@ def virtualRack(id_inspection):
     # calculo la mediana de las x de los ZEROS para el default. Excluimos los outliers
     defaultRlenght = df[(df["ZERO"]) & (df["x"] > 0.7) & (df["x"] < 3.8)].x.median()
     rlength = defaultRlenght
+    print("VR","2"*20)
 
     df['rackLength'] = defaultRlenght
     df['vRack'] = 0
@@ -328,7 +329,9 @@ def virtualRack(id_inspection):
             df['vRack'][j] = virtualRack
     #          df.loc[j,'vRack']=virtualRack
 
-    # print("virtualRack () -- END --","*"*20)
+    print("VR","3"*20)
+
+    print("virtualRack () -- END --","*"*20)
 
     return df
 
@@ -1201,8 +1204,9 @@ def decodeMachVR_noPD(id_inspection):
     return dfResult_nPA
 
 def decodeMachVR_noPD_levels_sorted(id_inspection):
+    print("decodeM --- start")
     df = virtualRack(id_inspection)
-
+    print("decodeM 0 - " *10)
     # GETTING JUST POSITION and vRack
     dfPos = df[["codePos", "vRack", "nivel"]]
     # nos quedamos con los digitos de Posicion
@@ -1216,6 +1220,7 @@ def decodeMachVR_noPD_levels_sorted(id_inspection):
     # print("&" * 30)
     # print(dfPos1)
     # dfPos1.sort_values('pos')
+    print("decodeM 1 - " *10)
 
     # EN ESTA SITUACIÓN NO TENEMOS INFORMACIÓN DE DETECCIÓN DE PALLETS.
     # # NOS QUEDAMOS CON EL TRUE-FALSE DE LOS PALLETS
@@ -1242,6 +1247,7 @@ def decodeMachVR_noPD_levels_sorted(id_inspection):
 
     df_posUnits = df_posUnits.drop_duplicates(subset="codeUnit", keep="first")
 
+    print("decodeM 2 - " *10)
 
     #### CONECTAMOS AL WMS-IMPORTED
     sqlEngine = engine()
@@ -1271,6 +1277,7 @@ def decodeMachVR_noPD_levels_sorted(id_inspection):
     df_noProductTest = df_noProductTest.drop_duplicates(subset='wmsPosition')
 
 
+    print("decodeM 3 - " *10)
 
     # UNIMOS LOS 2
     def reason(x):
@@ -1291,11 +1298,13 @@ def decodeMachVR_noPD_levels_sorted(id_inspection):
 
 
         elif isinstance(x['aPos'], str) & isinstance(x['wPos'], str):
-
-            if abs(int(x['wPos']) - int(x['aPos'])) == 2:
-                r = "2"
-            else:
-                r = "missMatch"
+            try:
+                if abs(int(x['wPos']) - int(x['aPos'])) == 2:
+                    r = "2"
+                else:
+                    r = "missMatch"
+            except:
+                r = "Unknown"
 
         #     print("r",r,"*"*25)
         return r
@@ -1314,6 +1323,7 @@ def decodeMachVR_noPD_levels_sorted(id_inspection):
                  'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'wPos', 'aPos', 'match', 'desc', 'picPath']
     dfResult_nPA = dfResult_nPA.reindex(columns=col_names)
 
+    print("decodeM 4 - " *10)
 
     return dfResult_nPA
 
@@ -1539,7 +1549,7 @@ def agregates(id_inspection,reqAsile,reqLevel):
     # print("-dfnanF"*0,dfnanF[['asile','wmsProduct','codeUnit','ex']])
     dfCount = dfagg.count()
     # print("-dfCount:","+" * 50)
-    print(dfCount)
+    # print(dfCount)
     # print("(("*30)
     # print(dfCount)
     json_array.append(dfCount.to_json(orient='split'))
@@ -1625,8 +1635,11 @@ def agregatesVR(id_inspection,reqAsile,reqLevel):
     df['position'] = df['wmsPosition'].str[8:11]
     df['level'] = df['wmsPosition'].str[10:12]
     # print("agregatesVR","1"*20)
-    # print(df.to_string())
-    # print('WMS products:', df[['wmsProduct']].drop_duplicates().dropna().shape[0])
+    # print(df)
+    # print('WMS products:', df[['wmsProduct']].drop_duplicates().dropna())
+    df.dropna(subset=['wmsProduct'],inplace=True)
+    # print("New df")
+    # print(df)
     # print('readed PA:',df[['codeUnit']].drop_duplicates().dropna().shape[0])
     df.drop(['vRack','picPath'],axis=1,inplace=True)
     df.drop_duplicates(inplace=True)

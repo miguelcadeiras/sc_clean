@@ -708,7 +708,7 @@ def allVR_noPD_1(request):
     # print(dvr)
     # dfpm10=pdQuery.plusminus10Pos(98,"UBG1002002")
 
-
+    # print("0"*30)
     picpath = []
     levels = []
     lastRead =0
@@ -718,15 +718,24 @@ def allVR_noPD_1(request):
         # print('in Get - matching =0')
         # df = pdQuery.fullDeDupR1(id_inspection)
         # print("allPD.view","*"*20)
+        # print("1" * 30)
+
         df = pdQuery.runningPosVR(id_inspection)
         # print("allPD.view1", "*" * 20)
         df = df[['vRack','pos','codeUnit','nivel','picPath']]
         description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
         # print("runningPosVR-completed: ",df)
+        # print("2" * 30)
+        # print("matching 0")
     else:
+        # print("matching != 0")
+
+        # print("3" * 30)
 
         df = pdQuery.decodeMachVR_noPD_levels_sorted(id_inspection)
         df = df.fillna('')
+        # print("4" * 30)
+
         #################################################################
         #EXPORT FULL INFO TO DEBUG
             # df.to_excel("resMergeWms.xlsx", sheet_name='ddp_dfwms_onCodeUnit-wmsProduct')
@@ -737,6 +746,8 @@ def allVR_noPD_1(request):
             id_inspection) + " order by id_validation;"
         dfv= pdQuery.pdDF(validationQuery)
         dfv = dfv.drop_duplicates(subset='product', keep='last')
+
+        # print("5" * 30)
 
         # print("dfV--------","+"*20)
         # print(dfv)
@@ -749,6 +760,8 @@ def allVR_noPD_1(request):
         df = df[['verified','wmsProduct','codeUnit','nivel','pos','wmsPosition','wmsDesc','wmsDesc1','wmsdesc2','match','desc','picPath']]
         description = ['vf','wmsProduct','codeUnit','N','AGVpos','wmsPos','D1','Description','D2','c','desc','p']
         df = df[df['wmsProduct'] != 'nan']
+
+        # print("6" * 30)
 
         if request.GET['matching']=='2':
 
@@ -804,6 +817,7 @@ def allVR_noPD_1(request):
     # print(df.columns)
     data = df.values.tolist()
 
+    # print("7" * 30)
 
     # description = list(df.columns.values)
 
@@ -833,6 +847,7 @@ def allVR_noPD_1(request):
     # print(data)
     readedRatio = 0
 
+    # print("8" * 30)
 
     if int(readedCount) > 0:
         if readedPositions>0:
@@ -913,6 +928,8 @@ def allVR_noPD_1(request):
         lastRead = querys.mysqlQuery(lastReadQuery)[0][0][0]
         lastRead = "Aisle:"+lastRead[0:3]+ " Pos:"+lastRead[3:6]
     # print(lastRead)
+
+    # print("9" * 30)
 
     context = {'data':data,
 
@@ -1532,16 +1549,16 @@ def carrousel(request):
                    'c', 'pic']
 
     dfx = df[df["wmsPosition"].notnull()]
-    print('dfx: ',dfx)
+    # print('dfx: ',dfx)
     dfa = dfx["wmsPosition"].str[4:7].unique()
-    print("dfa",dfa)
+    # print("dfa",dfa)
     # pd.set_option("display.max_rows", None, "display.max_columns", None)
     # pd.reset_option('all')
     # print("dfx",dfx["wmsPosition"])
     dfl = dfx["wmsPosition"].str[10:12].unique()
-    print("dfl: ",dfl)
+    # print("dfl: ",dfl)
     levels = dfl.tolist()
-    print("levels: ",levels)
+    # print("levels: ",levels)
     if '' in levels:
         levels.remove('')
     levels.sort()
