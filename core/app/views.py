@@ -949,7 +949,7 @@ def allVR_noPD_1(request):
                'picpath': picpath,
                'levels': levels,
                'lastRead':lastRead,
-               'falsePAlist':df['codeUnit'][(df['match']==False) & (df['codeUnit'].str.len()>0)].tolist() if int(request.GET['matching'])>0 else ""
+               'falsePAlist':df['codeUnit'][(df['match']==False) & (df['codeUnit'].str.len()>0)].tolist()[:20] if int(request.GET['matching'])>0 else ""
 
                }
 
