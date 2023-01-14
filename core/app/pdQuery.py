@@ -1620,7 +1620,7 @@ def agregatesVR(id_inspection,reqAsile,reqLevel):
     # print("reqAsile",reqAsile)
     # print("reqLevel",reqLevel)
     json_array = []
-
+    print("agregatesVR"*10)
     levelFactor = querys.getLevelFactor(id_inspection)
 
     df = decodeMachVR_noPD_levels_sorted(id_inspection)
@@ -1638,8 +1638,8 @@ def agregatesVR(id_inspection,reqAsile,reqLevel):
     # print(df)
     # print('WMS products:', df[['wmsProduct']].drop_duplicates().dropna())
     df.dropna(subset=['wmsProduct'],inplace=True)
-    # print("New df")
-    # print(df)
+    print("New df")
+    print(df)
     # print('readed PA:',df[['codeUnit']].drop_duplicates().dropna().shape[0])
     df.drop(['vRack','picPath'],axis=1,inplace=True)
     df.drop_duplicates(inplace=True)
@@ -1653,6 +1653,9 @@ def agregatesVR(id_inspection,reqAsile,reqLevel):
 
     # print(df[['wmsPosition','asile','level']])
     dfnan = df.replace(r'', np.NaN)
+    print("*dfNan"*15)
+    dfnan=df[~df['wmsProduct'].str.contains("nan")]
+    print(dfnan)
     # print(dfnan.info())
     dfnan["ex"] = np.NaN
     dfnan["ex"]  = dfnan["match"]*1

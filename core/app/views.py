@@ -1451,7 +1451,7 @@ def readedAnalysisVR_noPD(request):
     id_inspection = request.GET['id_inspection']
     id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
     wms_data = querys.mysqlQuery("select count(distinct wmsposition) from wmspositionmaptbl where id_inspection = "+str(id_inspection))[0][0][0]
-    print(querys.mysqlQuery("select count(distinct wmsposition) from wmspositionmaptbl where id_inspection = "+str(id_inspection)))
+    # print(querys.mysqlQuery("select count(distinct wmsposition) from wmspositionmaptbl where id_inspection = "+str(id_inspection)))
     jsonData = []
     reqAsile = request.GET['asile']
     reqLevel = request.GET['level']
@@ -1459,7 +1459,8 @@ def readedAnalysisVR_noPD(request):
 
     if wms_data > 0:
         jsonData = pdQuery.agregatesVR(id_inspection,reqAsile,reqLevel)
-        # print(jsonData)
+        print("AGREGATES RETURN"*5)
+        print(jsonData)
         barDict = json.loads(jsonData[0])
     else:
         jsonData = pdQuery.readAggregate(id_inspection)
