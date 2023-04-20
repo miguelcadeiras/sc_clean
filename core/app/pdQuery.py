@@ -1206,16 +1206,18 @@ def decodeMachVR_noPD(id_inspection):
 def decodeMachVR_noPD_levels_sorted(id_inspection):
     print("decodeM --- start")
     df = virtualRack(id_inspection)
-    print("decodeM 0 - " *10)
+    # print("decodeM 0 - " *10)
     # GETTING JUST POSITION and vRack
-    dfPos = df[["codePos", "vRack", "nivel"]]
+    dfPos = df[["codePos", "vRack", "nivel","x"]]
     # nos quedamos con los digitos de Posicion
     dfPos["pos"] = df["codePos"].str[0:10]
+
     # solo nos quedamos con las posiciones no nulas y vacías q tienen virtualRack
     dfPos = dfPos[(dfPos["codePos"].notnull()) & (dfPos["codePos"].str.len() > 0)]
     dfPos = dfPos.sort_values(['vRack', 'nivel'], ascending=(True, False))
-    # print("&" * 30)
-    # print(dfPos)
+    print("&" * 30)
+    print(dfPos)
+    print(dfPos.groupby(['vRack','pos'])['pos'].count())
     dfPos1 = dfPos[["pos", "vRack"]].drop_duplicates()
     # print("&" * 30)
     # print(dfPos1)

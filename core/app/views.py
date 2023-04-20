@@ -724,9 +724,7 @@ def allVR_noPD_1(request):
         # print("allPD.view1", "*" * 20)
         df = df[['vRack','pos','codeUnit','nivel','picPath']]
         description = ['rack', 'AGVpos', 'codeUnit', 'N','pic']
-        # print("runningPosVR-completed: ",df)
-        # print("2" * 30)
-        # print("matching 0")
+
     else:
         # print("matching != 0")
 
