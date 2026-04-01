@@ -78,7 +78,7 @@
                         <tbody>
                         {% for row in data %}
                         {% if forloop.counter  %}
-                        <tr role="row" class="odd {% if request.GET.matching == '1' and row.0 != False  %}bg-warning {% elif request.GET.matching == '1' and row.9 == False  %}bg-danger{% endif %}">
+                        <tr role="row" class="odd {% if request.GET.matching == '1' and row.0 != False  %}bg-warning {% elif request.GET.matching == '1' and row.10 == False  %}bg-danger{% endif %}">
                             {% for item in row %}
 
                             {% if forloop.last  %}
@@ -104,8 +104,8 @@
                                 {% if forloop.first  %}
                                     {% if item != False %} {{item}} {% endif %}
                                 {% else %}
-                                    {% if forloop.counter == 3 and row.9 == False %}
-                                        {% if row.5 != '' %}
+                                    {% if forloop.counter == 3 and row.10 == False %}
+                                        {% if row.6 != '' %}
                                         <a href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.4}}&list={{falsePAlist}}" target="_blank" >{{item}}
                                             {{row.4}}</a>
                                         {% else %}

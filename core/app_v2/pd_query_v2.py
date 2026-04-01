@@ -159,10 +159,12 @@ def decode_match_levels_sorted(id_inspection):
 
     # Keep legacy error labels intact (desc/match), expose corrected signal in a separate column.
     df_result['match_corrected'] = df_result['match'] | df_result['adj2_candidate']
+    df_result['pos_inferred'] = ''
+    df_result.loc[df_result['adj2_candidate'], 'pos_inferred'] = df_result.loc[df_result['adj2_candidate'], 'wmsPos']
 
     columns = [
         'pos', 'wmsPos', 'vRack', 'x', 'wmsProduct', 'codeUnit', 'visionBar', 'nivel',
         'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'wPos', 'aPos',
-        'match', 'match_original', 'adj2_candidate', 'match_corrected', 'desc', 'picPath'
+        'match', 'match_original', 'adj2_candidate', 'match_corrected', 'pos_inferred', 'desc', 'picPath'
     ]
     return df_result.reindex(columns=columns)
