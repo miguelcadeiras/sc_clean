@@ -68,7 +68,7 @@ def all_vr_no_pd_v2(request):
             (select count(wmsProduct) from wmspositionmaptbl where wmsproduct not like '' and id_inspection = {id_inspection}) as warehouse_unit_count,
             (select count(distinct(codePos)) from inventorymaptbl
                 where codePos not like ''
-                  and codePos not like '%XX%'
+                  and codePos not like '%%XX%%'
                   and substring(codePos,11,2) not like '01'
                   and id_inspection = {id_inspection}) as readed_positions,
             (select count(distinct(codeUnit)) from inventorymaptbl
