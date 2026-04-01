@@ -148,9 +148,22 @@ def decode_match_levels_sorted(id_inspection):
         return 'missMatch'
 
     df_result['desc'] = df_result.apply(reason, axis=1)
+    df_result['match_original'] = df_result['match']
+    df_result['adj2_candidate'] = (
+        (df_result['match'] == False)
+        & (df_result['desc'] == '2')
+        & (df_result['codeUnit'].notna())
+        & (df_result['wmsProduct'].notna())
+        & (df_result['codeUnit'] == df_result['wmsProduct'])
+    )
+
+    # Conservative correction: if same unit is shifted exactly +/-2, mark as corrected match.
+    df_result.loc[df_result['adj2_candidate'], 'match'] = True
+    df_result.loc[df_result['adj2_candidate'], 'desc'] = 'match_adj2'
 
     columns = [
         'pos', 'wmsPos', 'vRack', 'x', 'wmsProduct', 'codeUnit', 'visionBar', 'nivel',
-        'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'wPos', 'aPos', 'match', 'desc', 'picPath'
+        'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'wPos', 'aPos',
+        'match', 'match_original', 'adj2_candidate', 'desc', 'picPath'
     ]
     return df_result.reindex(columns=columns)

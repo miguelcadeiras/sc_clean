@@ -128,6 +128,8 @@ def all_vr_no_pd_v2(request):
             lr = last_read_df.iloc[0]['lastread']
             last_read = f"Aisle:{lr[0:3]} Pos:{lr[3:6]}"
 
+    pm2_corrected = int((df['desc'] == 'match_adj2').sum()) if 'desc' in df.columns else 0
+
     context = {
         'data': data,
         'description': df.columns.tolist(),
@@ -147,6 +149,7 @@ def all_vr_no_pd_v2(request):
         'lastRead': last_read,
         'falsePAlist': df['codeUnit'][(df['match'] == False) & (df['codeUnit'].str.len() > 0)].tolist()[:20]
             if int(matching) > 0 and 'codeUnit' in df.columns and 'match' in df.columns else '',
+        'pm2Corrected': pm2_corrected,
     }
 
     if matching == '3':
