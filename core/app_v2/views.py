@@ -38,7 +38,7 @@ def all_vr_no_pd_v2(request):
 
         df['verified'] = df['wmsProduct'].map(validation_map).fillna(False)
         df = df[
-            ['verified', 'wmsProduct', 'codeUnit', 'nivel', 'pos', 'pos_inferred', 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2',
+            ['verified', 'wmsProduct', 'codeUnit', 'nivel', 'pos', 'pos_inferred', 'matchAI', 'VerifiedAI', 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2',
              'match', 'desc', 'picPath']
         ]
         df = df[df['wmsProduct'] != 'nan']
@@ -55,7 +55,7 @@ def all_vr_no_pd_v2(request):
                 messages.warning(request, 'There are values on Aisle, Level or Pos that brings conflicts.')
 
             df = df[
-                ['waisle', 'wlevel', 'wpos', 'verified', 'wmsProduct', 'codeUnit', 'nivel', 'pos', 'pos_inferred', 'wmsPosition',
+                ['waisle', 'wlevel', 'wpos', 'verified', 'wmsProduct', 'codeUnit', 'nivel', 'pos', 'pos_inferred', 'matchAI', 'VerifiedAI', 'wmsPosition',
                  'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'match', 'desc', 'picPath']
             ].sort_values(['waisle', 'wlevel', 'wpos'], ascending=[True, True, True])
             df = df[df['wmsProduct'] != 'nan']

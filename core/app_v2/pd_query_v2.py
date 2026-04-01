@@ -162,9 +162,15 @@ def decode_match_levels_sorted(id_inspection):
     df_result['pos_inferred'] = ''
     df_result.loc[df_result['adj2_candidate'], 'pos_inferred'] = df_result.loc[df_result['adj2_candidate'], 'wmsPos']
 
+    effective_pos = df_result['pos_inferred'].where(df_result['pos_inferred'] != '', df_result['pos'])
+    df_result['matchAI'] = (effective_pos == df_result['wmsPos'])
+    df_result['VerifiedAI'] = False
+    df_result.loc[df_result['pos_inferred'] != '', 'VerifiedAI'] = 'wmsAI'
+    df_result.loc[(df_result['pos_inferred'] != '') & (df_result['matchAI'] == False), 'VerifiedAI'] = 'agvAI'
+
     columns = [
         'pos', 'wmsPos', 'vRack', 'x', 'wmsProduct', 'codeUnit', 'visionBar', 'nivel',
         'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'wPos', 'aPos',
-        'match', 'match_original', 'adj2_candidate', 'match_corrected', 'pos_inferred', 'desc', 'picPath'
+        'match', 'match_original', 'adj2_candidate', 'match_corrected', 'pos_inferred', 'matchAI', 'VerifiedAI', 'desc', 'picPath'
     ]
     return df_result.reindex(columns=columns)
