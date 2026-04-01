@@ -14,6 +14,8 @@ def all_vr_no_pd_v2(request):
 
     id_inspection = int(request.GET['id_inspection'])
     matching = request.GET.get('matching', '0')
+    qty = max(int(request.GET.get('qty', 500)), 1)
+    offset = max(int(request.GET.get('offset', 0)), 0)
 
     id_warehouse_df = pd_query_v2.pd_df(
         "select id_warehouse from inspectiontbl where id_inspection = %s",
@@ -58,11 +60,10 @@ def all_vr_no_pd_v2(request):
             ].sort_values(['waisle', 'wlevel', 'wpos'], ascending=[True, True, True])
             df = df[df['wmsProduct'] != 'nan']
 
-            groups = df.groupby(
-                ['waisle', 'wlevel', 'wpos', 'wmsPosition', 'wmsProduct', 'pos', 'codeUnit']
-            ).size().to_frame(name='count')
 
-    data = df.values.tolist()
+    total_rows = int(df.shape[0])
+    paged_df = df.iloc[offset:offset + qty].copy()
+    data = paged_df.values.tolist()
 
     metrics_df = pd_query_v2.pd_df(
         """
@@ -147,18 +148,15 @@ def all_vr_no_pd_v2(request):
         'picpath': picpath,
         'levels': levels,
         'lastRead': last_read,
-        'falsePAlist': df['codeUnit'][(df['match'] == False) & (df['codeUnit'].str.len() > 0)].tolist()[:20]
-            if int(matching) > 0 and 'codeUnit' in df.columns and 'match' in df.columns else '',
+        'falsePAlist': paged_df['codeUnit'][(paged_df['match'] == False) & (paged_df['codeUnit'].str.len() > 0)].tolist()[:20]
+            if int(matching) > 0 and 'codeUnit' in paged_df.columns and 'match' in paged_df.columns else '',
         'pm2Corrected': pm2_corrected,
+        'totalRows': total_rows,
+        'offset': offset,
+        'qty': qty,
     }
 
     if matching == '3':
-        context['groups'] = groups.to_html(
-            border=0,
-            classes='table table-head-fixed table-striped table-sm table-hover text-right',
-            table_id='fails_by_aisle'
-        )
-        context['data1'] = df.to_html()
         return render(request, 'allPD_v2/fail_by_v2.html', context)
 
     return render(request, 'allPD_v2/allPD_v2.html', context)
