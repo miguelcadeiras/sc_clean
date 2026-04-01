@@ -129,7 +129,7 @@ def all_vr_no_pd_v2(request):
             lr = last_read_df.iloc[0]['lastread']
             last_read = f"Aisle:{lr[0:3]} Pos:{lr[3:6]}"
 
-    pm2_corrected = int((df['desc'] == 'match_adj2').sum()) if 'desc' in df.columns else 0
+    pm2_corrected = int((df['adj2_candidate'] == True).sum()) if 'adj2_candidate' in df.columns else 0
 
     context = {
         'data': data,

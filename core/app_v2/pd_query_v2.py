@@ -157,13 +157,12 @@ def decode_match_levels_sorted(id_inspection):
         & (df_result['codeUnit'] == df_result['wmsProduct'])
     )
 
-    # Conservative correction: if same unit is shifted exactly +/-2, mark as corrected match.
-    df_result.loc[df_result['adj2_candidate'], 'match'] = True
-    df_result.loc[df_result['adj2_candidate'], 'desc'] = 'match_adj2'
+    # Keep legacy error labels intact (desc/match), expose corrected signal in a separate column.
+    df_result['match_corrected'] = df_result['match'] | df_result['adj2_candidate']
 
     columns = [
         'pos', 'wmsPos', 'vRack', 'x', 'wmsProduct', 'codeUnit', 'visionBar', 'nivel',
         'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'wPos', 'aPos',
-        'match', 'match_original', 'adj2_candidate', 'desc', 'picPath'
+        'match', 'match_original', 'adj2_candidate', 'match_corrected', 'desc', 'picPath'
     ]
     return df_result.reindex(columns=columns)
