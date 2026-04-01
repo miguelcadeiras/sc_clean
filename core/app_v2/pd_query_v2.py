@@ -15,18 +15,18 @@ def engine():
     return create_engine(conn)
 
 
-def pd_df(query):
+def pd_df(query, params=None):
     sql_engine = engine()
     with sql_engine.connect() as connection:
-        return pd.read_sql(query, connection)
+        return pd.read_sql(query, connection, params=params)
 
 
 def virtual_rack(id_inspection):
     query = (
         "select id_Vector, rack, x, codePos, codeUnit, customCode3, visionBar, nivel, picPath "
-        "from inventorymaptbl where id_inspection = {}"
-    ).format(int(id_inspection))
-    df = pd_df(query)
+        "from inventorymaptbl where id_inspection = %s"
+    )
+    df = pd_df(query, params=[int(id_inspection)])
 
     if df.empty:
         df['ZERO'] = pd.Series(dtype=bool)
@@ -106,7 +106,8 @@ def decode_match_levels_sorted(id_inspection):
 
     dfwms = pd_df(
         "select wmsPosition,wmsProduct,wmsDesc,wmsDesc1,wmsdesc2 "
-        "from wmspositionmaptbl where id_inspection = {}".format(int(id_inspection))
+        "from wmspositionmaptbl where id_inspection = %s",
+        params=[int(id_inspection)],
     )
     dfwms = dfwms.replace(r'^\s*$', np.nan, regex=True)
     dfwms['wPos'] = dfwms['wmsPosition'].str[4:10]

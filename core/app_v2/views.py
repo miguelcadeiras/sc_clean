@@ -16,7 +16,8 @@ def all_vr_no_pd_v2(request):
     matching = request.GET.get('matching', '0')
 
     id_warehouse_df = pd_query_v2.pd_df(
-        f"select id_warehouse from inspectiontbl where id_inspection = {id_inspection}"
+        "select id_warehouse from inspectiontbl where id_inspection = %s",
+        params=[id_inspection],
     )
     id_warehouse = id_warehouse_df.iloc[0]['id_warehouse'] if not id_warehouse_df.empty else 0
 
@@ -27,7 +28,8 @@ def all_vr_no_pd_v2(request):
         df = pd_query_v2.decode_match_levels_sorted(id_inspection).fillna('')
 
         dfv = pd_query_v2.pd_df(
-            f"select product, validation from validationtbl where id_inspection = {id_inspection} order by id_validation"
+            "select product, validation from validationtbl where id_inspection = %s order by id_validation",
+            params=[id_inspection],
         )
         dfv = dfv.drop_duplicates(subset='product', keep='last')
         validation_map = dfv.set_index('product')['validation'].to_dict()
@@ -62,19 +64,22 @@ def all_vr_no_pd_v2(request):
 
     data = df.values.tolist()
 
-    metrics_df = pd_query_v2.pd_df(f"""
+    metrics_df = pd_query_v2.pd_df(
+        """
         select
-            (select count(wmsposition) from wmspositionmaptbl where id_inspection = {id_inspection}) as warehouse_total_positions,
-            (select count(wmsProduct) from wmspositionmaptbl where wmsproduct not like '' and id_inspection = {id_inspection}) as warehouse_unit_count,
+            (select count(wmsposition) from wmspositionmaptbl where id_inspection = %s) as warehouse_total_positions,
+            (select count(wmsProduct) from wmspositionmaptbl where wmsproduct not like '' and id_inspection = %s) as warehouse_unit_count,
             (select count(distinct(codePos)) from inventorymaptbl
                 where codePos not like ''
                   and codePos not like '%%XX%%'
                   and substring(codePos,11,2) not like '01'
-                  and id_inspection = {id_inspection}) as readed_positions,
+                  and id_inspection = %s) as readed_positions,
             (select count(distinct(codeUnit)) from inventorymaptbl
                 where codeUnit not like ''
-                  and id_inspection = {id_inspection}) as readed_count
-    """)
+                  and id_inspection = %s) as readed_count
+        """,
+        params=[id_inspection, id_inspection, id_inspection, id_inspection],
+    )
 
     warehouse_total_positions = int(metrics_df.iloc[0]['warehouse_total_positions']) if not metrics_df.empty else 0
     warehouse_unit_count = int(metrics_df.iloc[0]['warehouse_unit_count']) if not metrics_df.empty else 0
@@ -92,29 +97,32 @@ def all_vr_no_pd_v2(request):
         return response
 
     inspection_df = pd_query_v2.pd_df(
-        f"select description, inspectionDate from inspectiontbl where id_inspection = {id_inspection}"
+        "select description, inspectionDate from inspectiontbl where id_inspection = %s",
+        params=[id_inspection],
     )
     inspection_data = inspection_df.values.tolist()[0] if not inspection_df.empty else ['', '']
 
     warehouse_name_df = pd_query_v2.pd_df(
-        f"""
+        """
         select warehousestbl.name,address,city,country
         from warehousestbl
         inner join inspectiontbl on inspectiontbl.id_warehouse = warehousestbl.id_warehouse
-        where id_inspection = {id_inspection}
-        """
+        where id_inspection = %s
+        """,
+        params=[id_inspection],
     )
     warehouse_name = warehouse_name_df.values.tolist()
 
     if not df.empty:
         last_read_df = pd_query_v2.pd_df(
-            f"""
+            """
             select substring(codePos,5,6) as lastread
             from inventorymaptbl
-            where id_inspection = {id_inspection} and codePos not like ''
+            where id_inspection = %s and codePos not like ''
             order by id_Vector desc
             limit 1
-            """
+            """,
+            params=[id_inspection],
         )
         if not last_read_df.empty and isinstance(last_read_df.iloc[0]['lastread'], str):
             lr = last_read_df.iloc[0]['lastread']
