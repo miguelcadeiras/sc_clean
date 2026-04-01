@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app',   # Enable the inner app
+    'app_v2',
     'mathfilters',
     'crispy_forms',
 ]
