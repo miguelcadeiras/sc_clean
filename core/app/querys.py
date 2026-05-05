@@ -49,12 +49,14 @@ def openConnection():
     # print(" querys module" ,hostname,IPAddr)
 
     if IPAddr != '10.128.0.3' :
+        print("server")
         cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
                                       database=mysql_schemaDev,sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION')
 
         # cnx.sql_mode = 'TRADITIONAL,NO_ENGINE_SUBSTITUTION'
         # print("connection with:",mysql_hostDev,mysql_userDev, mysql_passwordDev,mysql_schemaDev, cnx.sql_mode)
     else:
+        print("debug")
         cnx = mysql.connector.connect(host=mysql_host, user=mysql_user, password=mysql_password,
                                       database=mysql_schema,sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION')
         # cnx.sql_mode = 'TRADITIONAL,NO_ENGINE_SUBSTITUTION'
