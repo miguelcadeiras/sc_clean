@@ -14,7 +14,7 @@ import socket
 mysql_schema = 'inventory'
 mysql_user = 'smartcubik'
 mysql_password = 'Smartcubik1Root!'
-mysql_host = '151.106.108.129'
+mysql_host = 'localhost'
 
 mysql_schemaDev = 'inventory'
 mysql_userDev = 'webuser'
