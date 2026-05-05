@@ -188,8 +188,9 @@ def executeMulti(query):
 
 def getClientID(clientName):
     query = "SELECT id_client FROM clienttbl where clientName like '" + str(clientName) + "';"
+    print("query: ",query)
     result = mysqlQuery(query)
-    # print(result)
+    print(result)
     return result
 
 
