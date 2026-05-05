@@ -7,7 +7,7 @@ TEST_VAR = 3
 mysql_schema = 'inventory'
 mysql_user = 'smartcubik'
 mysql_password = 'Smartcubik1Root!'
-mysql_host = '151.106.108.129'
+mysql_host = 'localhost'
 
 # accesos a base local desarrollo
 mysql_schemaDev = 'inventory'
@@ -16,4 +16,4 @@ mysql_passwordDev = 'Smartcubik1web'
 mysql_hostDev = 'localhost'
 
 # mysql_alchemyDevConString = 'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
-mysql_alchemyDevConString = 'mysql+pymysql://Smartcubik1Root!:smartcubik@151.106.108.129/inventory'
+mysql_alchemyDevConString = 'mysql+pymysql://Smartcubik1Root!:smartcubik@localhost/inventory'
