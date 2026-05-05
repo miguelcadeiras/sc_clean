@@ -30,14 +30,14 @@ def engine():
     IPAddr = socket.gethostbyname(hostname)
     # print(IPAddr,hostname)
     # para debug cambio de != a ==
-    if IPAddr != '151.106.108.129' :
+    if IPAddr != '10.128.0.3':
         # print(" here")
         mysql_alchemyDevConString = 'mysql+pymysql://webuser:Smartcubik1web@127.0.0.1/inventory'
         # mysql_alchemyDevConString = 'mysql+pymysql://smartcubik:Smartcubik1Root!@151.106.108.129/inventory'
 
     else:
         # print(" 2here")
-        mysql_alchemyDevConString = 'mysql+pymysql://smartcubik:Smartcubik1Root!@151.106.108.129/inventory'
+        mysql_alchemyDevConString = 'mysql+pymysql://smartcubik:Smartcubik1Root!@localhost/inventory'
 
     sqlEngine = create_engine(mysql_alchemyDevConString)
 
@@ -1217,7 +1217,17 @@ def decodeMachVR_noPD_levels_sorted(id_inspection):
     dfPos = dfPos.sort_values(['vRack', 'nivel'], ascending=(True, False))
     print("&" * 30)
     print(dfPos)
-    print(dfPos.groupby(['vRack','pos'])['pos'].count())
+    # g1 = dfPos.groupby(['vRack','pos'])['pos'].count()
+    g1 = dfPos.groupby(['vRack', 'pos']).count().reset_index()
+    print("DUPLICATED...")
+    print(g1[g1.duplicated(subset=['vRack'], keep=False)])
+    # print(g1)
+    g1.sort_values(['vRack', 'codePos'], ascending=(True, True))
+    print(g1)
+    print("Dropping Fault Positions")
+    g1 = g1[["pos", "vRack"]].drop_duplicates(subset=['vRack'], keep="first")
+
+    print(g1)
     dfPos1 = dfPos[["pos", "vRack"]].drop_duplicates()
     # print("&" * 30)
     # print(dfPos1)
@@ -1240,6 +1250,7 @@ def decodeMachVR_noPD_levels_sorted(id_inspection):
 
     ###### COMENZAMOS CON LOS MERGE
     #UNIONES entre UNITS ,vrack y Posiciones y Vrack
+    ## CAMBIO dfPos1 por g1..
     df_posUnits = pd.merge(dfPos1,
                            dfUnits,
                            left_on=["vRack"],
@@ -1249,6 +1260,16 @@ def decodeMachVR_noPD_levels_sorted(id_inspection):
 
     df_posUnits = df_posUnits.drop_duplicates(subset="codeUnit", keep="first")
 
+    df_posUnits_g1 = pd.merge(g1,
+                           dfUnits,
+                           left_on=["vRack"],
+                           right_on=["vRack"],
+                           how="right"
+                           )
+
+    df_posUnits_g1 = df_posUnits_g1.drop_duplicates(subset="codeUnit", keep="first")
+    print("df_posUnits_g1 ------------------------")
+    print(df_posUnits_g1)
     print("decodeM 2 - " *10)
 
     #### CONECTAMOS AL WMS-IMPORTED
