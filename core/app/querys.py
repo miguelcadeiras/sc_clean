@@ -80,6 +80,8 @@ def mysqlQuery(query, *kargs):
     result = 'none'
     field_names = []
     try:
+
+        print("aaaaa")
         cnx,cursor = openConnection()
         # if settings.DEBUG:
         #     cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
