@@ -50,6 +50,8 @@ def openConnection():
 
     if IPAddr != '10.128.0.3' :
         print("server")
+
+        print("host:",mysql_hostDev, ",user:",mysql_userDev, "password:", mysql_passwordDev, "database:", mysql_schemaDev)
         cnx = mysql.connector.connect(host=mysql_hostDev, user=mysql_userDev, password=mysql_passwordDev,
                                       database=mysql_schemaDev,sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION')
 
