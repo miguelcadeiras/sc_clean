@@ -47,9 +47,13 @@ def engine():
 def mysqlQuery(query):
     # print("in MysqlQuery")
     # print( query)
+    print ("111")
     sqlEngine = engine()
+    print("222")
     dbConnection = sqlEngine.connect()
+    print("333")
     df = pd.read_sql(query, dbConnection)
+    print("444")
     dbConnection.close()
 
     return df
