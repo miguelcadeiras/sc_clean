@@ -22,23 +22,21 @@ class Command(BaseCommand):
 
         v2_total = len(v2)
         v2_mismatch = int((v2['match'] == False).sum())
-        v2_mismatch_corrected = int((v2['match_corrected'] == False).sum()) if 'match_corrected' in v2.columns else v2_mismatch
-        v2_pm2_original = int((v2['adj2_candidate'] == True).sum()) if 'adj2_candidate' in v2.columns else 0
-        v2_pm2_remaining = int((v2['desc'] == '2').sum())
-        v2_adj2_corrected = v2_pm2_original
+        v2_pm2 = int((v2['desc'] == '2').sum())
+        pm2_mask = v2['desc'] == '2'
+        v2_pm2_wms_ai = int((pm2_mask & (v2['VerifiedAI'] == 'wmsAI')).sum()) if 'VerifiedAI' in v2.columns else 0
+        v2_pm2_agv_ai = int((pm2_mask & (v2['VerifiedAI'] == 'agvAI')).sum()) if 'VerifiedAI' in v2.columns else 0
+        v2_pm2_remaining = int((pm2_mask & ~v2['VerifiedAI'].isin(['wmsAI', 'agvAI'])).sum()) if 'VerifiedAI' in v2.columns else v2_pm2
 
         self.stdout.write('--- Legacy ---')
         self.stdout.write(f'total_rows: {legacy_total}')
-        self.stdout.write(f'mismatch_rows: {legacy_mismatch}')
+        self.stdout.write(f'false_mismatch_rows: {legacy_mismatch}')
         self.stdout.write(f'plus_minus_2_rows: {legacy_pm2}')
 
         self.stdout.write('--- V2 ---')
         self.stdout.write(f'total_rows: {v2_total}')
-        self.stdout.write(f'mismatch_rows: {v2_mismatch}')
-        self.stdout.write(f'mismatch_rows_corrected: {v2_mismatch_corrected}')
-        self.stdout.write(f'plus_minus_2_original_candidates: {v2_pm2_original}')
-        self.stdout.write(f'plus_minus_2_remaining_rows: {v2_pm2_remaining}')
-        self.stdout.write(f'plus_minus_2_corrected_rows: {v2_adj2_corrected}')
-
-        delta = legacy_pm2 - v2_pm2_remaining
-        self.stdout.write(f'pm2_reduction_vs_legacy: {delta}')
+        self.stdout.write(f'false_mismatch_rows: {v2_mismatch}')
+        self.stdout.write(f'plus_minus_2_rows: {v2_pm2}')
+        self.stdout.write(f'plus_minus_2_wmsAI: {v2_pm2_wms_ai}')
+        self.stdout.write(f'plus_minus_2_agvAI: {v2_pm2_agv_ai}')
+        self.stdout.write(f'plus_minus_2_remaining_to_check: {v2_pm2_remaining}')

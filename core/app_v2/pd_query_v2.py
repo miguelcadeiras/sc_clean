@@ -5,6 +5,13 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 
+MATCHING_AI_RULES_DOC = 'docs/v2_matching_ai_rules.md'
+PALLET_WINDOW_M = 1.2
+RESET_DROP_M = 0.8
+RESET_MIN_PREV_X = 1.8
+RESET_MAX_CURRENT_X = 0.8
+
+
 def engine():
     hostname = socket.gethostname()
     ip_addr = socket.gethostbyname(hostname)
@@ -88,8 +95,115 @@ def running_pos_vr(id_inspection):
     return pd.merge(df_pos, df_units, on='vRack', how='right')
 
 
+def position_base(code):
+    if not isinstance(code, str) or len(code) < 10:
+        return ''
+    return code[:10]
+
+
+def position_level(code):
+    if not isinstance(code, str) or len(code) < 12:
+        return ''
+    level = code[10:12]
+    return '' if level == 'XX' else level
+
+
+def normalized_level(value):
+    if pd.isna(value):
+        return ''
+    try:
+        return f'{int(float(value)):02d}'
+    except Exception:
+        return str(value).zfill(2)
+
+
+def short_ai_reason(verified, reason):
+    if verified == True:
+        return 'WMS wins'
+    if verified == 'agvAI':
+        return 'AGV wins'
+    if reason.startswith('weak evidence'):
+        return 'weak'
+    if reason.startswith('ambiguous evidence'):
+        return 'ambiguous'
+    if reason.startswith('no local'):
+        return 'no evidence'
+    if reason:
+        return 'no decision'
+    return ''
+
+
+def add_encoder_windows(
+    inventory_df,
+    pallet_window_m=PALLET_WINDOW_M,
+    reset_drop_m=RESET_DROP_M,
+    reset_min_prev_x=RESET_MIN_PREV_X,
+    reset_max_current_x=RESET_MAX_CURRENT_X,
+):
+    df = inventory_df.sort_values('id_Vector').copy()
+    df['prev_x'] = df['x'].shift(1)
+    df['x_reset'] = (
+        df['x'].notna()
+        & df['prev_x'].notna()
+        & (df['prev_x'] > reset_min_prev_x)
+        & (df['x'] < reset_max_current_x)
+        & (df['x'] < df['prev_x'] - reset_drop_m)
+    )
+    df['encoder_segment'] = df['x_reset'].cumsum()
+    df['pallet_window'] = np.floor(df['x'].fillna(-1) / pallet_window_m).astype(int)
+    return df
+
+
+def physical_ai_evidence(row, inventory_df):
+    # Keep this logic aligned with docs/v2_matching_ai_rules.md.
+    if row['match'] or pd.isna(row['unit_id_Vector']) or not isinstance(row['codeUnit'], str) or row['codeUnit'] == '':
+        return False, False, ''
+
+    center = int(row['unit_id_Vector'])
+    hit = inventory_df[inventory_df['id_Vector'] == center]
+    if hit.empty:
+        return False, False, 'no hit'
+
+    segment = int(hit.iloc[0]['encoder_segment'])
+    pallet_window = int(hit.iloc[0]['pallet_window'])
+    if pallet_window < 0:
+        return False, False, 'no x'
+
+    around = inventory_df[
+        (inventory_df['encoder_segment'] == segment)
+        & (inventory_df['pallet_window'] == pallet_window)
+    ].copy()
+
+    code_pos = around[around['codePos'].notna()].copy()
+    code_pos = code_pos[code_pos['codePos'].str.len() >= 10]
+    if code_pos.empty:
+        return False, False, 'no local codePos evidence'
+
+    code_pos['pos_base'] = code_pos['codePos'].apply(position_base)
+    counts = code_pos['pos_base'].value_counts()
+    winner = counts.index[0]
+    winner_count = int(counts.iloc[0])
+    runner_up_count = int(counts.iloc[1]) if len(counts) > 1 else 0
+    evidence = ', '.join(f'{pos}:{count}' for pos, count in counts.head(4).items())
+
+    if winner_count < 2:
+        return False, False, f'weak evidence; {evidence}'
+    if runner_up_count > 0 and winner_count < runner_up_count * 2:
+        return False, False, f'ambiguous evidence; {evidence}'
+
+    wms_pos = row['wmsPos'] if isinstance(row['wmsPos'], str) else ''
+    agv_pos = row['pos'] if isinstance(row['pos'], str) else ''
+
+    if winner == wms_pos:
+        return True, True, f'wmsAI segment {segment} window {pallet_window}; {evidence}'
+    if winner == agv_pos and winner != wms_pos:
+        return False, 'agvAI', f'agvAI segment {segment} window {pallet_window}; {evidence}'
+
+    return False, False, f'winner does not match WMS or AGV; {evidence}'
+
+
 def decode_match_levels_sorted(id_inspection):
-    df = virtual_rack(id_inspection)
+    df = add_encoder_windows(virtual_rack(id_inspection))
 
     df_pos = df[['codePos', 'vRack', 'nivel', 'x']].copy()
     df_pos['pos'] = df['codePos'].str[0:10]
@@ -97,7 +211,8 @@ def decode_match_levels_sorted(id_inspection):
     df_pos = df_pos.sort_values(['vRack', 'nivel'], ascending=(True, False))
     df_pos1 = df_pos[['pos', 'vRack']].drop_duplicates()
 
-    df_units = df[['vRack', 'x', 'codeUnit', 'visionBar', 'nivel', 'picPath']].copy()
+    df_units = df[['id_Vector', 'vRack', 'x', 'codeUnit', 'visionBar', 'nivel', 'picPath']].copy()
+    df_units = df_units.rename(columns={'id_Vector': 'unit_id_Vector'})
     df_units = df_units[(df_units['codeUnit'].notnull()) & (df_units['codeUnit'].str.len() > 0)]
     df_units = df_units.drop_duplicates(subset='codeUnit', keep='first')
 
@@ -149,28 +264,22 @@ def decode_match_levels_sorted(id_inspection):
 
     df_result['desc'] = df_result.apply(reason, axis=1)
     df_result['match_original'] = df_result['match']
-    df_result['adj2_candidate'] = (
-        (df_result['match'] == False)
-        & (df_result['desc'] == '2')
-        & (df_result['codeUnit'].notna())
-        & (df_result['wmsProduct'].notna())
-        & (df_result['codeUnit'] == df_result['wmsProduct'])
-    )
-
-    # Keep legacy error labels intact (desc/match), expose corrected signal in a separate column.
-    df_result['match_corrected'] = df_result['match'] | df_result['adj2_candidate']
+    # NOTE: +/-2 is only a diagnostic label. We must not mark it as corrected
+    # just because the same pallet appears two positions away.
+    df_result['adj2_candidate'] = False
+    df_result['match_corrected'] = df_result['match']
     df_result['pos_inferred'] = ''
-    df_result.loc[df_result['adj2_candidate'], 'pos_inferred'] = df_result.loc[df_result['adj2_candidate'], 'wmsPos']
 
-    effective_pos = df_result['pos_inferred'].where(df_result['pos_inferred'] != '', df_result['pos'])
-    df_result['matchAI'] = (effective_pos == df_result['wmsPos'])
+    ai_results = df_result.apply(lambda row: physical_ai_evidence(row, df), axis=1)
+    df_result['matchAI'] = [result[0] for result in ai_results]
     df_result['VerifiedAI'] = False
-    df_result.loc[df_result['pos_inferred'] != '', 'VerifiedAI'] = 'wmsAI'
-    df_result.loc[(df_result['pos_inferred'] != '') & (df_result['matchAI'] == False), 'VerifiedAI'] = 'agvAI'
+    df_result['aiReason'] = [short_ai_reason(result[1], result[2]) for result in ai_results]
+    df_result.loc[[result[1] == True for result in ai_results], 'VerifiedAI'] = 'wmsAI'
+    df_result.loc[[result[1] == 'agvAI' for result in ai_results], 'VerifiedAI'] = 'agvAI'
 
     columns = [
-        'pos', 'wmsPos', 'vRack', 'x', 'wmsProduct', 'codeUnit', 'visionBar', 'nivel',
+        'pos', 'wmsPos', 'vRack', 'unit_id_Vector', 'x', 'wmsProduct', 'codeUnit', 'visionBar', 'nivel',
         'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'wPos', 'aPos',
-        'match', 'match_original', 'adj2_candidate', 'match_corrected', 'pos_inferred', 'matchAI', 'VerifiedAI', 'desc', 'picPath'
+        'match', 'match_original', 'adj2_candidate', 'match_corrected', 'pos_inferred', 'matchAI', 'VerifiedAI', 'aiReason', 'desc', 'picPath'
     ]
     return df_result.reindex(columns=columns)

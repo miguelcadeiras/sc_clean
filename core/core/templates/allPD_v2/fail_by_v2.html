@@ -43,6 +43,20 @@
 
 
 </div>
+{% if request.GET.matching != '0' %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="alert alert-info py-2 mb-2">
+            False legacy/v2: {{legacyMismatchCount}} / {{v2MismatchCount}} |
+            +/-2 legacy/v2: {{legacyPm2Count}} / {{v2Pm2Count}} |
+            wmsAI: {{pm2WmsAi}} |
+            agvAI: {{pm2AgvAi}} |
+            remaining +/-2 to check: {{pm2RemainingToCheck}}
+            {% if pm2DiagnosticsError %}| legacy diagnostic error: {{pm2DiagnosticsError}}{% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -68,6 +82,28 @@
             </div>
                 <!-- /.card-header -->
                 <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Showing {{pageStart}}-{{pageEnd}} of {{totalRows}}</span>
+                        <div>
+                            <div class="btn-group mr-2">
+                                <a class="btn btn-sm btn-outline-secondary {% if request.GET.qty == '500' or not request.GET.qty %}active{% endif %}" href="{{qty500Url}}">500</a>
+                                <a class="btn btn-sm btn-outline-secondary {% if request.GET.qty == '1000' %}active{% endif %}" href="{{qty1000Url}}">1000</a>
+                                <a class="btn btn-sm btn-outline-secondary {% if showAllRows %}active{% endif %}" href="{{qtyAllUrl}}">All</a>
+                            </div>
+                            <div class="btn-group">
+                                {% if hasPrevPage %}
+                                <a class="btn btn-sm btn-outline-secondary" href="{{prevPageUrl}}">Previous</a>
+                                {% else %}
+                                <span class="btn btn-sm btn-outline-secondary disabled">Previous</span>
+                                {% endif %}
+                                {% if hasNextPage %}
+                                <a class="btn btn-sm btn-outline-secondary" href="{{nextPageUrl}}">Next</a>
+                                {% else %}
+                                <span class="btn btn-sm btn-outline-secondary disabled">Next</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
 
                     <table id="table1" name="example1" class="table table-sm table-bordered table-striped dataTable " role="grid" aria-describedby="table1_info" style="width:100%">
                         <thead>
@@ -87,7 +123,7 @@
 
                         {% for row in data %}
                         {% if forloop.counter  %}
-                        <tr role="row" class="odd {% if  row.3 == 'wms'  %}bg-warning {% elif row.3 == 'agv'  %}bg-danger{% endif %}">
+                        <tr role="row" class="odd {% if row.3 == 'wms' %}bg-warning{% elif row.3 == 'agv' %}bg-danger{% elif row.12 == 'wmsAI' %}bg-success text-white{% elif row.12 == 'agvAI' %}bg-danger text-white{% endif %}">
                             {% for item in row %}
 
                             {% if forloop.last  %}
@@ -95,32 +131,32 @@
                                 <td>
                                     <div class="text-center">
                                         {% if row.4 != row.5  %}
-                                        <a href="media/smarti/{{request.GET.id_inspection}}/{{item}}" ><img src="media/smarti/{{request.GET.id_inspection}}/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
+                                        <a href="/media/smarti/{{request.GET.id_inspection}}/{{item}}" ><img src="/media/smarti/{{request.GET.id_inspection}}/{{item}}" class="rounded" alt="..." style="width: 200px; height: 200px;"></a>
                                         {% endif %}
                                     </div>
                                 </td>
                                 {% else %}
                                 <td>
 
-                                    <a href="media/smarti/{{request.GET.id_inspection}}/{{item}}" ><i class="fa fa-camera" aria-hidden="true"></i></a>
+                                    <a href="/media/smarti/{{request.GET.id_inspection}}/{{item}}" ><i class="fa fa-camera" aria-hidden="true"></i></a>
 
                                 </td>
                                 {% endif %}
 
                             {% else %}
-                            <td>
+                            <td class="{% if item == 'wmsAI' %}bg-success text-white{% elif item == 'agvAI' %}bg-danger text-white{% endif %}">
                                 {% if forloop.first  %}
                                     {% if item != False %}{{item}} {% endif %}
                                 {% else %}
-                                    {% if forloop.counter == 5 and row.15 == False %}
+                                    {% if forloop.counter == 5 and row.9 == False %}
                                         {% if row.5 == '' %}
-                                    <a href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.7}}&wms=1&list={{falsePAlist}}&PA=not_found" target="_blank" >{{item}}</a>
+                                    <a href="/plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.7}}&wms=1&list={{falsePAlist}}&PA=not_found" target="_blank" >{{item}}</a>
                                         {% else %}
-                                    <a href="plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.7}}&list={{falsePAlist}}" target="_blank" >{{item}}</a>
+                                    <a href="/plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.7}}&list={{falsePAlist}}" target="_blank" >{{item}}</a>
                                         {% endif %}
                                     {% else %}
-                                        {% if forloop.counter == 9 and item != '' %}
-                                            <span title="Inferido por discrepancia +/-2: mismo pallet leído y ajuste hacia posición WMS.">{{item}}</span>
+                                        {% if forloop.counter == 14 and item != '' %}
+                                            <span title="{{item}}">{{item|truncatechars:18}}</span>
                                         {% else %}
                                             {{item}}
                                         {% endif %}

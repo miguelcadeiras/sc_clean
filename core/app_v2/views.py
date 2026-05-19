@@ -3,7 +3,34 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
 
+from app import pdQuery as legacy_pd_query
 from . import pd_query_v2
+
+
+def pm2_diagnostics(id_inspection, v2_df):
+    pm2_mask = v2_df['desc'] == '2' if 'desc' in v2_df.columns else False
+    diagnostics = {
+        'legacyMismatchCount': 'n/a',
+        'v2MismatchCount': int((v2_df['match'] == False).sum()) if 'match' in v2_df.columns else 0,
+        'legacyPm2Count': 'n/a',
+        'v2Pm2Count': int(pm2_mask.sum()) if hasattr(pm2_mask, 'sum') else 0,
+        'pm2WmsAi': int((pm2_mask & (v2_df['VerifiedAI'] == 'wmsAI')).sum())
+            if hasattr(pm2_mask, 'sum') and 'VerifiedAI' in v2_df.columns else 0,
+        'pm2AgvAi': int((pm2_mask & (v2_df['VerifiedAI'] == 'agvAI')).sum())
+            if hasattr(pm2_mask, 'sum') and 'VerifiedAI' in v2_df.columns else 0,
+        'pm2RemainingToCheck': int((pm2_mask & ~v2_df['VerifiedAI'].isin(['wmsAI', 'agvAI'])).sum())
+            if hasattr(pm2_mask, 'sum') and 'VerifiedAI' in v2_df.columns else 0,
+        'pm2DiagnosticsError': '',
+    }
+
+    try:
+        legacy_df = legacy_pd_query.decodeMachVR_noPD_levels_sorted(id_inspection).fillna('')
+        diagnostics['legacyMismatchCount'] = int((legacy_df['match'] == False).sum()) if 'match' in legacy_df.columns else 'n/a'
+        diagnostics['legacyPm2Count'] = int((legacy_df['desc'] == '2').sum()) if 'desc' in legacy_df.columns else 'n/a'
+    except Exception as exc:
+        diagnostics['pm2DiagnosticsError'] = str(exc)
+
+    return diagnostics
 
 
 @login_required(login_url='/login/')
@@ -14,8 +41,10 @@ def all_vr_no_pd_v2(request):
 
     id_inspection = int(request.GET['id_inspection'])
     matching = request.GET.get('matching', '0')
-    qty = max(int(request.GET.get('qty', 500)), 1)
-    offset = max(int(request.GET.get('offset', 0)), 0)
+    qty_param = request.GET.get('qty', '500')
+    show_all_rows = str(qty_param).lower() == 'all'
+    qty = None if show_all_rows else max(int(qty_param), 1)
+    offset = 0 if show_all_rows else max(int(request.GET.get('offset', 0)), 0)
 
     id_warehouse_df = pd_query_v2.pd_df(
         "select id_warehouse from inspectiontbl where id_inspection = %s",
@@ -28,6 +57,7 @@ def all_vr_no_pd_v2(request):
         df = df[['vRack', 'pos', 'codeUnit', 'nivel', 'picPath']]
     else:
         df = pd_query_v2.decode_match_levels_sorted(id_inspection).fillna('')
+        diagnostics = pm2_diagnostics(id_inspection, df)
 
         dfv = pd_query_v2.pd_df(
             "select product, validation from validationtbl where id_inspection = %s order by id_validation",
@@ -38,8 +68,8 @@ def all_vr_no_pd_v2(request):
 
         df['verified'] = df['wmsProduct'].map(validation_map).fillna(False)
         df = df[
-            ['verified', 'wmsProduct', 'codeUnit', 'nivel', 'pos', 'pos_inferred', 'matchAI', 'VerifiedAI', 'wmsPosition', 'wmsDesc', 'wmsDesc1', 'wmsdesc2',
-             'match', 'desc', 'picPath']
+            ['verified', 'wmsProduct', 'codeUnit', 'nivel', 'pos', 'wmsPosition', 'match', 'desc',
+             'matchAI', 'VerifiedAI', 'aiReason', 'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'picPath']
         ]
         df = df[df['wmsProduct'] != 'nan']
 
@@ -55,15 +85,49 @@ def all_vr_no_pd_v2(request):
                 messages.warning(request, 'There are values on Aisle, Level or Pos that brings conflicts.')
 
             df = df[
-                ['waisle', 'wlevel', 'wpos', 'verified', 'wmsProduct', 'codeUnit', 'nivel', 'pos', 'pos_inferred', 'matchAI', 'VerifiedAI', 'wmsPosition',
-                 'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'match', 'desc', 'picPath']
+                ['waisle', 'wlevel', 'wpos', 'verified', 'wmsProduct', 'codeUnit', 'nivel', 'pos',
+                 'wmsPosition', 'match', 'desc', 'matchAI', 'VerifiedAI',
+                 'aiReason', 'wmsDesc', 'wmsDesc1', 'wmsdesc2', 'picPath']
             ].sort_values(['waisle', 'wlevel', 'wpos'], ascending=[True, True, True])
             df = df[df['wmsProduct'] != 'nan']
+    if matching == '0':
+        diagnostics = {
+            'legacyMismatchCount': 'n/a',
+            'v2MismatchCount': 'n/a',
+            'legacyPm2Count': 'n/a',
+            'v2Pm2Count': 'n/a',
+            'pm2WmsAi': 'n/a',
+            'pm2AgvAi': 'n/a',
+            'pm2RemainingToCheck': 'n/a',
+            'pm2DiagnosticsError': '',
+        }
 
 
     total_rows = int(df.shape[0])
-    paged_df = df.iloc[offset:offset + qty].copy()
+    if show_all_rows:
+        paged_df = df.copy()
+        page_qty = total_rows if total_rows > 0 else 1
+    else:
+        paged_df = df.iloc[offset:offset + qty].copy()
+        page_qty = qty
     data = paged_df.values.tolist()
+    prev_offset = max(offset - page_qty, 0)
+    next_offset = offset + page_qty
+    prev_params = request.GET.copy()
+    next_params = request.GET.copy()
+    qty_500_params = request.GET.copy()
+    qty_1000_params = request.GET.copy()
+    qty_all_params = request.GET.copy()
+    prev_params['offset'] = str(prev_offset)
+    prev_params['qty'] = str(page_qty)
+    next_params['offset'] = str(next_offset)
+    next_params['qty'] = str(page_qty)
+    qty_500_params['offset'] = '0'
+    qty_500_params['qty'] = '500'
+    qty_1000_params['offset'] = '0'
+    qty_1000_params['qty'] = '1000'
+    qty_all_params['offset'] = '0'
+    qty_all_params['qty'] = 'all'
 
     metrics_df = pd_query_v2.pd_df(
         """
@@ -129,8 +193,6 @@ def all_vr_no_pd_v2(request):
             lr = last_read_df.iloc[0]['lastread']
             last_read = f"Aisle:{lr[0:3]} Pos:{lr[3:6]}"
 
-    pm2_corrected = int((df['adj2_candidate'] == True).sum()) if 'adj2_candidate' in df.columns else 0
-
     context = {
         'data': data,
         'description': df.columns.tolist(),
@@ -150,10 +212,27 @@ def all_vr_no_pd_v2(request):
         'lastRead': last_read,
         'falsePAlist': paged_df['codeUnit'][(paged_df['match'] == False) & (paged_df['codeUnit'].str.len() > 0)].tolist()[:20]
             if int(matching) > 0 and 'codeUnit' in paged_df.columns and 'match' in paged_df.columns else '',
-        'pm2Corrected': pm2_corrected,
+        'legacyMismatchCount': diagnostics['legacyMismatchCount'],
+        'v2MismatchCount': diagnostics['v2MismatchCount'],
+        'legacyPm2Count': diagnostics['legacyPm2Count'],
+        'v2Pm2Count': diagnostics['v2Pm2Count'],
+        'pm2WmsAi': diagnostics['pm2WmsAi'],
+        'pm2AgvAi': diagnostics['pm2AgvAi'],
+        'pm2RemainingToCheck': diagnostics['pm2RemainingToCheck'],
+        'pm2DiagnosticsError': diagnostics['pm2DiagnosticsError'],
         'totalRows': total_rows,
         'offset': offset,
         'qty': qty,
+        'pageStart': offset + 1 if total_rows > 0 else 0,
+        'pageEnd': total_rows if show_all_rows else min(offset + page_qty, total_rows),
+        'hasPrevPage': not show_all_rows and offset > 0,
+        'hasNextPage': not show_all_rows and next_offset < total_rows,
+        'prevPageUrl': f"?{prev_params.urlencode()}",
+        'nextPageUrl': f"?{next_params.urlencode()}",
+        'qty500Url': f"?{qty_500_params.urlencode()}",
+        'qty1000Url': f"?{qty_1000_params.urlencode()}",
+        'qtyAllUrl': f"?{qty_all_params.urlencode()}",
+        'showAllRows': show_all_rows,
     }
 
     if matching == '3':
