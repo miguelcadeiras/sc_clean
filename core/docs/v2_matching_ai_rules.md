@@ -238,16 +238,31 @@ v2_virtual_rack_cache_meta
 The cache is keyed by `id_inspection` and `id_Vector`. It is considered valid
 while the source inspection keeps the same row count and max `id_Vector`.
 
-V2 also persists the legacy summary counters used by the header:
+V2 can also persist the legacy summary counters used by the optional
+`&legacy=1` header comparison:
 
 ```text
 v2_legacy_matching_summary_cache
 ```
 
-Warm or refresh the cache before using a large inspection in production:
+Warm or refresh the virtual-rack cache before using a large inspection in
+production:
 
 ```bash
 python manage.py warm_v2_virtual_rack_cache 348
+```
+
+By default, the v2 page does not calculate legacy counters. To compare against
+legacy in the page, add:
+
+```text
+&legacy=1
+```
+
+To warm both virtual-rack cache and legacy summary cache:
+
+```bash
+python manage.py warm_v2_virtual_rack_cache 348 --legacy
 ```
 
 Refresh every inspection:

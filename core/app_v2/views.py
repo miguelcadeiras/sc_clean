@@ -23,7 +23,7 @@ def false_pa_window_map(df, window_size=3):
     return result
 
 
-def pm2_diagnostics(id_inspection, v2_df):
+def pm2_diagnostics(id_inspection, v2_df, include_legacy=False):
     pm2_mask = v2_df['desc'] == '2' if 'desc' in v2_df.columns else False
     diagnostics = {
         'legacyMismatchCount': 'n/a',
@@ -37,7 +37,11 @@ def pm2_diagnostics(id_inspection, v2_df):
         'pm2RemainingToCheck': int((pm2_mask & ~v2_df['VerifiedAI'].isin(['wmsAI', 'agvAI'])).sum())
             if hasattr(pm2_mask, 'sum') and 'VerifiedAI' in v2_df.columns else 0,
         'pm2DiagnosticsError': '',
+        'includeLegacyDiagnostics': include_legacy,
     }
+
+    if not include_legacy:
+        return diagnostics
 
     try:
         legacy_summary = pd_query_v2.legacy_matching_summary(id_inspection)
@@ -59,6 +63,7 @@ def all_vr_no_pd_v2(request):
 
     id_inspection = int(request.GET['id_inspection'])
     matching = request.GET.get('matching', '0')
+    include_legacy_diagnostics = request.GET.get('legacy') == '1'
     qty_param = request.GET.get('qty', '500')
     show_all_rows = str(qty_param).lower() == 'all'
     qty = None if show_all_rows else max(int(qty_param), 1)
@@ -75,7 +80,7 @@ def all_vr_no_pd_v2(request):
         df = df[['vRack', 'pos', 'codeUnit', 'nivel', 'picPath']]
     else:
         df = pd_query_v2.decode_match_levels_sorted(id_inspection).fillna('')
-        diagnostics = pm2_diagnostics(id_inspection, df)
+        diagnostics = pm2_diagnostics(id_inspection, df, include_legacy=include_legacy_diagnostics)
 
         dfv = pd_query_v2.pd_df(
             "select product, validation from validationtbl where id_inspection = %s order by id_validation",
@@ -119,6 +124,7 @@ def all_vr_no_pd_v2(request):
             'pm2AgvAi': 'n/a',
             'pm2RemainingToCheck': 'n/a',
             'pm2DiagnosticsError': '',
+            'includeLegacyDiagnostics': include_legacy_diagnostics,
         }
 
 
@@ -241,6 +247,7 @@ def all_vr_no_pd_v2(request):
         'pm2AgvAi': diagnostics['pm2AgvAi'],
         'pm2RemainingToCheck': diagnostics['pm2RemainingToCheck'],
         'pm2DiagnosticsError': diagnostics['pm2DiagnosticsError'],
+        'includeLegacyDiagnostics': diagnostics['includeLegacyDiagnostics'],
         'totalRows': total_rows,
         'offset': offset,
         'qty': qty,

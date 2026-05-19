@@ -36,9 +36,14 @@
 <div class="row">
     <div class="col-lg-12">
         <div class="alert alert-info py-2 mb-2">
+            {% if includeLegacyDiagnostics %}
             False legacy/v2: {{legacyMismatchCount}} / {{v2MismatchCount}} |
             +/-2 legacy/v2: {{legacyPm2Count}} / {{v2Pm2Count}} |
             resolved +/-2: {{pm2ResolvedByV2}} |
+            {% else %}
+            False v2: {{v2MismatchCount}} |
+            +/-2 v2: {{v2Pm2Count}} |
+            {% endif %}
             wmsAI: {{pm2WmsAi}} |
             agvAI: {{pm2AgvAi}} |
             remaining +/-2 to check: {{pm2RemainingToCheck}}

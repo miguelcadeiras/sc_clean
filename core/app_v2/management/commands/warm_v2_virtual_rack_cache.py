@@ -15,6 +15,11 @@ class Command(BaseCommand):
             action='store_true',
             help='Refresh cache for every inspection found in inspectiontbl.',
         )
+        parser.add_argument(
+            '--legacy',
+            action='store_true',
+            help='Also refresh legacy summary counters used by &legacy=1 diagnostics.',
+        )
 
     def handle(self, *args, **options):
         ids = options['id_inspection']
@@ -30,12 +35,17 @@ class Command(BaseCommand):
         for id_inspection in ids:
             start = time.time()
             df = pd_query_v2.virtual_rack(id_inspection, refresh_cache=True)
-            legacy_summary = pd_query_v2.legacy_matching_summary(id_inspection, refresh_cache=True)
+            legacy_text = ''
+            if options['legacy']:
+                legacy_summary = pd_query_v2.legacy_matching_summary(id_inspection, refresh_cache=True)
+                legacy_text = (
+                    f' legacy_false={legacy_summary["legacyMismatchCount"]}'
+                    f' legacy_pm2={legacy_summary["legacyPm2Count"]}'
+                )
             elapsed = time.time() - start
             self.stdout.write(
                 self.style.SUCCESS(
-                    f'id_inspection={id_inspection} cached rows={len(df)} '
-                    f'legacy_false={legacy_summary["legacyMismatchCount"]} '
-                    f'legacy_pm2={legacy_summary["legacyPm2Count"]} elapsed={elapsed:.2f}s'
+                    f'id_inspection={id_inspection} cached rows={len(df)}'
+                    f'{legacy_text} elapsed={elapsed:.2f}s'
                 )
             )
