@@ -22,7 +22,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("authentication.urls")),  # add this
-    path("", include("app.urls"))  # add this
+    path("", include("app.urls")),  # legacy
+    path("v2/", include("app_v2.urls")),
 ]
 
 # Serving the media files in development mode

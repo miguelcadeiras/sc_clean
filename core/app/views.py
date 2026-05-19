@@ -19,6 +19,7 @@ from django.http import JsonResponse
 
 import csv, os
 from . import querys,utils,pdQuery,flags
+from app_v2 import pd_query_v2
 from .models import *
 
 
@@ -1447,18 +1448,13 @@ def readedAnalysisVR_noPD(request):
     """
     # print("readedAnalysisVR","1"*10,"*"*20)
     id_inspection = request.GET['id_inspection']
-    id_warehouse = querys.mysqlQuery("select id_warehouse from inspectiontbl where id_inspection = " + str(id_inspection))[0][0][0]
     wms_data = querys.mysqlQuery("select count(distinct wmsposition) from wmspositionmaptbl where id_inspection = "+str(id_inspection))[0][0][0]
-    # print(querys.mysqlQuery("select count(distinct wmsposition) from wmspositionmaptbl where id_inspection = "+str(id_inspection)))
     jsonData = []
     reqAsile = request.GET['asile']
     reqLevel = request.GET['level']
-    # print("readedAnalysisVR","2"*10,"*"*20)
 
     if wms_data > 0:
-        jsonData = pdQuery.agregatesVR(id_inspection,reqAsile,reqLevel)
-        print("AGREGATES RETURN"*5)
-        print(jsonData)
+        jsonData = pd_query_v2.readed_analysis_payload(id_inspection, reqAsile, reqLevel)
         barDict = json.loads(jsonData[0])
     else:
         jsonData = pdQuery.readAggregate(id_inspection)
@@ -1520,10 +1516,6 @@ def readedAnalysisVR_noPD(request):
             'inspection': querys.getInspectionData(request.GET['id_inspection']),
 
     }
-    print("context ----------------------------------------------")
-    print(context)
-    # print("readedAnalysisVR","end"*10,"*"*20)
-
     return render(request, 'readedAnalysis.html', context)
 
 @login_required(login_url="/login/")
