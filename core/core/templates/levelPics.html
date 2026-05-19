@@ -21,7 +21,7 @@
     <div class="col-lg-4" >
         <span>
 <!--            {{warehouseName.0.0.1}},{{warehouseName.0.0.2}},<br>{{warehouseName.0.0.3}}<br>-->
-            Inspection date:{{inspection.1}} || <a href="/all?id_inspection={{request.GET.id_inspection}}&qty=500&offset=0&matching=1&pic=0">   Description : {{inspection.0}} </a> </span>
+            Inspection date:{{inspection.1}} || <a href="{% if isV2 %}/v2/all{% else %}/all{% endif %}?id_inspection={{request.GET.id_inspection}}&qty=500&offset=0&matching=1&pic=0">   Description : {{inspection.0}} </a> </span>
     </div>
 
 
@@ -57,8 +57,8 @@
                             <td></td>
                         {% for row in item.2%}
 
-                            <td class="{% if row.1 == True %}bg-success {% else %} bg-danger {% endif %}" style="font-size: 0.5rem;" >
-                                <i class=" {% if row.2 != '' %}fas fa-box {% else %}far fa-square{% endif %} fa-xs" data-toggle="tooltip" title="{{row.0}}-{{row.2}}"></i>
+                            <td class="{% if row.4 %}{{row.4}}{% elif row.1 == True %}bg-success {% else %} bg-danger {% endif %}" style="font-size: 0.5rem;" >
+                                <i class=" {% if row.2 != '' %}fas fa-box {% else %}far fa-square{% endif %} fa-xs" data-toggle="tooltip" title="{{row.0}}-{{row.2}}{% if row.5 %} | {{row.5}}{% endif %}{% if row.6 %} | {{row.6}}{% endif %}{% if row.7 %} | verified: {{row.7}}{% endif %}"></i>
 <!--                                <a href="#"><span class="glyphicon glyphicon-cloud icon-size" tooltip-glyph="glyph-tooltip-demo" data-original-title="cloud icon"></span></a>-->
 
                             </td>

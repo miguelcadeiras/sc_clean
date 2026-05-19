@@ -6,6 +6,24 @@ from django.shortcuts import render
 from . import pd_query_v2
 
 
+def level_pic_cell_class(match, verified, verified_ai):
+    verified = str(verified).strip()
+    verified_ai = str(verified_ai).strip()
+    is_match = str(match).lower() == 'true' or match == 1
+
+    if verified == 'wms':
+        return 'bg-warning'
+    if verified == 'agv':
+        return 'bg-danger text-white'
+    if verified_ai == 'wmsAI':
+        return 'bg-success text-white'
+    if verified_ai == 'agvAI':
+        return 'bg-danger text-white'
+    if is_match:
+        return 'bg-success'
+    return 'bg-danger'
+
+
 def false_pa_window_map(df, window_size=3):
     if 'codeUnit' not in df.columns or 'match' not in df.columns:
         return {}
@@ -267,3 +285,83 @@ def all_vr_no_pd_v2(request):
         return render(request, 'allPD_v2/fail_by_v2.html', context)
 
     return render(request, 'allPD_v2/allPD_v2.html', context)
+
+
+@login_required(login_url='/login/')
+def level_pics_v2(request):
+    id_inspection = int(request.GET['id_inspection'])
+
+    df = pd_query_v2.decode_match_levels_sorted(id_inspection).fillna('')
+    df = df[df['wmsPosition'].astype(str).str.len() >= 12].copy()
+
+    validation_df = pd_query_v2.pd_df(
+        "select product, validation from validationtbl where id_inspection = %s order by id_validation",
+        params=[id_inspection],
+    )
+    if validation_df.empty:
+        validation_map = {}
+    else:
+        validation_df = validation_df.drop_duplicates(subset='product', keep='last')
+        validation_map = validation_df.set_index('product')['validation'].to_dict()
+
+    df['verified'] = df['wmsProduct'].map(validation_map).fillna('')
+    df['waisle'] = df['wmsPosition'].str[4:7]
+    df['wlevel'] = df['wmsPosition'].str[10:12]
+    df['cellClass'] = df.apply(
+        lambda row: level_pic_cell_class(row['match'], row['verified'], row['VerifiedAI']),
+        axis=1,
+    )
+
+    df = df.sort_values(['wlevel', 'waisle', 'wmsPosition'], ascending=[True, True, True])
+    levels = sorted([level for level in df['wlevel'].unique().tolist() if len(level) == 2])
+
+    data = []
+    for level in levels:
+        level_df = df[df['wlevel'] == level]
+        aisles = sorted([aisle for aisle in level_df['waisle'].unique().tolist() if len(aisle) == 3])
+        for aisle in aisles:
+            aisle_df = level_df[level_df['waisle'] == aisle].sort_values('wmsPosition')
+            data.append([
+                level,
+                aisle,
+                aisle_df[
+                    ['wmsPosition', 'match', 'codeUnit', 'picPath', 'cellClass', 'VerifiedAI', 'posSource', 'verified']
+                ].values.tolist(),
+            ])
+
+    id_warehouse_df = pd_query_v2.pd_df(
+        "select id_warehouse from inspectiontbl where id_inspection = %s",
+        params=[id_inspection],
+    )
+    id_warehouse = id_warehouse_df.iloc[0]['id_warehouse'] if not id_warehouse_df.empty else request.GET.get('id_warehouse', '')
+
+    inspection_df = pd_query_v2.pd_df(
+        "select description, inspectionDate from inspectiontbl where id_inspection = %s",
+        params=[id_inspection],
+    )
+    inspection_data = tuple(inspection_df.values.tolist()[0]) if not inspection_df.empty else ('', '')
+
+    warehouse_name_df = pd_query_v2.pd_df(
+        """
+        select warehousestbl.name,address,city,country
+        from warehousestbl
+        inner join inspectiontbl on inspectiontbl.id_warehouse = warehousestbl.id_warehouse
+        where id_inspection = %s
+        """,
+        params=[id_inspection],
+    )
+    warehouse_name = [[tuple(warehouse_name_df.values.tolist()[0])]] if not warehouse_name_df.empty else [[('', '', '', '')]]
+
+    context = {
+        'data': data,
+        'description': ['wmsPosition', 'match', 'codeUnit', 'picPath', 'cellClass', 'VerifiedAI', 'posSource', 'verified'],
+        'clientName': request.user.profile.client,
+        'id_warehouse': id_warehouse,
+        'warehouseName': warehouse_name,
+        'inspection': inspection_data,
+        'picpath': [],
+        'levels': levels,
+        'isV2': True,
+    }
+
+    return render(request, 'levelPics.html', context)
