@@ -1,5 +1,6 @@
 import os
 import socket
+import json
 
 import numpy as np
 import pandas as pd
@@ -14,6 +15,7 @@ RESET_MAX_CURRENT_X = 0.8
 VIRTUAL_RACK_CACHE_TABLE = 'v2_virtual_rack_cache'
 VIRTUAL_RACK_CACHE_META_TABLE = 'v2_virtual_rack_cache_meta'
 LEGACY_SUMMARY_CACHE_TABLE = 'v2_legacy_matching_summary_cache'
+READED_ANALYSIS_CACHE_TABLE = 'v2_readed_analysis_cache'
 
 
 def engine():
@@ -87,6 +89,23 @@ def ensure_legacy_summary_cache_table():
             legacy_mismatch_count int not null,
             legacy_pm2_count int not null,
             cached_at timestamp not null default current_timestamp on update current_timestamp
+        )
+        """
+    )
+
+
+def ensure_readed_analysis_cache_table():
+    execute_sql(
+        f"""
+        create table if not exists {READED_ANALYSIS_CACHE_TABLE} (
+            id_inspection int not null,
+            asile varchar(16) not null,
+            level varchar(16) not null,
+            source_row_count int not null,
+            source_max_vector int not null,
+            payload_json mediumtext not null,
+            cached_at timestamp not null default current_timestamp on update current_timestamp,
+            primary key (id_inspection, asile, level)
         )
         """
     )
@@ -242,6 +261,86 @@ def legacy_matching_summary(id_inspection, refresh_cache=False):
         )
 
     return summary
+
+
+def readed_analysis_payload(id_inspection, req_asile='All', req_level='All', refresh_cache=False):
+    signature = inventory_signature(id_inspection)
+    row_count, max_vector = signature
+    req_asile = str(req_asile)
+    req_level = str(req_level)
+
+    if cache_enabled() and not refresh_cache:
+        ensure_readed_analysis_cache_table()
+        cached = pd_df(
+            f"""
+            select payload_json, source_row_count, source_max_vector
+            from {READED_ANALYSIS_CACHE_TABLE}
+            where id_inspection = %s and asile = %s and level = %s
+            """,
+            params=[int(id_inspection), req_asile, req_level],
+        )
+        if not cached.empty:
+            if int(cached.iloc[0]['source_row_count']) == row_count:
+                if int(cached.iloc[0]['source_max_vector']) == max_vector:
+                    return json.loads(cached.iloc[0]['payload_json'])
+
+    payload = build_readed_analysis_payload(id_inspection, req_asile, req_level)
+
+    if cache_enabled():
+        ensure_readed_analysis_cache_table()
+        execute_sql(
+            f"""
+            insert into {READED_ANALYSIS_CACHE_TABLE}
+                (id_inspection, asile, level, source_row_count, source_max_vector, payload_json)
+            values (%s, %s, %s, %s, %s, %s)
+            on duplicate key update
+                source_row_count = values(source_row_count),
+                source_max_vector = values(source_max_vector),
+                payload_json = values(payload_json),
+                cached_at = current_timestamp
+            """,
+            params=(int(id_inspection), req_asile, req_level, row_count, max_vector, json.dumps(payload)),
+        )
+
+    return payload
+
+
+def build_readed_analysis_payload(id_inspection, req_asile, req_level):
+    df = decode_match_levels_sorted(id_inspection)
+    df = df[
+        ['wmsProduct', 'codeUnit', 'nivel', 'pos', 'wmsPosition', 'match']
+    ].copy()
+    df['asile'] = df['wmsPosition'].str[4:7]
+    df['position'] = df['wmsPosition'].str[8:11]
+    df['level'] = df['wmsPosition'].str[10:12]
+    df = df[df['wmsProduct'].notna()]
+    df = df[~df['wmsProduct'].astype(str).str.contains('nan', na=False)]
+    df.drop_duplicates(inplace=True)
+
+    dfnan = df.replace(r'', np.nan)
+    dfnan['ex'] = dfnan['match'] * 1
+    dfnan = dfnan.replace(1, np.nan)
+
+    json_array = []
+    asile_filtered = dfnan[dfnan['level'] == req_level] if req_level != 'All' else dfnan
+    asile_counts = asile_filtered[['asile', 'wmsProduct', 'codeUnit', 'ex']].groupby(['asile']).count()
+    json_array.append(asile_counts.to_json(orient='split'))
+
+    level_filtered = dfnan[dfnan['asile'] == req_asile] if req_asile != 'All' else dfnan
+    level_counts = level_filtered[['level', 'wmsProduct', 'codeUnit', 'ex']].groupby(['level']).count()
+    json_array.append(level_counts.to_json(orient='split'))
+
+    level_asile_counts = level_filtered[
+        ['asile', 'level', 'wmsProduct', 'codeUnit', 'ex']
+    ].groupby(['level', 'asile']).count()
+    json_array.append(level_asile_counts.to_json(orient='split'))
+
+    for level in dfnan['level'].dropna().unique():
+        level_slice = level_filtered[level_filtered['level'] == level]
+        level_by_asile = level_slice[['asile', 'wmsProduct', 'codeUnit', 'ex']].groupby(['asile']).count()
+        json_array.append(level_by_asile.to_json(orient='split'))
+
+    return json_array
 
 
 def raw_inventory(id_inspection):

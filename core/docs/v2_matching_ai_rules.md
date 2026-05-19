@@ -265,6 +265,19 @@ To warm both virtual-rack cache and legacy summary cache:
 python manage.py warm_v2_virtual_rack_cache 348 --legacy
 ```
 
+`/readedAnalysis` uses the v2 corrected matching result for its aggregate
+charts and persists the final chart payload in:
+
+```text
+v2_readed_analysis_cache
+```
+
+Warm the default aggregate chart (`asile=All`, `level=All`) with:
+
+```bash
+python manage.py warm_v2_virtual_rack_cache 348 --readed-analysis
+```
+
 Refresh every inspection:
 
 ```bash

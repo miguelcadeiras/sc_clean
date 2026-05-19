@@ -20,6 +20,11 @@ class Command(BaseCommand):
             action='store_true',
             help='Also refresh legacy summary counters used by &legacy=1 diagnostics.',
         )
+        parser.add_argument(
+            '--readed-analysis',
+            action='store_true',
+            help='Also refresh /readedAnalysis aggregate cache for asile=All and level=All.',
+        )
 
     def handle(self, *args, **options):
         ids = options['id_inspection']
@@ -42,10 +47,19 @@ class Command(BaseCommand):
                     f' legacy_false={legacy_summary["legacyMismatchCount"]}'
                     f' legacy_pm2={legacy_summary["legacyPm2Count"]}'
                 )
+            readed_text = ''
+            if options['readed_analysis']:
+                payload = pd_query_v2.readed_analysis_payload(
+                    id_inspection,
+                    'All',
+                    'All',
+                    refresh_cache=True,
+                )
+                readed_text = f' readed_analysis_parts={len(payload)}'
             elapsed = time.time() - start
             self.stdout.write(
                 self.style.SUCCESS(
                     f'id_inspection={id_inspection} cached rows={len(df)}'
-                    f'{legacy_text} elapsed={elapsed:.2f}s'
+                    f'{legacy_text}{readed_text} elapsed={elapsed:.2f}s'
                 )
             )
