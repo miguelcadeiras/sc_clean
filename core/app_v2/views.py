@@ -3,8 +3,24 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from app import pdQuery as legacy_pd_query
 from . import pd_query_v2
+
+
+def false_pa_window_map(df, window_size=3):
+    if 'codeUnit' not in df.columns or 'match' not in df.columns:
+        return {}
+
+    code_units = df.loc[
+        (df['match'] == False) & (df['codeUnit'].str.len() > 0),
+        'codeUnit',
+    ].astype(str).tolist()
+
+    result = {}
+    for index, code_unit in enumerate(code_units):
+        start = max(index - window_size, 0)
+        end = min(index + window_size + 1, len(code_units))
+        result[code_unit] = str(code_units[start:end])
+    return result
 
 
 def pm2_diagnostics(id_inspection, v2_df):
@@ -14,8 +30,8 @@ def pm2_diagnostics(id_inspection, v2_df):
         'v2MismatchCount': int((v2_df['match'] == False).sum()) if 'match' in v2_df.columns else 0,
         'legacyPm2Count': 'n/a',
         'v2Pm2Count': int(pm2_mask.sum()) if hasattr(pm2_mask, 'sum') else 0,
-        'pm2WmsAi': int((pm2_mask & (v2_df['VerifiedAI'] == 'wmsAI')).sum())
-            if hasattr(pm2_mask, 'sum') and 'VerifiedAI' in v2_df.columns else 0,
+        'pm2ResolvedByV2': 'n/a',
+        'pm2WmsAi': int((v2_df['VerifiedAI'] == 'wmsAI').sum()) if 'VerifiedAI' in v2_df.columns else 0,
         'pm2AgvAi': int((pm2_mask & (v2_df['VerifiedAI'] == 'agvAI')).sum())
             if hasattr(pm2_mask, 'sum') and 'VerifiedAI' in v2_df.columns else 0,
         'pm2RemainingToCheck': int((pm2_mask & ~v2_df['VerifiedAI'].isin(['wmsAI', 'agvAI'])).sum())
@@ -24,9 +40,11 @@ def pm2_diagnostics(id_inspection, v2_df):
     }
 
     try:
-        legacy_df = legacy_pd_query.decodeMachVR_noPD_levels_sorted(id_inspection).fillna('')
-        diagnostics['legacyMismatchCount'] = int((legacy_df['match'] == False).sum()) if 'match' in legacy_df.columns else 'n/a'
-        diagnostics['legacyPm2Count'] = int((legacy_df['desc'] == '2').sum()) if 'desc' in legacy_df.columns else 'n/a'
+        legacy_summary = pd_query_v2.legacy_matching_summary(id_inspection)
+        diagnostics['legacyMismatchCount'] = legacy_summary['legacyMismatchCount']
+        diagnostics['legacyPm2Count'] = legacy_summary['legacyPm2Count']
+        if isinstance(diagnostics['legacyPm2Count'], int):
+            diagnostics['pm2ResolvedByV2'] = diagnostics['legacyPm2Count'] - diagnostics['v2Pm2Count']
     except Exception as exc:
         diagnostics['pm2DiagnosticsError'] = str(exc)
 
@@ -96,6 +114,7 @@ def all_vr_no_pd_v2(request):
             'v2MismatchCount': 'n/a',
             'legacyPm2Count': 'n/a',
             'v2Pm2Count': 'n/a',
+            'pm2ResolvedByV2': 'n/a',
             'pm2WmsAi': 'n/a',
             'pm2AgvAi': 'n/a',
             'pm2RemainingToCheck': 'n/a',
@@ -104,6 +123,7 @@ def all_vr_no_pd_v2(request):
 
 
     total_rows = int(df.shape[0])
+    false_pa_list_by_unit = false_pa_window_map(df) if int(matching) > 0 else {}
     if show_all_rows:
         paged_df = df.copy()
         page_qty = total_rows if total_rows > 0 else 1
@@ -210,12 +230,13 @@ def all_vr_no_pd_v2(request):
         'picpath': picpath,
         'levels': levels,
         'lastRead': last_read,
-        'falsePAlist': paged_df['codeUnit'][(paged_df['match'] == False) & (paged_df['codeUnit'].str.len() > 0)].tolist()[:20]
-            if int(matching) > 0 and 'codeUnit' in paged_df.columns and 'match' in paged_df.columns else '',
+        'falsePAlist': '',
+        'falsePAListByUnit': false_pa_list_by_unit,
         'legacyMismatchCount': diagnostics['legacyMismatchCount'],
         'v2MismatchCount': diagnostics['v2MismatchCount'],
         'legacyPm2Count': diagnostics['legacyPm2Count'],
         'v2Pm2Count': diagnostics['v2Pm2Count'],
+        'pm2ResolvedByV2': diagnostics['pm2ResolvedByV2'],
         'pm2WmsAi': diagnostics['pm2WmsAi'],
         'pm2AgvAi': diagnostics['pm2AgvAi'],
         'pm2RemainingToCheck': diagnostics['pm2RemainingToCheck'],

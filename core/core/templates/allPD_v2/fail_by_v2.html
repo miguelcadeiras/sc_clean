@@ -49,6 +49,7 @@
         <div class="alert alert-info py-2 mb-2">
             False legacy/v2: {{legacyMismatchCount}} / {{v2MismatchCount}} |
             +/-2 legacy/v2: {{legacyPm2Count}} / {{v2Pm2Count}} |
+            resolved +/-2: {{pm2ResolvedByV2}} |
             wmsAI: {{pm2WmsAi}} |
             agvAI: {{pm2AgvAi}} |
             remaining +/-2 to check: {{pm2RemainingToCheck}}
@@ -150,9 +151,9 @@
                                 {% else %}
                                     {% if forloop.counter == 5 and row.9 == False %}
                                         {% if row.5 == '' %}
-                                    <a href="/plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.7}}&wms=1&list={{falsePAlist}}&PA=not_found" target="_blank" >{{item}}</a>
+                                    <a href="/plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.7}}&wms=1&list={{falsePAListByUnit|get_item:item|urlencode}}&PA=not_found" target="_blank" >{{item}}</a>
                                         {% else %}
-                                    <a href="/plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.7}}&list={{falsePAlist}}" target="_blank" >{{item}}</a>
+                                    <a href="/plusMinus?id_inspection={{request.GET.id_inspection}}&id_unit={{item}}&agvPos={{row.7}}&list={{falsePAListByUnit|get_item:item|urlencode}}" target="_blank" >{{item}}</a>
                                         {% endif %}
                                     {% else %}
                                         {% if forloop.counter == 14 and item != '' %}
